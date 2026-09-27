@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marcin Okarmus</title>
+<meta name="description" content="Marcin Okarmus, mgr inż. automatyki i robotyki (AGH). 25 lat praktyki w przemyśle elektronicznym, IT i automatyce: produkcja, systemy wbudowane, automatyka budynkowa, dane przemysłowe.">
+<meta property="og:title" content="Marcin Okarmus">
+<meta property="og:description" content="Inżynier i praktyk przemysłu: produkcja, systemy wbudowane, automatyka budynkowa, dane przemysłowe.">
+<meta property="og:url" content="https://okarmus.edu.pl/">
+<meta property="og:type" content="profile">
+<link rel="canonical" href="https://okarmus.edu.pl/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231F4E79'/%3E%3Ctext x='32' y='42' font-family='Georgia,serif' font-size='30' fill='white' text-anchor='middle'%3EMO%3C/text%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #fbfaf7;
+  --surface: #ffffff;
+  --text: #1c2230;
+  --muted: #5b6475;
+  --line: #e2e0da;
+  --accent: #1f4e79;
+  --accent-soft: #e8eef5;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12161d;
+    --surface: #1a2029;
+    --text: #e6e8ec;
+    --muted: #9aa3b2;
+    --line: #2b3340;
+    --accent: #8fb6de;
+    --accent-soft: #1f2b3a;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 17px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+.wrap { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+header { padding: 72px 0 36px; border-bottom: 1px solid var(--line); }
+.eyebrow { color: var(--muted); font-size: 15px; letter-spacing: .02em; margin: 0 0 6px; }
+h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: normal;
+  font-size: clamp(38px, 7vw, 54px);
+  line-height: 1.1;
+  margin: 0 0 14px;
+}
+.lead { font-size: 19px; color: var(--muted); margin: 0 0 22px; max-width: 620px; }
+.contact { display: flex; flex-wrap: wrap; gap: 10px 22px; font-size: 15px; }
+.contact a { display: inline-flex; align-items: center; gap: 7px; }
+.contact svg { width: 16px; height: 16px; fill: currentColor; }
+
+section { padding: 40px 0 8px; }
+h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--accent);
+  margin: 0 0 18px;
+}
+p { margin: 0 0 14px; }
+
+.areas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.area {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+.area h3 { font-size: 16px; margin: 0 0 6px; }
+.area p { font-size: 15px; color: var(--muted); margin: 0; }
+
+.job { display: grid; grid-template-columns: 128px 1fr; gap: 4px 20px; padding: 14px 0; border-top: 1px solid var(--line); }
+.job:first-of-type { border-top: 0; padding-top: 0; }
+.when { color: var(--muted); font-size: 14px; padding-top: 3px; font-variant-numeric: tabular-nums; }
+.job h3 { font-size: 17px; margin: 0; }
+.org { color: var(--muted); font-size: 15px; margin: 0 0 6px; }
+.job p:last-child { font-size: 15.5px; margin: 0; }
+
+ul.plain { list-style: none; padding: 0; margin: 0; }
+ul.plain li { padding: 7px 0 7px 18px; position: relative; font-size: 15.5px; }
+ul.plain li::before { content: ""; position: absolute; left: 0; top: 17px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); opacity: .7; }
+.src { color: var(--muted); }
+
+.facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; font-size: 15px; }
+.facts h3 { font-size: 13px; color: var(--muted); font-weight: 600; margin: 0 0 4px; }
+.facts p { margin: 0; }
+
+footer { margin-top: 48px; padding: 24px 0 40px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+
+@media (max-width: 620px) {
+  body { font-size: 16px; }
+  header { padding-top: 48px; }
+  .areas, .facts { grid-template-columns: 1fr; }
+  .job { grid-template-columns: 1fr; }
+  .when { padding-top: 0; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <p class="eyebrow">mgr inż. automatyki i robotyki</p>
+    <h1>Marcin Okarmus</h1>
+    <p class="lead">Inżynier i menedżer z 25-letnim doświadczeniem w przemyśle elektronicznym, IT i automatyce. Łączę konstrukcję sprzętu, oprogramowanie i organizację produkcji, a tę praktykę chcę przekazywać studentom kierunków technicznych.</p>
+    <div class="contact">
+      <a href="mailto:Marcin.Okarmus@gmail.com"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm1 2.4V17h16V7.4l-8 5.6-8-5.6ZM5.6 7 12 11.5 18.4 7H5.6Z"/></svg>Marcin.Okarmus@gmail.com</a>
+      <a href="https://www.linkedin.com/in/marcin-okarmus"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9.5h4V21H3V9.5Zm7 0h3.8v1.6h.06c.53-1 1.83-2.06 3.77-2.06 4.03 0 4.77 2.65 4.77 6.1V21h-4v-5.2c0-1.24-.02-2.84-1.73-2.84-1.73 0-2 1.35-2 2.75V21h-4V9.5Z"/></svg>linkedin.com/in/marcin-okarmus</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="o-mnie">
+    <h2>O mnie</h2>
+    <p>Jestem absolwentem Automatyki i Robotyki na Akademii Górniczo-Hutniczej w Krakowie. Zaczynałem jako programista baz danych systemu ERP, potem tworzyłem oprogramowanie wbudowane w Nokii w Helsinkach, kierowałem działem R&D elektroniki konsumenckiej, a następnie jednostką biznesową IoT i urządzeń medycznych w Comarch, obejmującą rozwój produktów i produkcję.</p>
+    <p>Pracowałem przy pełnym cyklu życia produktu: od projektu i prototypu, przez produkcję seryjną i kontrolę jakości, po wdrożenie i wsparcie. Na co dzień wykorzystuję narzędzia sztucznej inteligencji w pracy inżynierskiej i w automatyzacji procesów.</p>
+  </section>
+
+  <section id="obszary">
+    <h2>Obszary dydaktyczne</h2>
+    <div class="areas">
+      <div class="area">
+        <h3>Zarządzanie i inżynieria produkcji</h3>
+        <p>Organizacja i zarządzanie produkcją, systemy MES, OEE, CMMS i ERP, digitalizacja zakładów (Przemysł 4.0), systemy zarządzania jakością.</p>
+      </div>
+      <div class="area">
+        <h3>Energetyka i automatyka budynkowa</h3>
+        <p>Automatyka budynkowa i systemy smart home, sterowniki pomp ciepła, zgodność urządzeń z wymaganiami regulacyjnymi.</p>
+      </div>
+      <div class="area">
+        <h3>Mechatronika i elektronika</h3>
+        <p>Systemy wbudowane i mikrokontrolery, systemy sterowania, wizualizacja procesów i HMI, montaż i kontrola jakości elektroniki (standardy IPC).</p>
+      </div>
+      <div class="area">
+        <h3>Informatyka i dane</h3>
+        <p>Bazy danych (SQL, Oracle, PostgreSQL), programowanie w C/C++ i Pythonie, akwizycja i wizualizacja danych przemysłowych, zastosowania AI w inżynierii.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="doswiadczenie">
+    <h2>Doświadczenie zawodowe</h2>
+    <div class="job">
+      <div class="when">od 2025</div>
+      <div>
+        <h3>Operations Manager</h3>
+        <p class="org">Grenton sp. z o.o., producent systemów smart home i automatyki budynkowej</p>
+        <p>Zarządzanie operacjami: magazyn, logistyka, kontrola jakości i reklamacje. Wsparcie działu R&D, rozwój testerów produkcyjnych i aplikacji linii produkcyjnej, własny portal operacyjny z pełną historią wyrobu.</p>
+      </div>
+    </div>
+    <div class="job">
+      <div class="when">2022 - 2025</div>
+      <div>
+        <h3>Project Manager</h3>
+        <p class="org">Accevo (dawniej ANT Solutions)</p>
+        <p>Wdrożenia systemów MES, OEE i CMMS w zakładach produkcyjnych (branża spożywcza, motoryzacyjna, lotnicza, zbrojeniowa, kosmetyczna), akwizycja danych maszynowych, szkolenia użytkowników.</p>
+      </div>
+    </div>
+    <div class="job">
+      <div class="when">2017 - 2022</div>
+      <div>
+        <h3>Dyrektor Business Unit, IoT i urządzenia medyczne</h3>
+        <p class="org">Comarch</p>
+        <p>Rozwój oprogramowania i sprzętu, produkcja i sprzedaż urządzeń IoT i medycznych wraz z aplikacjami mobilnymi i systemami telemetrycznymi. Zespół 120 osób.</p>
+      </div>
+    </div>
+    <div class="job">
+      <div class="when">2007 - 2017</div>
+      <div>
+        <h3>Kierownik projektu, Kierownik R&D</h3>
+        <p class="org">Comarch</p>
+        <p>Oprogramowanie wbudowane, mobilne i sprzęt dla elektroniki konsumenckiej, m.in. dla Nokii, Jabry, Samsunga i Delphi.</p>
+      </div>
+    </div>
+    <div class="job">
+      <div class="when">2007</div>
+      <div>
+        <h3>Inżynier oprogramowania wbudowanego</h3>
+        <p class="org">Nokia, Helsinki</p>
+        <p>Oprogramowanie w C/C++ dla urządzeń Bluetooth.</p>
+      </div>
+    </div>
+    <div class="job">
+      <div class="when">2000 - 2007</div>
+      <div>
+        <h3>Inżynier oprogramowania, Team Leader</h3>
+        <p class="org">Comarch</p>
+        <p>Bazy danych Oracle w systemie klasy ERP, kierowanie zespołem programistów.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="projekty">
+    <h2>Projekty konstrukcyjne</h2>
+    <ul class="plain">
+      <li>Sprzęt i oprogramowanie sterowników pomp ciepła, wraz z produkcją wyrobu końcowego.</li>
+      <li>Sprzęt i oprogramowanie sterowników automatów rozrywkowych (cymbergaj, bilard, piłkarzyki), wraz z produkcją.</li>
+    </ul>
+  </section>
+
+  <section id="publikacje">
+    <h2>Publikacje</h2>
+    <ul class="plain">
+      <li>Jakość montażu urządzeń elektronicznych, okiem praktyka <span class="src">| elektronikab2b.pl</span></li>
+      <li>IoT i nietrywialne rozwiązania trywialnych problemów <span class="src">| elektronikab2b.pl</span></li>
+      <li>O szybkim prototypowaniu i produkcji urządzeń elektronicznych <span class="src">| tek.info.pl</span></li>
+    </ul>
+  </section>
+
+  <section id="wyksztalcenie">
+    <h2>Wykształcenie i certyfikaty</h2>
+    <div class="facts">
+      <div>
+        <h3>Wykształcenie</h3>
+        <p>mgr inż. Automatyka i Robotyka, AGH w Krakowie</p>
+      </div>
+      <div>
+        <h3>Certyfikaty</h3>
+        <p>Certified Scrum Product Owner, Certified IPC Specialist, Comarch MBA</p>
+      </div>
+      <div>
+        <h3>Języki</h3>
+        <p>polski, angielski (biegły), niemiecki (podstawowy)</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">Marcin Okarmus | okarmus.edu.pl</div>
+</footer>
+</body>
+</html>
