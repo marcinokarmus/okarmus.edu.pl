@@ -1,0 +1,1040 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elektrotechnika I — lab 1 (student)</title>
+<style>
+:root{
+  --bg:#f7f7f4; --panel:#ffffff; --fg:#1d2330; --muted:#5d6675; --grid:#d9dce2;
+  --accent:#1f6fd1; --accent2:#e2741d; --accent3:#1f9a5a; --danger:#d23b3b; --violet:#7a4cc9; --gold:#c49a00;
+  --chip:#eef2f8;
+}
+:root[data-theme="dark"]{
+  --bg:#12151b; --panel:#1b2029; --fg:#e9edf3; --muted:#9aa4b4; --grid:#323a47;
+  --accent:#5aa2ff; --accent2:#ff9a4a; --accent3:#43c785; --danger:#ff6464; --violet:#ae8cff; --gold:#e8c040;
+  --chip:#232a36;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;overflow:hidden}
+.slide{position:absolute;inset:0;padding:3.2vh 5vw 9vh;display:none;flex-direction:column;gap:1.4vh;overflow:auto}
+.slide.active{display:flex}
+.kicker{font-size:clamp(13px,1.05vw,18px);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{font-size:clamp(32px,4.4vw,76px);margin:0;line-height:1.05}
+h2{font-size:clamp(24px,2.8vw,46px);margin:0;line-height:1.1}
+p,li,td,th,label,.txt{font-size:clamp(16px,1.45vw,25px);line-height:1.4}
+p{margin:.2em 0}
+ul,ol{margin:.2em 0;padding-left:1.3em} li{margin:.2em 0}
+.muted{color:var(--muted)}
+.big{font-size:clamp(21px,2vw,34px)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:2vw;align-items:start}
+.cols.c3{grid-template-columns:1fr 1fr 1fr}
+.cols.c64{grid-template-columns:1.5fr 1fr}
+.cols.c46{grid-template-columns:1fr 1.5fr}
+.card{background:var(--panel);border:1px solid var(--grid);border-radius:14px;padding:1.2vh 1.2vw}
+.card h3{margin:.1em 0 .3em;font-size:clamp(17px,1.5vw,27px)}
+.card p,.card li{font-size:clamp(14px,1.25vw,21px)}
+.card .emo{font-size:clamp(26px,2.6vw,46px)}
+.def{border-left:6px solid var(--accent);background:var(--panel);border-radius:10px;padding:.9vh 1.3vw}
+.def p{font-size:clamp(17px,1.6vw,28px)}
+.warn{border-left:6px solid var(--danger);background:var(--panel);border-radius:10px;padding:.9vh 1.3vw}
+.formula{font-family:"Cambria Math","Times New Roman",serif;font-size:clamp(22px,2.3vw,40px);background:var(--panel);border:2px solid var(--grid);border-radius:12px;padding:.25em .7em;display:inline-block}
+canvas.viz{width:100%;height:44vh;display:block;background:var(--panel);border:1px solid var(--grid);border-radius:14px}
+canvas.tall{height:56vh}
+canvas.short{height:30vh}
+.ctrl{display:flex;gap:.9vw;align-items:center;flex-wrap:wrap}
+.ctrl label{display:flex;align-items:center;gap:.5em;font-size:clamp(14px,1.2vw,20px)}
+input[type=range]{width:clamp(140px,14vw,280px);accent-color:var(--accent);height:28px}
+input[type=checkbox]{width:1.2em;height:1.2em;accent-color:var(--accent3)}
+button,select,input[type=text],input[type=number]{font:inherit;font-size:clamp(14px,1.2vw,20px);padding:.3em .7em;border-radius:10px;border:1px solid var(--grid);background:var(--panel);color:var(--fg)}
+input[type=number]{width:6.5em}
+button,select{cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+button.sel{background:var(--accent);color:#fff;border-color:var(--accent)}
+.val{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent)}
+.res{font-variant-numeric:tabular-nums;font-weight:800;color:var(--accent3);font-size:clamp(20px,2vw,34px)}
+.bad{color:var(--danger);font-weight:800}
+.info{font-size:clamp(14px,1.2vw,20px);color:var(--muted)}
+.info b{color:var(--fg)}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+table{border-collapse:collapse;width:100%}
+th,td{border-bottom:1px solid var(--grid);padding:.3em .55em;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+td input[type=number]{width:5.5em}
+.tag{display:inline-block;background:var(--chip);border-radius:8px;padding:.05em .45em;font-weight:600}
+.ex{background:var(--panel);border:1px solid var(--grid);border-left:6px solid var(--accent2);border-radius:12px;padding:.9vh 1.2vw}
+.ex h3{margin:0 0 .3em;font-size:clamp(16px,1.45vw,25px);color:var(--accent2)}
+.ex ol li{display:none}
+.ex ol li.on{display:list-item}
+.ex .step{margin-top:.4em}
+.you{background:var(--panel);border:1px dashed var(--accent3);border-radius:12px;padding:.8vh 1.2vw}
+.you h3{margin:0 0 .3em;font-size:clamp(16px,1.45vw,25px);color:var(--accent3)}
+details summary{cursor:pointer;font-weight:600;font-size:clamp(15px,1.3vw,22px)}
+details p{color:var(--accent3);font-weight:700}
+.plan{display:grid;grid-template-columns:repeat(5,1fr);gap:.8vw}
+.plan .card{border-top:6px solid var(--accent)}
+.plan .card:nth-child(2){border-top-color:var(--accent2)}
+.plan .card:nth-child(3){border-top-color:var(--accent3)}
+.plan .card:nth-child(4){border-top-color:var(--violet)}
+.plan .card:nth-child(5){border-top-color:var(--danger)}
+.plan .time{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;font-size:clamp(13px,1.1vw,18px)}
+.quizbig{font-size:clamp(34px,4.2vw,72px);font-weight:800;text-align:center;padding:2vh 0;font-variant-numeric:tabular-nums}
+.quizans{font-size:clamp(28px,3.2vw,56px);font-weight:800;text-align:center;color:var(--accent3);min-height:1.3em;font-variant-numeric:tabular-nums}
+.title-wrap{margin:auto 0;display:flex;flex-direction:column;gap:2vh}
+.hint{position:fixed;right:1.2vw;top:1vh;font-size:13px;color:var(--muted);opacity:.7}
+#bar{position:fixed;left:0;right:0;bottom:0;height:6vh;min-height:44px;display:flex;align-items:center;gap:.8vw;padding:0 1.2vw;background:var(--panel);border-top:1px solid var(--grid);z-index:10}
+#bar button{padding:.2em .7em}
+#prog{flex:1;height:6px;background:var(--grid);border-radius:4px;overflow:hidden}
+#prog div{height:100%;background:var(--accent);width:0}
+#cnt{font-variant-numeric:tabular-nums;color:var(--muted);font-size:15px;min-width:5ch;text-align:right}
+#blk{color:var(--muted);font-size:15px;white-space:nowrap}
+.notes{display:none}
+#notes{position:fixed;left:0;right:0;bottom:6vh;max-height:42vh;overflow:auto;background:var(--panel);border-top:3px solid var(--accent2);padding:1.2vh 2vw;display:none;z-index:9;box-shadow:0 -8px 24px rgba(0,0,0,.15)}
+#notes.show{display:block}
+#notes, #notes *{font-size:clamp(14px,1.12vw,19px)}
+@media (max-width:800px){.cols,.cols.c3,.cols.c64,.cols.c46,.plan{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hint">← → przewijanie · F pełny ekran · T motyw</div>
+
+<!-- ======================= BLOK 1 ======================= -->
+
+<!-- 1 -->
+<section class="slide" id="s-title" data-blok="Blok 1 · organizacja i BHP">
+  <div class="title-wrap">
+    <div class="kicker">Elektrotechnika I · laboratorium 1</div>
+    <h1>Podstawowe prawa obwodów elektrycznych</h1>
+    <p class="big muted">BHP · wielkości elektryczne · prawo Ohma · łączenie rezystorów · prawa Kirchhoffa · rzeczywiste źródło napięcia</p>
+    <p class="muted">Energetyka odnawialna i zarządzanie energią · I rok · studia stacjonarne · mgr M. Okarmus</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="slide" id="s-plan" data-blok="Blok 1 · organizacja i BHP">
+  <div class="kicker">Plan zajęć</div>
+  <h2>Dzisiaj: 11:30–15:00</h2>
+  <div class="plan">
+    <div class="card"><div class="time">11:30–12:10</div><h3>1. BHP i rozgrzewka</h3><p>Jak prąd działa na człowieka, napięcia bezpieczne, zasady pracy. Przedrostki i jednostki.</p></div>
+    <div class="card"><div class="time">12:10–12:50</div><h3>2. Wielkości elektryczne</h3><p>Prąd, napięcie, rezystancja, moc, energia, kWh. Ile kosztuje prąd?</p></div>
+    <div class="card"><div class="time">13:00–13:45</div><h3>3. Prawo Ohma</h3><p>Pomiar na żywo, charakterystyki I(U): rezystor i dioda LED, moc rezystora.</p></div>
+    <div class="card"><div class="time">13:45–14:15</div><h3>4. Łączenie rezystorów</h3><p>Szeregowo, równolegle, układ mieszany, dzielnik napięcia.</p></div>
+    <div class="card"><div class="time">14:15–15:00</div><h3>5. Kirchhoff i źródło</h3><p>Prawa Kirchhoffa, rzeczywiste źródło napięcia — pomiary do sprawozdania.</p></div>
+  </div>
+  <p class="muted">12:50–13:00 przerwa</p>
+  <div class="def"><p>Na każdym bloku: <b>krótka teoria → przykład krok po kroku → Twoja kolej</b> (liczycie sami, potem sprawdzamy). Potrzebny kalkulator (telefon też może być).</p></div>
+</section>
+
+<!-- 3 -->
+<section class="slide" id="s-zal" data-blok="Blok 1 · organizacja i BHP">
+  <div class="kicker">Organizacja</div>
+  <h2>Jak zaliczyć laboratorium</h2>
+  <div class="cols">
+    <div class="card">
+      <h3>Warunki zaliczenia (wg sylabusa)</h3>
+      <ul>
+        <li>wykonanie <b>wszystkich ćwiczeń</b> laboratoryjnych,</li>
+        <li><b>sprawozdanie</b> z każdego ćwiczenia,</li>
+        <li><b>ustna obrona</b> sprawozdań (krótka rozmowa: „skąd ten wynik?”).</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Dzisiaj: sprawozdanie nr 1</h3>
+      <ul>
+        <li>dostajecie <b>kartę pomiarów i zadań</b> (każdy ma własny wariant),</li>
+        <li><b>część A</b> — pomiary z dzisiejszych zajęć,</li>
+        <li><b>część B</b> — zadania rachunkowe, kończycie w domu,</li>
+        <li>oddajecie <b>na następnych zajęciach</b>.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="def"><p>Sprawozdanie ocenia się za <b>tok obliczeń, jednostki i wnioski</b> — sam wynik nie wystarczy.</p></div>
+</section>
+
+<!-- 4 -->
+<section class="slide" id="s-bhp" data-blok="Blok 1 · organizacja i BHP">
+  <div class="kicker">BHP · jak prąd działa na człowieka</div>
+  <h2>Groźne jest natężenie prądu płynącego przez ciało</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz short" id="cv-bhp"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <label>napięcie dotyku <input type="range" id="bh-u" min="6" max="400" step="1" value="230"> <span class="val" id="bh-uv"></span></label>
+        <span class="ctrl"><button data-bu="12">12 V</button><button data-bu="24">24 V</button><button data-bu="50">50 V</button><button data-bu="230">230 V</button><button data-bu="400">400 V</button></span>
+      </div>
+      <div class="ctrl">
+        <label>rezystancja ciała <input type="range" id="bh-r" min="500" max="5000" step="50" value="1000"> <span class="val" id="bh-rv"></span></label>
+        <span class="ctrl"><button data-br="1000">mokre ręce</button><button data-br="2000">suche ręce</button></span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Prąd przez ciało: <span class="res" id="bh-i"></span></h3>
+      <p id="bh-eff" class="big"></p>
+      <p class="info">Prąd przemienny 50 Hz, droga ręka–ręka lub ręka–stopy. Wartości przybliżone wg <b>IEC 60479-1</b> (skutki przepływu prądu przez człowieka). Skutki zależą też od <b>czasu</b> przepływu.</p>
+      <p class="info">Wyłącznik różnicowoprądowy w instalacji domowej: <b>30 mA</b>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="slide" id="s-bhp2" data-blok="Blok 1 · organizacja i BHP">
+  <div class="kicker">BHP · zasady</div>
+  <h2>Napięcia bezpieczne i zasady pracy w pracowni</h2>
+  <div class="cols">
+    <div class="card">
+      <h3>Napięcie dotykowe dopuszczalne długotrwale</h3>
+      <table>
+        <tr><th>warunki</th><th>AC</th><th>DC</th></tr>
+        <tr><td>normalne</td><td style="white-space:nowrap"><b>50 V</b></td><td style="white-space:nowrap"><b>120 V</b></td></tr>
+        <tr><td>zwiększone zagrożenie (wilgoć, ciasne metalowe przestrzenie)</td><td style="white-space:nowrap"><b>25 V</b></td><td style="white-space:nowrap"><b>60 V</b></td></tr>
+      </table>
+      <p class="info">wg <b>PN-HD 60364-4-41</b> (ochrona przeciwporażeniowa w instalacjach) i IEC TS 61201. Granice wynikają ze skutków prądu opisanych w IEC 60479-1 (poprzedni slajd). Dzisiejsze pomiary: bateria 9 V — bezpieczne.</p>
+    </div>
+    <div class="card">
+      <h3>Zasady pracy na stanowisku</h3>
+      <ol>
+        <li>Układ łączymy i zmieniamy <b>przy wyłączonym zasilaniu</b>.</li>
+        <li>Zasilanie włączamy dopiero <b>po sprawdzeniu układu</b> przez prowadzącego.</li>
+        <li>Miernik: najpierw <b>rodzaj</b> wielkości i <b>zakres</b>, potem podłączenie.</li>
+        <li>Nie dotykamy elementów pod napięciem; uszkodzone przewody — zgłaszamy.</li>
+        <li>Coś się grzeje, dymi, pachnie — <b>wyłączyć zasilanie</b> i zgłosić.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="slide" id="s-pref" data-blok="Blok 1 · organizacja i BHP">
+  <div class="kicker">Rozgrzewka · przedrostki i jednostki</div>
+  <h2>Zamień jednostki</h2>
+  <div class="cols c46">
+    <div class="card">
+      <table>
+        <tr><th>przedrostek</th><th>znak</th><th>mnożnik</th></tr>
+        <tr><td>mikro</td><td><b>µ</b></td><td>10<sup>−6</sup> = 0,000 001</td></tr>
+        <tr><td>mili</td><td><b>m</b></td><td>10<sup>−3</sup> = 0,001</td></tr>
+        <tr><td>—</td><td></td><td>1</td></tr>
+        <tr><td>kilo</td><td><b>k</b></td><td>10<sup>3</sup> = 1 000</td></tr>
+        <tr><td>mega</td><td><b>M</b></td><td>10<sup>6</sup> = 1 000 000</td></tr>
+        <tr><td>giga</td><td><b>G</b></td><td>10<sup>9</sup></td></tr>
+      </table>
+      <p class="info">Uwaga: <b>m</b> (mili) ≠ <b>M</b> (mega). 1 mΩ to miliom, 1 MΩ to megaom — miliard razy więcej.</p>
+    </div>
+    <div class="card">
+      <div class="quizbig" id="pf-q"></div>
+      <div class="quizans" id="pf-a"></div>
+      <div class="ctrl" style="justify-content:center"><button id="pf-show" class="primary">Pokaż odpowiedź</button><button id="pf-next">Następne ▶</button></div>
+      <p class="info" style="text-align:center">Liczycie na kartce, potem sprawdzamy.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= BLOK 2 ======================= -->
+
+<!-- 7 -->
+<section class="slide" id="s-hydro" data-blok="Blok 2 · wielkości elektryczne">
+  <div class="kicker">Blok 2 · wielkości elektryczne</div>
+  <h2>Obwód elektryczny jak obieg wody</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-hydro"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <label>napięcie U (pompa) <input type="range" id="hy-u" min="0" max="24" step="1" value="12"> <span class="val" id="hy-uv"></span></label>
+        <label>rezystancja R (zwężenie) <input type="range" id="hy-r" min="2" max="24" step="1" value="6"> <span class="val" id="hy-rv"></span></label>
+      </div>
+    </div>
+    <div class="card">
+      <table>
+        <tr><th>woda</th><th>prąd elektryczny</th></tr>
+        <tr><td>pompa wytwarza różnicę ciśnień</td><td>źródło wytwarza <b>napięcie U</b> [V]</td></tr>
+        <tr><td>przepływ wody (litry na sekundę)</td><td><b>natężenie prądu I</b> [A]</td></tr>
+        <tr><td>zwężenie rury utrudnia przepływ</td><td><b>rezystancja R</b> [Ω]</td></tr>
+      </table>
+      <p>Prąd: <span class="res" id="hy-i"></span></p>
+      <p class="info">Większe napięcie → większy prąd. Większa rezystancja → mniejszy prąd. Prąd jest <b>taki sam w każdym miejscu</b> zamkniętego obwodu.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="slide" id="s-wiel" data-blok="Blok 2 · wielkości elektryczne">
+  <div class="kicker">Wielkości i jednostki</div>
+  <h2>Sześć wielkości, które trzeba znać</h2>
+  <table>
+    <tr><th>wielkość</th><th>symbol</th><th>jednostka</th><th>wzór</th><th>przykład</th></tr>
+    <tr><td>ładunek elektryczny</td><td><b>Q</b></td><td>kulomb [C], amperogodzina [Ah]</td><td>Q = I · t</td><td>akumulator 12 V, 100 Ah</td></tr>
+    <tr><td>natężenie prądu</td><td><b>I</b></td><td>amper [A]</td><td>I = Q / t</td><td>czajnik ok. 9 A, dioda LED 10 mA</td></tr>
+    <tr><td>napięcie</td><td><b>U</b></td><td>wolt [V]</td><td>U = R · I</td><td>gniazdko 230 V, bateria 9 V</td></tr>
+    <tr><td>rezystancja</td><td><b>R</b></td><td>om [Ω]</td><td>R = U / I</td><td>rezystor 1 kΩ</td></tr>
+    <tr><td>moc</td><td><b>P</b></td><td>wat [W]</td><td>P = U · I</td><td>panel PV 400 W, czajnik 2 kW</td></tr>
+    <tr><td>energia (praca)</td><td><b>W</b></td><td>dżul [J], kilowatogodzina [kWh]</td><td>W = P · t</td><td>rachunek za prąd: kWh</td></tr>
+  </table>
+  <div class="def"><p><b>1 kWh</b> = urządzenie o mocy 1 kW pracujące przez 1 godzinę. W dżulach: 1 W = 1 J/s, więc 1 kWh = 1000 J/s · 3600 s = 3 600 000 J = 3,6 MJ. To jest jednostka z rachunku za prąd.</p></div>
+</section>
+
+<!-- 9 -->
+<section class="slide" id="s-czajnik" data-blok="Blok 2 · wielkości elektryczne">
+  <div class="kicker">Przykład krok po kroku</div>
+  <h2>Czajnik elektryczny</h2>
+  <div class="ex" data-steps>
+    <h3>Czajnik o mocy 2 kW zasilany z sieci 230 V gotuje wodę przez 3 minuty. Oblicz: a) prąd pobierany przez czajnik, b) zużytą energię w kWh, c) koszt jednego gotowania przy cenie 1,10 zł/kWh.</h3>
+    <ol>
+      <li>Dane: P = 2 kW = 2000 W, U = 230 V, t = 3 min = 3/60 h = 0,05 h, cena 1,10 zł/kWh.</li>
+      <li>a) P = U · I → I = P / U = 2000 W / 230 V ≈ <b>8,7 A</b></li>
+      <li>b) W = P · t = 2 kW · 0,05 h = <b>0,1 kWh</b></li>
+      <li>c) koszt = 0,1 kWh · 1,10 zł/kWh = <b>0,11 zł</b> (11 groszy)</li>
+      <li>Kontrola: 10 gotowań dziennie przez 30 dni → 30 kWh → ok. 33 zł miesięcznie.</li>
+    </ol>
+    <div class="step ctrl"><button class="primary" data-next>Następny krok ▶</button><button data-reset>Od początku</button></div>
+  </div>
+  <p class="info">Cena 1,10 zł/kWh — orientacyjna cena energii razem z dystrybucją; na rachunku sprawdzicie własną.</p>
+</section>
+
+<!-- 10 -->
+<section class="slide" id="s-twoja1" data-blok="Blok 2 · wielkości elektryczne">
+  <div class="kicker">Twoja kolej</div>
+  <h2>Policz sam(a)</h2>
+  <div class="cols c3">
+    <div class="you"><h3>1. Panel fotowoltaiczny</h3><p>Panel o mocy 400 W pracuje z pełną mocą przez 4,5 h. Ile energii wyprodukuje? Podaj w Wh i kWh.</p>
+      <details><summary>odpowiedź</summary><p>W = 400 W · 4,5 h = 1800 Wh = 1,8 kWh</p></details></div>
+    <div class="you"><h3>2. Akumulator magazynu energii</h3><p>Akumulator 12 V ma pojemność 100 Ah. Ile energii zgromadzi? Jak długo zasili żarówkę LED 10 W?</p>
+      <details><summary>odpowiedź</summary><p>W = 12 V · 100 Ah = 1200 Wh = 1,2 kWh; t = 1200 Wh / 10 W = 120 h</p></details></div>
+    <div class="you"><h3>3. Ładowarka telefonu</h3><p>Ładowarka pobiera z sieci 230 V prąd 0,1 A. Jaka jest jej moc? Ile kosztuje 1 h ładowania (1,10 zł/kWh)?</p>
+      <details><summary>odpowiedź</summary><p>P = 230 V · 0,1 A = 23 W; W = 0,023 kWh; koszt ≈ 0,025 zł (2,5 grosza)</p></details></div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="slide" id="s-kalk" data-blok="Blok 2 · wielkości elektryczne">
+  <div class="kicker">Ile kosztuje prąd?</div>
+  <h2>Kalkulator zużycia energii w domu</h2>
+  <div class="cols c64">
+    <div class="card">
+      <table id="kl-tab">
+        <tr><th></th><th>urządzenie</th><th>moc [W]</th><th>godz. dziennie</th><th>kWh / miesiąc</th></tr>
+      </table>
+    </div>
+    <div class="card">
+      <p><label>cena energii <input type="number" id="kl-c" value="1.10" step="0.05" min="0"> zł/kWh</label></p>
+      <p>Razem w miesiącu (30 dni):</p>
+      <p class="res" id="kl-kwh"></p>
+      <p class="res" id="kl-zl"></p>
+      <canvas class="viz short" id="cv-kalk"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= BLOK 3 ======================= -->
+
+<!-- 12 -->
+<section class="slide" id="s-ohm" data-blok="Blok 3 · prawo Ohma">
+  <div class="kicker">Blok 3 · prawo Ohma</div>
+  <h2>Prawo Ohma: U = R · I</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-ohm"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <label>napięcie źródła U <input type="range" id="oh-u" min="0" max="24" step="0.5" value="9"> <span class="val" id="oh-uv"></span></label>
+        <label>rezystancja R <select id="oh-r"></select></label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="def"><p><b>Prawo Ohma:</b> natężenie prądu płynącego przez przewodnik jest wprost proporcjonalne do napięcia.</p></div>
+      <p style="text-align:center;margin:1vh 0"><span class="formula">U = R · I</span></p>
+      <p style="text-align:center"><span class="formula">I = U / R</span> &nbsp; <span class="formula">R = U / I</span></p>
+      <p>Amperomierz: <span class="res" id="oh-i"></span></p>
+      <p>Woltomierz: <span class="res" id="oh-v"></span></p>
+    </div>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="slide" id="s-pomiar" data-blok="Blok 3 · prawo Ohma">
+  <div class="kicker">Jak mierzyć</div>
+  <h2>Woltomierz równolegle, amperomierz szeregowo</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-pom"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <button data-pm="ok" class="sel">✔ poprawnie</button>
+        <button data-pm="apar">✘ amperomierz równolegle</button>
+        <button data-pm="vser">✘ woltomierz szeregowo</button>
+      </div>
+    </div>
+    <div class="card">
+      <p id="pm-msg" class="big"></p>
+      <h3>Multimetr — gniazda</h3>
+      <ul>
+        <li><b>COM</b> — zawsze przewód czarny,</li>
+        <li><b>VΩ</b> — pomiar napięcia i rezystancji,</li>
+        <li><b>mA</b> — małe prądy (zwykle do 200–400 mA, z bezpiecznikiem),</li>
+        <li><b>10 A</b> (lub 20 A) — duże prądy.</li>
+      </ul>
+      <p class="info">Po pomiarze prądu przełóż przewód z powrotem do gniazda VΩ!</p>
+    </div>
+  </div>
+</section>
+
+<!-- 14 -->
+<section class="slide" id="s-live1" data-blok="Blok 3 · prawo Ohma">
+  <div class="kicker">Pokaz na żywo</div>
+  <h2>Sprawdzamy prawo Ohma pomiarem</h2>
+  <div class="cols">
+    <div class="card">
+      <p>Bateria 9 V + rezystor. Mierzymy <b>U</b> na rezystorze i <b>I</b> w obwodzie, liczymy R = U / I i porównujemy z wartością z oznaczenia.</p>
+      <table id="lv-tab">
+        <tr><th>R z oznaczenia</th><th>U [V]</th><th>I [mA]</th><th>R = U/I</th><th>różnica</th></tr>
+      </table>
+      <div class="ctrl" style="margin-top:.6vh"><button id="lv-demo">przykładowe wyniki</button><button id="lv-clr">wyczyść</button></div>
+    </div>
+    <div class="card">
+      <h3>Błąd względny</h3>
+      <p style="text-align:center"><span class="formula">δ = |R<sub>zm</sub> − R<sub>n</sub>| / R<sub>n</sub> · 100%</span></p>
+      <p>Rezystory mają <b>tolerancję</b>, np. ±5% (złoty pasek) — wynik w tym przedziale jest zgodny z oznaczeniem.</p>
+      <p>Mierniki też mają swoją dokładność (podaną w instrukcji miernika).</p>
+      <p class="info">Wyniki zapisujecie w <b>karcie, część A1</b>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 15 -->
+<section class="slide" id="s-char" data-blok="Blok 3 · prawo Ohma">
+  <div class="kicker">Charakterystyka prądowo-napięciowa I(U)</div>
+  <h2>Element liniowy i nieliniowy</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-char"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <label>napięcie U <input type="range" id="ch-u" min="0" max="3" step="0.01" value="1.9"> <span class="val" id="ch-uv"></span></label>
+        <label><input type="checkbox" id="ch-r" checked> rezystor 100 Ω</label>
+        <label><input type="checkbox" id="ch-l" checked> dioda LED czerwona</label>
+      </div>
+    </div>
+    <div class="card">
+      <table>
+        <tr><th></th><th>I</th><th>R = U / I</th></tr>
+        <tr><td style="color:var(--accent)"><b>rezystor</b></td><td id="ch-ir"></td><td id="ch-rr"></td></tr>
+        <tr><td style="color:var(--danger)"><b>LED</b></td><td id="ch-il"></td><td id="ch-rl"></td></tr>
+      </table>
+      <p><b>Rezystor</b>: prosta — R stałe, prawo Ohma działa.</p>
+      <p><b>Dioda LED</b>: do ok. 1,6 V prawie nic nie płynie, potem prąd gwałtownie rośnie. R zależy od napięcia — element <b>nieliniowy</b>.</p>
+      <p class="info">Dlatego diodę LED zawsze zasilamy przez rezystor ograniczający prąd.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 16 -->
+<section class="slide" id="s-moc" data-blok="Blok 3 · prawo Ohma">
+  <div class="kicker">Moc wydzielana w rezystorze</div>
+  <h2>Dobór rezystora do diody LED</h2>
+  <div class="cols">
+    <div class="card">
+      <p style="text-align:center"><span class="formula">P = U · I = I² · R = U² / R</span></p>
+      <p>Rezystor ma <b>moc znamionową</b> (np. 0,25 W). Większa moc → przegrzanie, spalenie.</p>
+      <div class="ctrl">
+        <label>zasilanie <input type="number" id="ld-u" value="9" step="0.5" min="0"> V</label>
+        <label>dioda <select id="ld-c"><option value="2.0">czerwona 2,0 V</option><option value="2.1">zielona 2,1 V</option><option value="3.0">niebieska 3,0 V</option><option value="3.1">biała 3,1 V</option></select></label>
+        <label>prąd <input type="number" id="ld-i" value="10" step="1" min="1"> mA</label>
+      </div>
+      <p id="ld-out"></p>
+      <p class="info"><b>Szereg E12</b> — znormalizowane wartości, w jakich produkuje się rezystory (IEC 60063): 12 wartości na dekadę: 10, 12, 15, 18, 22, 27, 33, 39, 47, 56, 68, 82 (× 1, 10, 100, 1000 …). Rezystora 95 Ω nie kupimy — bierzemy najbliższy z szeregu.</p>
+    </div>
+    <div class="you">
+      <h3>Twoja kolej</h3>
+      <p>1. Rezystor 100 Ω, 0,25 W podłączono bezpośrednio do baterii 9 V. Czy wytrzyma?</p>
+      <details><summary>odpowiedź</summary><p>P = U²/R = 81/100 = 0,81 W &gt; 0,25 W — spali się (zagrzeje mocno).</p></details>
+      <p>2. Dobierz rezystor dla diody białej (3,1 V, 20 mA) zasilanej z 5 V (USB).</p>
+      <details><summary>odpowiedź</summary><p>R = (5 − 3,1) / 0,02 = 95 Ω → z E12 100 Ω; I = 19 mA; P ≈ 0,036 W</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= BLOK 4 ======================= -->
+
+<!-- 17 -->
+<section class="slide" id="s-polacz" data-blok="Blok 4 · łączenie rezystorów">
+  <div class="kicker">Blok 4 · łączenie rezystorów</div>
+  <h2>Połączenie szeregowe i równoległe</h2>
+  <div class="cols">
+    <div class="card">
+      <h3>Szeregowe</h3>
+      <ul>
+        <li>przez wszystkie elementy płynie <b>ten sam prąd</b>,</li>
+        <li>napięcia się <b>sumują</b>: U = U<sub>1</sub> + U<sub>2</sub> + …</li>
+      </ul>
+      <p style="text-align:center"><span class="formula">R<sub>z</sub> = R<sub>1</sub> + R<sub>2</sub> + R<sub>3</sub></span></p>
+      <p class="info">R<sub>z</sub> jest <b>większa</b> od największej z rezystancji.</p>
+    </div>
+    <div class="card">
+      <h3>Równoległe</h3>
+      <ul>
+        <li>na wszystkich elementach jest <b>to samo napięcie</b>,</li>
+        <li>prądy się <b>sumują</b>: I = I<sub>1</sub> + I<sub>2</sub> + …</li>
+      </ul>
+      <p style="text-align:center"><span class="formula">1/R<sub>z</sub> = 1/R<sub>1</sub> + 1/R<sub>2</sub> + 1/R<sub>3</sub></span></p>
+      <p style="text-align:center">dla dwóch: <span class="formula">R<sub>z</sub> = R<sub>1</sub>·R<sub>2</sub> / (R<sub>1</sub> + R<sub>2</sub>)</span></p>
+      <p class="info">R<sub>z</sub> jest <b>mniejsza</b> od najmniejszej z rezystancji. Dwa jednakowe: R<sub>z</sub> = R/2.</p>
+    </div>
+  </div>
+  <p class="info">Gdzie to spotkacie: odbiorniki w domu są połączone <b>równolegle</b> (każdy ma 230 V); ogniwa w panelu PV — <b>szeregowo</b> (napięcia się sumują).</p>
+</section>
+
+<!-- 18 -->
+<section class="slide" id="s-plytka" data-blok="Blok 4 · łączenie rezystorów">
+  <div class="kicker">Wirtualna płytka</div>
+  <h2>Sprawdź: prądy i napięcia w układzie</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-pl"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <button data-pl="s" class="sel">szeregowo</button><button data-pl="p">równolegle</button><button data-pl="m">R1 + (R2 ‖ R3)</button>
+        <label>U <input type="range" id="pl-u" min="1" max="24" step="1" value="12"> <span class="val" id="pl-uv"></span></label>
+      </div>
+      <div class="ctrl">
+        <label>R1 <select id="pl-r1"></select></label><label>R2 <select id="pl-r2"></select></label><label>R3 <select id="pl-r3"></select></label>
+      </div>
+    </div>
+    <div class="card">
+      <p>rezystancja zastępcza R<sub>z</sub> = <span class="res" id="pl-rz"></span></p>
+      <p>prąd ze źródła I = U / R<sub>z</sub> = <span class="res" id="pl-i"></span></p>
+      <table id="pl-tab"></table>
+      <p class="info" id="pl-chk"></p>
+    </div>
+  </div>
+</section>
+
+<!-- 19 -->
+<section class="slide" id="s-miesz" data-blok="Blok 4 · łączenie rezystorów">
+  <div class="kicker">Przykład krok po kroku</div>
+  <h2>Układ mieszany</h2>
+  <div class="cols c46">
+    <canvas class="viz" id="cv-miesz"></canvas>
+    <div class="ex" data-steps>
+      <h3>R1 = 220 Ω, R2 = R3 = 470 Ω, U = 9 V. Oblicz R<sub>z</sub>, prąd I oraz napięcia U<sub>1</sub> i U<sub>23</sub>.</h3>
+      <ol>
+        <li>R2 ‖ R3: dwa jednakowe → R<sub>23</sub> = 470 / 2 = <b>235 Ω</b></li>
+        <li>R<sub>23</sub> jest w szeregu z R1: R<sub>z</sub> = 220 + 235 = <b>455 Ω</b></li>
+        <li>I = U / R<sub>z</sub> = 9 V / 455 Ω ≈ <b>19,8 mA</b></li>
+        <li>U<sub>1</sub> = R1 · I = 220 Ω · 0,0198 A ≈ <b>4,35 V</b></li>
+        <li>U<sub>23</sub> = R<sub>23</sub> · I = 235 · 0,0198 ≈ <b>4,65 V</b>; kontrola: 4,35 + 4,65 = 9 V ✔</li>
+        <li>Prądy gałęzi: I<sub>2</sub> = I<sub>3</sub> = 4,65 V / 470 Ω ≈ <b>9,9 mA</b>; kontrola: 9,9 + 9,9 = 19,8 mA ✔</li>
+      </ol>
+      <div class="step ctrl"><button class="primary" data-next>Następny krok ▶</button><button data-reset>Od początku</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- 20 -->
+<section class="slide" id="s-dziel" data-blok="Blok 4 · łączenie rezystorów">
+  <div class="kicker">Dzielnik napięcia</div>
+  <h2>Jak „zrobić” mniejsze napięcie</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-dz"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <label>U <input type="number" id="dz-u" value="12" step="0.5" min="0"> V</label>
+        <label>R1 <select id="dz-r1"></select></label><label>R2 <select id="dz-r2"></select></label>
+        <label><input type="checkbox" id="dz-l"> odbiornik R<sub>L</sub></label><label><select id="dz-rl"></select></label>
+      </div>
+    </div>
+    <div class="card">
+      <p style="text-align:center"><span class="formula">U<sub>wy</sub> = U · R2 / (R1 + R2)</span></p>
+      <p>U<sub>wy</sub> = <span class="res" id="dz-out"></span></p>
+      <p id="dz-msg" class="info"></p>
+      <p class="info">Zastosowania: pomiar wysokiego napięcia (np. napięcia baterii w falowniku przez dzielnik do przetwornika), czujniki rezystancyjne (termistor + rezystor).</p>
+    </div>
+  </div>
+</section>
+
+<!-- 21 -->
+<section class="slide" id="s-twoja2" data-blok="Blok 4 · łączenie rezystorów">
+  <div class="kicker">Twoja kolej</div>
+  <h2>Połączenia rezystorów</h2>
+  <div class="cols c3">
+    <div class="you"><h3>1. Szeregowo</h3><p>R1 = 100 Ω, R2 = 220 Ω, R3 = 680 Ω połączono szeregowo i zasilono z 12 V. Oblicz R<sub>z</sub>, I oraz U<sub>3</sub>.</p>
+      <details><summary>odpowiedź</summary><p>R<sub>z</sub> = 1000 Ω; I = 12 mA; U<sub>3</sub> = 680 · 0,012 = 8,16 V</p></details></div>
+    <div class="you"><h3>2. Równolegle</h3><p>R1 = 1 kΩ i R2 = 4,7 kΩ połączono równolegle do 9 V. Oblicz R<sub>z</sub>, I<sub>1</sub>, I<sub>2</sub> i prąd całkowity.</p>
+      <details><summary>odpowiedź</summary><p>R<sub>z</sub> ≈ 825 Ω; I<sub>1</sub> = 9 mA; I<sub>2</sub> ≈ 1,91 mA; I ≈ 10,9 mA</p></details></div>
+    <div class="you"><h3>3. Dzielnik</h3><p>Z akumulatora 24 V trzeba uzyskać 5 V do wejścia pomiarowego. R2 = 1 kΩ. Ile musi wynosić R1?</p>
+      <details><summary>odpowiedź</summary><p>5 = 24 · 1000 / (R1 + 1000) → R1 = 3800 Ω (np. 3,9 kΩ z E12 → U<sub>wy</sub> ≈ 4,9 V)</p></details></div>
+  </div>
+</section>
+
+<!-- ======================= BLOK 5 ======================= -->
+
+<!-- 22 -->
+<section class="slide" id="s-k1" data-blok="Blok 5 · Kirchhoff i źródło">
+  <div class="kicker">Blok 5 · prawa Kirchhoffa</div>
+  <h2>I prawo Kirchhoffa — węzeł</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-k1"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <label>I<sub>1</sub> <input type="range" id="k1-a" min="0" max="5" step="0.1" value="3"> <span class="val" id="k1-av"></span></label>
+        <label>I<sub>2</sub> <input type="range" id="k1-b" min="0" max="5" step="0.1" value="2"> <span class="val" id="k1-bv"></span></label>
+        <label>I<sub>3</sub> <input type="range" id="k1-c" min="0" max="5" step="0.1" value="1.5"> <span class="val" id="k1-cv"></span></label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="def"><p>Suma prądów <b>wpływających</b> do węzła = suma prądów <b>wypływających</b> z węzła.</p></div>
+      <p style="text-align:center;margin:1vh 0"><span class="formula">I<sub>1</sub> + I<sub>2</sub> = I<sub>3</sub> + I<sub>4</sub></span></p>
+      <p>I<sub>4</sub> = <span class="res" id="k1-d"></span></p>
+      <p class="info" id="k1-msg"></p>
+      <p class="info">Ładunek w węźle nie znika i się nie gromadzi. Przykład: prąd z dwóch stringów PV wpływa do skrzynki przyłączeniowej i wypływa jednym przewodem do falownika.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 23 -->
+<section class="slide" id="s-k2" data-blok="Blok 5 · Kirchhoff i źródło">
+  <div class="kicker">Prawa Kirchhoffa</div>
+  <h2>II prawo Kirchhoffa — oczko</h2>
+  <div class="cols c64">
+    <canvas class="viz" id="cv-k2"></canvas>
+    <div class="card">
+      <div class="def"><p>W zamkniętym obwodzie (oczku) suma napięć źródeł = suma spadków napięć na odbiornikach.</p></div>
+      <p style="text-align:center;margin:1vh 0"><span class="formula">U<sub>bat</sub> = U<sub>R</sub> + U<sub>LED</sub></span></p>
+      <h3>Pomiar na żywo (bateria + 470 Ω + LED)</h3>
+      <table>
+        <tr><td>U<sub>bat</sub></td><td><input type="number" id="k2-b" step="0.01"> V</td></tr>
+        <tr><td>U<sub>R</sub></td><td><input type="number" id="k2-r" step="0.01"> V</td></tr>
+        <tr><td>U<sub>LED</sub></td><td><input type="number" id="k2-l" step="0.01"> V</td></tr>
+      </table>
+      <p id="k2-out"></p>
+      <div class="ctrl"><button id="k2-demo">przykładowe wyniki</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- 24 -->
+<section class="slide" id="s-zrodlo" data-blok="Blok 5 · Kirchhoff i źródło">
+  <div class="kicker">Rzeczywiste źródło napięcia</div>
+  <h2>Dlaczego napięcie baterii spada pod obciążeniem?</h2>
+  <div class="cols">
+    <div>
+      <canvas class="viz" id="cv-zr"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <label>E <input type="range" id="zr-e" min="1" max="24" step="0.1" value="12"> <span class="val" id="zr-ev"></span></label>
+        <label>R<sub>w</sub> <input type="range" id="zr-w" min="0.1" max="10" step="0.1" value="2"> <span class="val" id="zr-wv"></span></label>
+      </div>
+      <div class="ctrl">
+        <label>R<sub>obc</sub> <input type="range" id="zr-o" min="0" max="100" step="1" value="50"> <span class="val" id="zr-ov"></span></label>
+      </div>
+    </div>
+    <div>
+      <canvas class="viz" id="cv-zr2"></canvas>
+      <p style="text-align:center"><span class="formula">U = E − I · R<sub>w</sub></span></p>
+      <p class="info" id="zr-out"></p>
+    </div>
+  </div>
+</section>
+
+<!-- 25 -->
+<section class="slide" id="s-lab" data-blok="Blok 5 · Kirchhoff i źródło">
+  <div class="kicker">Mini-laboratorium · do sprawozdania</div>
+  <h2>Wyznaczamy E i R<sub>w</sub> źródła z pomiarów</h2>
+  <div class="cols c46">
+    <div class="card">
+      <p class="info">Źródło: bateria 9 V + rezystor 100 Ω w szeregu (udaje dużą R<sub>w</sub>). Zmieniamy R<sub>obc</sub>, mierzymy U na zaciskach i I.</p>
+      <table id="lb-tab">
+        <tr><th>R<sub>obc</sub></th><th>U [V]</th><th>I [mA]</th></tr>
+      </table>
+      <div class="ctrl" style="margin-top:.6vh"><button id="lb-demo">dane wirtualne</button><button id="lb-clr">wyczyść</button></div>
+    </div>
+    <div>
+      <canvas class="viz tall" id="cv-lab"></canvas>
+      <p id="lb-out" class="big"></p>
+    </div>
+  </div>
+</section>
+
+<!-- 26 -->
+<section class="slide" id="s-karta" data-blok="Blok 5 · Kirchhoff i źródło">
+  <div class="kicker">Sprawozdanie nr 1</div>
+  <h2>Karta pomiarów i zadań</h2>
+  <div class="cols">
+    <div class="card">
+      <h3>Część A — pomiary (dziś, na zajęciach)</h3>
+      <ul>
+        <li>A1 — prawo Ohma: tabela U, I, R, błąd względny,</li>
+        <li>A2 — II prawo Kirchhoffa: napięcia w oczku z LED,</li>
+        <li>A3 — źródło napięcia: tabela U(I), wykres, E i R<sub>w</sub>,</li>
+        <li>wnioski — 2–3 zdania własnymi słowami.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Część B — zadania (w domu)</h3>
+      <ul>
+        <li>10 zadań, <b>dane z Twojego wariantu</b> (numer w nagłówku karty),</li>
+        <li>rozwiązania na osobnej kartce, <b>z tokiem obliczeń i jednostkami</b>,</li>
+        <li>oddajecie kartę + kartki <b>na następnych zajęciach</b>,</li>
+        <li>przy oddaniu — krótka rozmowa (obrona).</li>
+      </ul>
+    </div>
+  </div>
+  <div class="def"><p>Punktacja: część A — 10 pkt, część B — 20 pkt. Zaliczenie od 51%.</p></div>
+</section>
+
+<!-- 27 -->
+<section class="slide" id="s-wzory" data-blok="Blok 5 · Kirchhoff i źródło">
+  <div class="kicker">Podsumowanie</div>
+  <h2>Ściąga wzorów</h2>
+  <div class="cols c3">
+    <div class="card"><h3>Wielkości</h3>
+      <p>I = Q / t</p><p>P = U · I = I²R = U²/R</p><p>W = P · t</p><p>1 kWh = 3,6 MJ</p><p>W<sub>akum</sub> = U · Q [Wh]</p></div>
+    <div class="card"><h3>Ohm i połączenia</h3>
+      <p>U = R · I</p><p>szereg.: R<sub>z</sub> = R<sub>1</sub> + R<sub>2</sub> + …</p><p>równol.: 1/R<sub>z</sub> = 1/R<sub>1</sub> + 1/R<sub>2</sub> + …</p><p>dwa: R<sub>z</sub> = R<sub>1</sub>R<sub>2</sub>/(R<sub>1</sub>+R<sub>2</sub>)</p><p>dzielnik: U<sub>wy</sub> = U·R<sub>2</sub>/(R<sub>1</sub>+R<sub>2</sub>)</p></div>
+    <div class="card"><h3>Kirchhoff i źródło</h3>
+      <p>węzeł: ΣI<sub>wpł</sub> = ΣI<sub>wypł</sub></p><p>oczko: ΣE = ΣU</p><p>źródło: U = E − I·R<sub>w</sub></p><p>zwarcie: I<sub>z</sub> = E / R<sub>w</sub></p><p>R<sub>w</sub> = (U<sub>1</sub> − U<sub>2</sub>) / (I<sub>2</sub> − I<sub>1</sub>)</p></div>
+  </div>
+  <p class="big" style="text-align:center;margin-top:2vh">Dziękuję! Do zobaczenia na kolejnych zajęciach.</p>
+</section>
+
+<div id="bar">
+  <button id="b-prev" title="poprzedni (←)">◀</button>
+  <button id="b-next" title="następny (→)">▶</button>
+  <span id="blk"></span>
+  <div id="prog"><div></div></div>
+  <span id="cnt"></span>
+  <button id="b-theme" title="motyw (T)">◐</button>
+  <button id="b-fs" title="pełny ekran (F)">⛶</button>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const TAU=Math.PI*2;
+let C={}, NOW=0, DT=0, LAST=0;
+function readColors(){ const cs=getComputedStyle(document.documentElement); for(const k of ['bg','panel','fg','muted','grid','accent','accent2','accent3','danger','violet','gold','chip']) C[k]=cs.getPropertyValue('--'+k).trim(); }
+function toggleTheme(){ const r=document.documentElement; r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'; try{localStorage.setItem('el1-theme',r.dataset.theme);}catch(e){} }
+try{ const t=localStorage.getItem('el1-theme'); if(t) document.documentElement.dataset.theme=t; }catch(e){}
+readColors();
+
+/* ---------- liczby ---------- */
+function fmt(x,d=2){ if(!isFinite(x)) return '—'; const neg=x<0; x=Math.abs(x); const s=(Math.round(x*10**d)/10**d).toFixed(d); let [a,b]=s.split('.');
+  a=a.replace(/\B(?=(\d{3})+(?!\d))/g,' '); b=b?b.replace(/0+$/,''):''; return (neg?'−':'')+(b?a+','+b:a); }
+function si(x,unit,d=3){ if(!isFinite(x)) return '∞ '+unit; const ax=Math.abs(x); if(ax===0) return '0 '+unit;
+  const P=[[1e9,'G'],[1e6,'M'],[1e3,'k'],[1,''],[1e-3,'m'],[1e-6,'µ']]; for(const [m,p] of P){ if(ax>=m*0.9995){ const v=x/m; const dd=Math.max(0,d-1-Math.floor(Math.log10(Math.abs(v)+1e-12))); return fmt(v,dd)+' '+p+unit; } }
+  return fmt(x/1e-6,1)+' µ'+unit; }
+const ohm=r=>si(r,'Ω');
+const num=el=>{ const v=parseFloat(String(el.value).replace(',','.')); return isFinite(v)?v:NaN; };
+
+/* ---------- rysowanie ---------- */
+function fit(cv){ const r=cv.getBoundingClientRect(), d=window.devicePixelRatio||1; const W=Math.max(10,r.width), H=Math.max(10,r.height);
+  if(cv.width!==Math.round(W*d)||cv.height!==Math.round(H*d)){ cv.width=Math.round(W*d); cv.height=Math.round(H*d); }
+  const g=cv.getContext('2d'); g.setTransform(d,0,0,d,0,0); g.clearRect(0,0,W,H); return {g,w:W,h:H}; }
+function line(g,x1,y1,x2,y2,col,w=2,dash){ g.strokeStyle=col; g.lineWidth=w; g.setLineDash(dash||[]); g.beginPath(); g.moveTo(x1,y1); g.lineTo(x2,y2); g.stroke(); g.setLineDash([]); }
+function poly(g,pts,col,w=2.5,closed=false){ g.strokeStyle=col; g.lineWidth=w; g.lineJoin='round'; g.beginPath(); pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1])); if(closed) g.closePath(); g.stroke(); }
+function text(g,s,x,y,col,size=14,align='left',weight=600){ g.fillStyle=col; g.font=`${weight} ${size}px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif`; g.textAlign=align; g.textBaseline='middle'; g.fillText(s,x,y); }
+function dot(g,x,y,r,col){ g.fillStyle=col; g.beginPath(); g.arc(x,y,r,0,TAU); g.fill(); }
+function arrow(g,x1,y1,x2,y2,col,w=3,hs=12){ line(g,x1,y1,x2,y2,col,w); const a=Math.atan2(y2-y1,x2-x1); g.fillStyle=col; g.beginPath(); g.moveTo(x2,y2); g.lineTo(x2-hs*Math.cos(a-0.4),y2-hs*Math.sin(a-0.4)); g.lineTo(x2-hs*Math.cos(a+0.4),y2-hs*Math.sin(a+0.4)); g.closePath(); g.fill(); }
+function resistor(g,x,y,vert,label,col){ const L=54,W=20; g.fillStyle=C.panel; g.strokeStyle=col||C.fg; g.lineWidth=2.5;
+  if(vert){ g.fillRect(x-W/2,y-L/2,W,L); g.strokeRect(x-W/2,y-L/2,W,L); if(label) text(g,label,x+W/2+8,y,col||C.fg,15,'left',700); }
+  else { g.fillRect(x-L/2,y-W/2,L,W); g.strokeRect(x-L/2,y-W/2,L,W); if(label) text(g,label,x,y-W/2-12,col||C.fg,15,'center',700); } }
+function battery(g,x,y,label,vert=true){ g.fillStyle=C.panel; if(vert){ g.fillRect(x-22,y-7,44,14); line(g,x-20,y-6,x+20,y-6,C.fg,3); line(g,x-10,y+6,x+10,y+6,C.fg,6);
+    text(g,'+',x+26,y-12,C.danger,16,'left',800); if(label) text(g,label,x-30,y,C.fg,15,'right',700); }
+  else { g.fillRect(x-7,y-22,14,44); line(g,x-6,y-20,x-6,y+20,C.fg,3); line(g,x+6,y-10,x+6,y+10,C.fg,6); if(label) text(g,label,x,y-34,C.fg,15,'center',700); } }
+function meter(g,x,y,letter,reading,col){ g.fillStyle=C.panel; g.strokeStyle=col||C.fg; g.lineWidth=2.5; g.beginPath(); g.arc(x,y,18,0,TAU); g.fill(); g.stroke();
+  text(g,letter,x,y+1,col||C.fg,18,'center',800); if(reading) text(g,reading,x,y+34,C.accent,16,'center',800); }
+function node(g,x,y){ dot(g,x,y,4.5,C.fg); }
+function led(g,x,y,on,rot=0){ // domyślnie pozioma, anoda z lewej; rot=Math.PI/2 → anoda u góry
+  g.save(); g.translate(x,y); g.rotate(rot); x=0; y=0;
+  g.fillStyle=C.panel; g.fillRect(x-14,y-14,28,28); g.fillStyle=on?C.danger:C.panel; g.strokeStyle=C.fg; g.lineWidth=2.5;
+  g.beginPath(); g.moveTo(x-12,y-12); g.lineTo(x+10,y); g.lineTo(x-12,y+12); g.closePath(); g.fill(); g.stroke(); line(g,x+11,y-13,x+11,y+13,C.fg,3);
+  if(on){ arrow(g,x+2,y-16,x+12,y-28,C.danger,2,6); arrow(g,x+10,y-12,x+20,y-24,C.danger,2,6); } g.restore(); }
+/* płynące kropki (kierunek umowny prądu) */
+const PH={};
+function pathOf(pts,closed){ const P=closed?[...pts,pts[0]]:pts, seg=[]; let L=0; for(let i=0;i<P.length-1;i++){ const a=P[i],b=P[i+1],l=Math.hypot(b[0]-a[0],b[1]-a[1]); seg.push([a,b,l,L]); L+=l; } return {seg,L}; }
+function pointAt(p,s){ for(const [a,b,l,L0] of p.seg){ if(s<=L0+l){ const u=l?(s-L0)/l:0; return [a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u]; } } const z=p.seg[p.seg.length-1]; return z[1]; }
+function flow(g,key,pts,closed,speed,col,gap=26,r=3.4){ if(speed<=0.01) return; const p=pathOf(pts,closed); PH[key]=((PH[key]||0)+speed*DT)%gap; for(let s=PH[key]; s<p.L; s+=gap){ const [x,y]=pointAt(p,s); dot(g,x,y,r,col); } }
+const spd=(I,Iref)=>Math.min(160,Math.max(0,90*I/Iref)); // px/s
+/* osie wykresu */
+function axes(g,x0,y0,x1,y1,xmax,ymax,xl,yl,xt,yt,fx,fy){ line(g,x0,y0,x1,y0,C.muted,1.5); line(g,x0,y0,x0,y1,C.muted,1.5);
+  for(let i=0;i<=xt;i++){ const x=x0+(x1-x0)*i/xt; line(g,x,y0,x,y1,C.grid,1); text(g,fx(xmax*i/xt),x,y0+14,C.muted,12,'center',500); }
+  for(let i=0;i<=yt;i++){ const y=y0+(y1-y0)*i/yt; line(g,x0,y,x1,y,C.grid,1); text(g,fy(ymax*i/yt),x0-6,y,C.muted,12,'right',500); }
+  text(g,xl,x1,y0+30,C.fg,13,'right',700); text(g,yl,x0+6,y1-10,C.fg,13,'left',700); }
+
+const E12=[10,12,15,18,22,27,33,39,47,56,68,82];
+const RLIST=[100,150,220,330,470,680,1000,1500,2200,3300,4700,6800,10000];
+function fillR(sel,val,list=RLIST){ sel.innerHTML=list.map(r=>`<option value="${r}"${r===val?' selected':''}>${ohm(r)}</option>`).join(''); }
+function e12up(r){ for(let dec=1;dec<=1e6;dec*=10) for(const v of E12){ if(v*dec>=r-1e-9) return v*dec; } return r; }
+const frame={};
+
+/* ===== 4. BHP ===== */
+const ZONES=[[0,0.5,'prąd nieodczuwalny',C.accent3],[0.5,10,'odczuwalny — mrowienie, skurcze; można puścić przewód',C.gold],[10,30,'skurcz mięśni — trudno puścić przewód, kłopoty z oddychaniem',C.accent2],[30,50,'zagrożenie życia — zatrzymanie oddechu (tu działa RCD 30 mA)',C.danger],[50,1e9,'migotanie komór serca — śmiertelne zagrożenie',C.violet]];
+function bhpUpd(){ const U=+$('#bh-u').value, R=+$('#bh-r').value, I=U/R*1000; $('#bh-uv').textContent=U+' V'; $('#bh-rv').textContent=fmt(R,0)+' Ω';
+  $('#bh-i').textContent=I<10?fmt(I,1)+' mA':fmt(I,0)+' mA'; const z=ZONES.find(z=>I>=z[0]&&I<z[1]); $('#bh-eff').innerHTML=`<span style="color:${zoneCol(z)};font-weight:800">${z[2]}</span>`; }
+function zoneCol(z){ const i=ZONES.indexOf(z); return [C.accent3,C.gold,C.accent2,C.danger,C.violet][i]; }
+['#bh-u','#bh-r'].forEach(s=>$(s).addEventListener('input',bhpUpd));
+$$('[data-bu]').forEach(b=>b.onclick=()=>{ $('#bh-u').value=b.dataset.bu; bhpUpd(); });
+$$('[data-br]').forEach(b=>b.onclick=()=>{ $('#bh-r').value=b.dataset.br; bhpUpd(); });
+bhpUpd();
+frame['s-bhp']=()=>{ const {g,w,h}=fit($('#cv-bhp')); const L=30,Rr=w-30, y=h*0.45, bh=34; const lx=v=>L+(Rr-L)*(Math.log10(v)-(-1))/(3-(-1));
+  const cols=[C.accent3,C.gold,C.accent2,C.danger,C.violet];
+  ZONES.forEach((z,i)=>{ const a=lx(Math.max(0.1,z[0])), b=lx(Math.min(1000,z[1])); g.fillStyle=cols[i]; g.globalAlpha=.85; g.fillRect(a,y-bh/2,b-a,bh); g.globalAlpha=1; });
+  [0.1,0.5,1,10,30,50,100,1000].forEach(v=>{ const x=lx(v); line(g,x,y+bh/2,x,y+bh/2+6,C.muted,1); text(g,fmt(v,1),x,y+bh/2+16,C.muted,12,'center',500); });
+  text(g,'mA (skala logarytmiczna)',Rr,y+bh/2+34,C.muted,12,'right',500);
+  const I=+$('#bh-u').value/+$('#bh-r').value*1000, x=lx(Math.min(1000,Math.max(0.1,I)));
+  g.fillStyle=C.fg; g.beginPath(); g.moveTo(x,y-bh/2-2); g.lineTo(x-10,y-bh/2-20); g.lineTo(x+10,y-bh/2-20); g.closePath(); g.fill();
+  text(g,(I<10?fmt(I,1):fmt(I,0))+' mA',x,y-bh/2-32,C.fg,16,'center',800); };
+
+/* ===== 6. przedrostki ===== */
+const PFX=[
+ ()=>{const v=[0.045,0.25,0.008,1.2,0.15][r5()]; return [`${fmt(v,3)} A = ? mA`,`${fmt(v*1000,1)} mA`];},
+ ()=>{const v=[750,20,4.5,1500,330][r5()]; return [`${fmt(v,1)} mA = ? A`,`${fmt(v/1000,4)} A`];},
+ ()=>{const v=[2200,470,15000,680,1000000][r5()]; return [`${fmt(v,0)} Ω = ? kΩ`,`${fmt(v/1000,3)} kΩ`];},
+ ()=>{const v=[4.7,0.33,2.2,0.1,47][r5()]; return [`${fmt(v,2)} kΩ = ? Ω`,`${fmt(v*1000,0)} Ω`];},
+ ()=>{const v=[3.5,0.8,2,12.5,0.25][r5()]; return [`${fmt(v,2)} kW = ? W`,`${fmt(v*1000,0)} W`];},
+ ()=>{const v=[1500,250,3600,90,12000][r5()]; return [`${fmt(v,0)} Wh = ? kWh`,`${fmt(v/1000,3)} kWh`];},
+ ()=>{const v=[0.4,15,110,0.23,20][r5()]; return [`${fmt(v,2)} kV = ? V`,`${fmt(v*1000,0)} V`];},
+ ()=>{const v=[500,25,1200,80,3][r5()]; return [`${fmt(v,0)} µA = ? mA`,`${fmt(v/1000,3)} mA`];},
+ ()=>{const v=[2.5,0.6,15,1.2,250][r5()]; return [`${fmt(v,1)} MW = ? kW`,`${fmt(v*1000,0)} kW`];},
+];
+function r5(){ return Math.floor(Math.random()*5); }
+let pfLast=-1; function pfNew(){ let i; do{ i=Math.floor(Math.random()*PFX.length); }while(i===pfLast); pfLast=i; const [q,a]=PFX[i](); $('#pf-q').textContent=q; $('#pf-a').dataset.a=a; $('#pf-a').textContent=''; }
+$('#pf-next').onclick=pfNew; $('#pf-show').onclick=()=>{ $('#pf-a').textContent=$('#pf-a').dataset.a; }; pfNew();
+
+/* ===== 7. obieg wody ===== */
+function hyUpd(){ const U=+$('#hy-u').value, R=+$('#hy-r').value; $('#hy-uv').textContent=U+' V'; $('#hy-rv').textContent=R+' Ω'; $('#hy-i').textContent=fmt(U/R,2)+' A'; }
+['#hy-u','#hy-r'].forEach(s=>$(s).addEventListener('input',hyUpd)); hyUpd();
+frame['s-hydro']=()=>{ const {g,w,h}=fit($('#cv-hydro')); const U=+$('#hy-u').value, R=+$('#hy-r').value, I=U/R;
+  const x0=w*0.18,x1=w*0.82,y0=h*0.2,y1=h*0.8, pw=26; const loop=[[x0,y1],[x0,y0],[x1,y0],[x1,y1]];
+  g.strokeStyle=C.accent; g.globalAlpha=.25; g.lineWidth=pw; g.lineJoin='round'; g.beginPath(); loop.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1])); g.closePath(); g.stroke(); g.globalAlpha=1;
+  // zwężenie
+  const nw=Math.max(4,pw*(1-R/30)), ny0=(y0+y1)/2-50, ny1=(y0+y1)/2+50; g.fillStyle=C.panel; g.fillRect(x1-pw/2-1,ny0,pw+2,ny1-ny0);
+  g.fillStyle=C.accent; g.globalAlpha=.25; g.fillRect(x1-nw/2,ny0,nw,ny1-ny0); g.globalAlpha=1; g.fillStyle=C.muted; g.fillRect(x1-pw/2,ny0,(pw-nw)/2,ny1-ny0); g.fillRect(x1+nw/2,ny0,(pw-nw)/2,ny1-ny0);
+  text(g,'zwężenie',x1-pw,(y0+y1)/2-9,C.fg,14,'right',700); text(g,'= rezystancja',x1-pw,(y0+y1)/2+9,C.fg,14,'right',700);
+  flow(g,'hy',loop,true,spd(I,2),C.accent,22,4);
+  // pompa
+  const py=(y0+y1)/2; g.fillStyle=C.panel; g.strokeStyle=C.fg; g.lineWidth=2.5; g.beginPath(); g.arc(x0,py,32,0,TAU); g.fill(); g.stroke();
+  g.save(); g.translate(x0,py); g.rotate(-NOW*spd(I,2)/30); for(let k=0;k<4;k++){ g.rotate(TAU/4); line(g,0,0,24,0,C.accent2,4); } g.restore();
+  text(g,'pompa',x0+42,py-9,C.fg,14,'left',700); text(g,'= źródło napięcia',x0+42,py+9,C.fg,14,'left',700);
+  text(g,'ciśnienie wysokie (+)',(x0+x1)/2,y0-24,C.danger,14,'center',700); text(g,'ciśnienie niskie (−)',(x0+x1)/2,y1+24,C.accent,14,'center',700); };
+
+/* ===== 8–9 kroki ===== */
+$$('[data-steps]').forEach(ex=>{ const li=[...ex.querySelectorAll('ol li')]; let k=0; const upd=()=>li.forEach((l,i)=>l.classList.toggle('on',i<k));
+  ex.querySelector('[data-next]').onclick=()=>{ k=Math.min(li.length,k+1); upd(); }; ex.querySelector('[data-reset]').onclick=()=>{ k=0; upd(); }; upd(); });
+
+/* ===== 11. kalkulator ===== */
+const DEV=[['lodówka',100,8,true],['czajnik',2000,0.3,true],['pralka',2000,0.5,true],['oświetlenie LED (10 żarówek)',100,5,true],['telewizor',100,4,true],['komputer/laptop',60,6,true],['płyta indukcyjna',3500,0.7,false],['grzejnik elektryczny',2000,6,false],['ładowanie auta elektrycznego',7400,1.5,false]];
+$('#kl-tab').insertAdjacentHTML('beforeend',DEV.map((d,i)=>`<tr><td><input type="checkbox" data-kc="${i}"${d[3]?' checked':''}></td><td>${d[0]}</td><td><input type="number" data-kp="${i}" value="${d[1]}" min="0" step="10"></td><td><input type="number" data-kh="${i}" value="${d[2]}" min="0" max="24" step="0.1"></td><td data-kw="${i}"></td></tr>`).join(''));
+let KL=[];
+function klUpd(){ const c=num($('#kl-c')); let tot=0; KL=DEV.map((d,i)=>{ const on=$(`[data-kc="${i}"]`).checked, P=num($(`[data-kp="${i}"]`)), hh=num($(`[data-kh="${i}"]`)); const e=on?P*hh*30/1000:0; tot+=e; $(`[data-kw="${i}"]`).textContent=on?fmt(e,1):'—'; return [d[0],e]; });
+  $('#kl-kwh').textContent=fmt(tot,1)+' kWh'; $('#kl-zl').textContent='≈ '+fmt(tot*c,2)+' zł'; }
+$('#s-kalk').addEventListener('input',klUpd); klUpd();
+frame['s-kalk']=()=>{ const {g,w,h}=fit($('#cv-kalk')); const it=KL.filter(k=>k[1]>0).sort((a,b)=>b[1]-a[1]); if(!it.length) return; const mx=it[0][1], bh=Math.min(22,(h-10)/it.length-4);
+  it.forEach((k,i)=>{ const y=6+i*(bh+4), bw=(w-150)*k[1]/mx; g.fillStyle=C.accent2; g.fillRect(110,y,bw,bh); text(g,k[0].split(' (')[0].slice(0,16),104,y+bh/2,C.fg,12,'right',600); text(g,fmt(k[1],1),114+bw,y+bh/2,C.muted,12,'left',600); }); };
+
+/* ===== 12. prawo Ohma ===== */
+fillR($('#oh-r'),1000);
+function ohUpd(){ const U=+$('#oh-u').value, R=+$('#oh-r').value; $('#oh-uv').textContent=fmt(U,1)+' V'; $('#oh-i').textContent=si(U/R,'A'); $('#oh-v').textContent=fmt(U,2)+' V'; }
+['#oh-u','#oh-r'].forEach(s=>$(s).addEventListener('input',ohUpd)); ohUpd();
+frame['s-ohm']=()=>{ const {g,w,h}=fit($('#cv-ohm')); const U=+$('#oh-u').value, R=+$('#oh-r').value, I=U/R;
+  const x1=w*0.2,x2=w*0.58,x3=w*0.8,y1=h*0.18,y2=h*0.82,ym=(y1+y2)/2; const loop=[[x1,y2],[x1,y1],[x2,y1],[x2,y2]];
+  poly(g,loop,C.fg,2.5,true); poly(g,[[x2,y1],[x3,y1],[x3,y2],[x2,y2]],C.muted,2); node(g,x2,y1); node(g,x2,y2);
+  flow(g,'ohm',loop,true,spd(I,0.02),C.accent2);
+  battery(g,x1,ym,'U = '+fmt(U,1)+' V'); resistor(g,x2,ym,true,'R = '+ohm(R)); meter(g,(x1+x2)/2,y1,'A',si(I,'A')); meter(g,x3,ym,'V',fmt(U,2)+' V');
+  text(g,'kierunek prądu (umowny): od + do −',w/2,h-12,C.muted,12,'center',500); };
+
+/* ===== 13. jak mierzyć ===== */
+let PM='ok';
+const PMMSG={ok:'<span class="res">Poprawnie.</span> Amperomierz w szeregu mierzy prąd odbiornika, woltomierz równolegle — napięcie na nim. Żarówka świeci.',
+  apar:'<span class="bad">Zwarcie!</span> Amperomierz ma rezystancję bliską zeru — prąd płynie przez miernik zamiast przez żarówkę. Przepala się bezpiecznik miernika (albo miernik).',
+  vser:'<span class="bad">Prawie brak prądu.</span> Woltomierz ma ogromną rezystancję (ok. 10 MΩ) — żarówka nie świeci, a miernik pokazuje napięcie całego źródła.'};
+$$('[data-pm]').forEach(b=>b.onclick=()=>{ PM=b.dataset.pm; $$('[data-pm]').forEach(x=>x.classList.toggle('sel',x===b)); $('#pm-msg').innerHTML=PMMSG[PM]; }); $('#pm-msg').innerHTML=PMMSG.ok;
+function bulb(g,x,y,on){ if(on){ g.fillStyle=C.gold; g.globalAlpha=.35; g.beginPath(); g.arc(x,y,34,0,TAU); g.fill(); g.globalAlpha=1; }
+  g.fillStyle=on?C.gold:C.panel; g.strokeStyle=C.fg; g.lineWidth=2.5; g.beginPath(); g.arc(x,y,18,0,TAU); g.fill(); g.stroke(); const d=12.7; line(g,x-d,y-d,x+d,y+d,C.fg,2); line(g,x-d,y+d,x+d,y-d,C.fg,2); }
+frame['s-pomiar']=()=>{ const {g,w,h}=fit($('#cv-pom')); const x1=w*0.2,x2=w*0.58,x3=w*0.8,y1=h*0.18,y2=h*0.82,ym=(y1+y2)/2, xa=(x1+x2)/2;
+  const loop=[[x1,y2],[x1,y1],[x2,y1],[x2,y2]]; poly(g,loop,C.fg,2.5,true); poly(g,[[x2,y1],[x3,y1],[x3,y2],[x2,y2]],C.muted,2); node(g,x2,y1); node(g,x2,y2);
+  battery(g,x1,ym,'12 V');
+  if(PM==='ok'){ flow(g,'pm',loop,true,70,C.accent2); bulb(g,x2,ym,true); meter(g,xa,y1,'A','0,5 A'); meter(g,x3,ym,'V','12 V'); }
+  else if(PM==='apar'){ flow(g,'pm2',[[x1,y2],[x1,y1],[x3,y1],[x3,y2]],true,160,C.danger,16,4); bulb(g,x2,ym,false); meter(g,x3,ym,'A','!!!',C.danger); g.fillStyle=C.panel; g.fillRect(xa-20,y1-8,40,16); text(g,'(przewód)',xa,y1-16,C.muted,12,'center',500); line(g,xa-20,y1,xa+20,y1,C.fg,2.5);
+    text(g,'💥',x3+30,ym-30,C.danger,30,'center',400); }
+  else { bulb(g,x2,ym,false); meter(g,xa,y1,'V','≈ 12 V',C.danger); g.fillStyle=C.panel; g.fillRect(x3-6,ym-24,12,48); text(g,'(brak drugiego miernika)',x3+8,ym,C.muted,12,'left',500); }
+};
+
+/* ===== 14. pomiar na żywo ===== */
+const LV=[470,1000,2200];
+$('#lv-tab').insertAdjacentHTML('beforeend',LV.map((r,i)=>`<tr><td><b>${ohm(r)}</b></td><td><input type="number" step="0.01" data-lu="${i}"></td><td><input type="number" step="0.01" data-li="${i}"></td><td data-lr="${i}"></td><td data-ld="${i}"></td></tr>`).join(''));
+function lvUpd(){ LV.forEach((r,i)=>{ const U=num($(`[data-lu="${i}"]`)), I=num($(`[data-li="${i}"]`))/1000; if(isFinite(U)&&isFinite(I)&&I>0){ const R=U/I, d=Math.abs(R-r)/r*100;
+  $(`[data-lr="${i}"]`).innerHTML=`<b>${ohm(R)}</b>`; $(`[data-ld="${i}"]`).innerHTML=`<span style="color:${d<=5?C.accent3:C.danger};font-weight:700">${fmt(d,1)}%</span>`; } else { $(`[data-lr="${i}"]`).textContent=''; $(`[data-ld="${i}"]`).textContent=''; } }); }
+$('#s-live1').addEventListener('input',lvUpd);
+$('#lv-demo').onclick=()=>{ [[9.31,20.1],[9.38,9.27],[9.41,4.31]].forEach(([u,i],k)=>{ $(`[data-lu="${k}"]`).value=u; $(`[data-li="${k}"]`).value=i; }); lvUpd(); };
+$('#lv-clr').onclick=()=>{ $$('#lv-tab input').forEach(x=>x.value=''); lvUpd(); };
+
+/* ===== 15. charakterystyki ===== */
+const LED_IS=7.5e-18, LED_NVT=2*0.02585;
+const ledI=u=>LED_IS*(Math.exp(u/LED_NVT)-1);
+function chUpd(){ const U=+$('#ch-u').value, Ir=U/100, Il=ledI(U); $('#ch-uv').textContent=fmt(U,2)+' V';
+  $('#ch-ir').textContent=si(Ir,'A'); $('#ch-rr').textContent=U>0?ohm(100):'—'; $('#ch-il').textContent=Il<1e-6?'≈ 0':si(Il,'A'); $('#ch-rl').textContent=U>0?(Il<1e-9?'> 1 GΩ':ohm(U/Il)):'—'; }
+['#ch-u'].forEach(s=>$(s).addEventListener('input',chUpd)); chUpd();
+frame['s-char']=()=>{ const {g,w,h}=fit($('#cv-char')); const x0=60,y0=h-40,x1=w-20,y1=20, Umax=3, Imax=0.03; const X=u=>x0+(x1-x0)*u/Umax, Y=i=>y0-(y0-y1)*Math.min(i,Imax*1.05)/Imax;
+  axes(g,x0,y0,x1,y1,Umax,Imax,'U [V]','I [mA]',6,6,v=>fmt(v,1),v=>fmt(v*1000,0));
+  g.save(); g.beginPath(); g.rect(x0,y1-4,x1-x0,y0-y1+4); g.clip();
+  if($('#ch-r').checked){ poly(g,[[X(0),Y(0)],[X(Umax),Y(Umax/100)]],C.accent,3); }
+  if($('#ch-l').checked){ const pts=[]; for(let u=0;u<=Umax;u+=0.005) pts.push([X(u),Y(ledI(u))]); poly(g,pts,C.danger,3); }
+  g.restore(); const U=+$('#ch-u').value; line(g,X(U),y0,X(U),y1,C.muted,1,[5,5]);
+  if($('#ch-r').checked && U/100<=Imax) dot(g,X(U),Y(U/100),7,C.accent);
+  if($('#ch-l').checked && ledI(U)<=Imax) dot(g,X(U),Y(ledI(U)),7,C.danger);
+  if($('#ch-r').checked) text(g,'rezystor 100 Ω',X(2.6),Y(0.026)-14,C.accent,14,'center',700);
+  if($('#ch-l').checked) text(g,'LED',X(1.95)+26,Y(0.022),C.danger,14,'left',700); };
+
+/* ===== 16. dobór rezystora LED ===== */
+function ldUpd(){ const U=num($('#ld-u')), Uf=+$('#ld-c').value, I=num($('#ld-i'))/1000; if(!(U>Uf)||!(I>0)){ $('#ld-out').innerHTML='<span class="bad">Napięcie zasilania musi być większe od napięcia diody.</span>'; return; }
+  const R=(U-Uf)/I, Re=e12up(R), Ie=(U-Uf)/Re, P=(U-Uf)*Ie;
+  $('#ld-out').innerHTML=`R = (${fmt(U,2)} − ${fmt(Uf,1)}) V / ${fmt(I*1000,1)} mA = <b>${ohm(R)}</b><br>z szeregu E12 (w górę): <span class="res">${ohm(Re)}</span><br>prąd rzeczywisty: <b>${fmt(Ie*1000,1)} mA</b>, moc rezystora: <b>${fmt(P,3)} W</b> ${P<=0.25?'— wystarczy 0,25 W':'— <span class="bad">potrzebny rezystor większej mocy!</span>'}`; }
+$('#s-moc').addEventListener('input',ldUpd); ldUpd();
+
+/* ===== 18. wirtualna płytka ===== */
+let PL='s'; fillR($('#pl-r1'),220); fillR($('#pl-r2'),470); fillR($('#pl-r3'),1000);
+$$('[data-pl]').forEach(b=>b.onclick=()=>{ PL=b.dataset.pl; $$('[data-pl]').forEach(x=>x.classList.toggle('sel',x===b)); plUpd(); });
+let PLS={};
+function plSolve(){ const U=+$('#pl-u').value, R=[+$('#pl-r1').value,+$('#pl-r2').value,+$('#pl-r3').value]; let Rz,I,u,i;
+  if(PL==='s'){ Rz=R[0]+R[1]+R[2]; I=U/Rz; i=[I,I,I]; u=R.map(r=>r*I); }
+  else if(PL==='p'){ Rz=1/(1/R[0]+1/R[1]+1/R[2]); I=U/Rz; u=[U,U,U]; i=R.map(r=>U/r); }
+  else { const R23=R[1]*R[2]/(R[1]+R[2]); Rz=R[0]+R23; I=U/Rz; const U23=I*R23; u=[I*R[0],U23,U23]; i=[I,U23/R[1],U23/R[2]]; }
+  return {U,R,Rz,I,u,i}; }
+function plUpd(){ PLS=plSolve(); const S=PLS; $('#pl-uv').textContent=S.U+' V'; $('#pl-rz').textContent=ohm(S.Rz); $('#pl-i').textContent=si(S.I,'A');
+  $('#pl-tab').innerHTML='<tr><th></th><th>R</th><th>U</th><th>I</th><th>P</th></tr>'+[0,1,2].map(k=>`<tr><td><b>R${k+1}</b></td><td>${ohm(S.R[k])}</td><td>${fmt(S.u[k],2)} V</td><td>${si(S.i[k],'A')}</td><td>${si(S.u[k]*S.i[k],'W')}</td></tr>`).join('');
+  $('#pl-chk').innerHTML = PL==='s' ? `Kontrola: U<sub>1</sub> + U<sub>2</sub> + U<sub>3</sub> = ${fmt(S.u[0]+S.u[1]+S.u[2],2)} V = U ✔` : PL==='p' ? `Kontrola: I<sub>1</sub> + I<sub>2</sub> + I<sub>3</sub> = ${si(S.i[0]+S.i[1]+S.i[2],'A')} = I ✔` : `Kontrola: U<sub>1</sub> + U<sub>23</sub> = ${fmt(S.u[0]+S.u[1],2)} V ✔; I<sub>2</sub> + I<sub>3</sub> = ${si(S.i[1]+S.i[2],'A')} = I ✔`; }
+$('#s-plytka').addEventListener('input',plUpd); plUpd();
+frame['s-plytka']=()=>{ const {g,w,h}=fit($('#cv-pl')); const S=PLS, x1=w*0.17,x2=w*0.9,y1=h*0.18,y2=h*0.82,ym=(y1+y2)/2, ref=Math.max(S.I,1e-9), col=C.accent2;
+  const lab=k=>'R'+(k+1)+' = '+ohm(S.R[k]);
+  if(PL==='s'){ const loop=[[x1,y2],[x1,y1],[x2,y1],[x2,y2]]; poly(g,loop,C.fg,2.5,true); flow(g,'pls',loop,true,90,col);
+    resistor(g,x1+(x2-x1)*0.33,y1,false,lab(0)); resistor(g,x1+(x2-x1)*0.7,y1,false,lab(1)); resistor(g,x2,ym,true,''); text(g,lab(2),x2-18,ym,C.fg,15,'right',700); }
+  else { const xa=PL==='p'?x1+(x2-x1)*0.45:x1+(x2-x1)*0.6, xb=PL==='p'?x1+(x2-x1)*0.72:x2-(x2-x1)*0.08, xc=x2;
+    const br=PL==='p'?[[xa,0],[xb,1],[x2,2]]:[[xa,1],[xb,2]];
+    const last=br[br.length-1][0]; poly(g,[[last,y1],[x1,y1],[x1,y2],[last,y2]],C.fg,2.5);
+    br.forEach(([x,k])=>{ line(g,x,y1,x,y2,C.fg,2.5); });
+    // przepływ w gałęziach
+    br.forEach(([x,k])=>flow(g,'plb'+k,[[x,y1],[x,y2]],false,90*S.i[k]/ref,col));
+    // przepływ w przewodach głównych
+    let acc=S.I; let px=x1; flow(g,'plm0',[[x1,y2],[x1,y1]],false,90,col);
+    if(PL==='m'){ const xr=x1+(x2-x1)*0.3; flow(g,'plm1',[[x1,y1],[xa,y1]],false,90,col); resistor(g,xr,y1,false,lab(0)); px=xa; }
+    br.forEach(([x,k],j)=>{ flow(g,'plt'+j,[[px,y1],[x,y1]],false,90*acc/ref,col); if(j>0) flow(g,'plbt'+j,[[x,y2],[px,y2]],false,90*acc/ref,col); acc-=S.i[k]; px=x; });
+    flow(g,'plret',[[br[0][0],y2],[x1,y2]],false,90,col);
+    br.forEach(([x,k])=>{ resistor(g,x,ym,true,''); text(g,'R'+(k+1),x-16,ym-9,C.fg,15,'right',800); text(g,ohm(S.R[k]),x-16,ym+9,C.muted,13,'right',700); });
+    br.forEach(([x])=>{ node(g,x,y1); node(g,x,y2); }); }
+  battery(g,x1,ym,'U = '+S.U+' V'); };
+
+/* ===== 19. schemat układu mieszanego ===== */
+frame['s-miesz']=()=>{ const {g,w,h}=fit($('#cv-miesz')); const x1=w*0.2,x2=w*0.92,y1=h*0.2,y2=h*0.8,ym=(y1+y2)/2, xa=x1+(x2-x1)*0.55, xr=x1+(x2-x1)*0.27;
+  poly(g,[[x2,y1],[x1,y1],[x1,y2],[x2,y2]],C.fg,2.5); line(g,xa,y1,xa,y2,C.fg,2.5); line(g,x2,y1,x2,y2,C.fg,2.5); node(g,xa,y1); node(g,xa,y2);
+  battery(g,x1,ym,'9 V'); resistor(g,xr,y1,false,'R1 = 220 Ω'); resistor(g,xa,ym,true,''); resistor(g,x2,ym,true,'');
+  text(g,'R2',xa-16,ym,C.fg,15,'right',700); text(g,'470 Ω',xa-16,ym+18,C.muted,13,'right',600); text(g,'R3',x2-16,ym,C.fg,15,'right',700); text(g,'470 Ω',x2-16,ym+18,C.muted,13,'right',600);
+  arrow(g,x1+18,y1-16,x1+60,y1-16,C.accent2,2.5,9); text(g,'I',x1+70,y1-16,C.accent2,16,'left',800); };
+
+/* ===== 20. dzielnik ===== */
+fillR($('#dz-r1'),1000); fillR($('#dz-r2'),1000); fillR($('#dz-rl'),470);
+let DZ={};
+function dzUpd(){ const U=num($('#dz-u')), R1=+$('#dz-r1').value, R2=+$('#dz-r2').value, RL=+$('#dz-rl').value, L=$('#dz-l').checked;
+  const R2e=L?R2*RL/(R2+RL):R2, Uw=U*R2e/(R1+R2e), U0=U*R2/(R1+R2); DZ={U,R1,R2,RL,L,Uw,I:U/(R1+R2e)}; $('#dz-out').textContent=fmt(Uw,2)+' V';
+  $('#dz-msg').innerHTML=L?`Bez odbiornika byłoby ${fmt(U0,2)} V. Odbiornik R<sub>L</sub> = ${ohm(RL)} jest równoległy do R2 (R2 ‖ R<sub>L</sub> = ${ohm(R2e)}) — napięcie spada o ${fmt((U0-Uw)/U0*100,0)}%.`:`Prąd dzielnika: ${si(U/(R1+R2),'A')}.`; }
+$('#s-dziel').addEventListener('input',dzUpd); dzUpd();
+frame['s-dziel']=()=>{ const {g,w,h}=fit($('#cv-dz')); const S=DZ, x1=w*0.2,x2=w*0.5,x3=w*0.72,x4=w*0.88,y1=h*0.1,y2=h*0.9,ym=(y1+y2)/2;
+  poly(g,[[x2,y1],[x1,y1],[x1,y2],[x2,y2]],C.fg,2.5); line(g,x2,y1,x2,y2,C.fg,2.5); line(g,x2,ym,x4,ym,C.fg,2.5); line(g,x2,y2,x4,y2,C.fg,2.5); node(g,x2,ym); node(g,x2,y2);
+  battery(g,x1,ym,'U = '+fmt(S.U,1)+' V'); resistor(g,x2,(y1+ym)/2,true,'R1 = '+ohm(S.R1)); resistor(g,x2,(ym+y2)/2,true,'R2 = '+ohm(S.R2));
+  flow(g,'dz',[[x1,y2],[x1,y1],[x2,y1],[x2,ym]],false,spd(S.I,0.01),C.accent2);
+  if(S.L){ line(g,x3,ym,x3,y2,C.fg,2.5); node(g,x3,ym); node(g,x3,y2); resistor(g,x3,(ym+y2)/2,true,''); text(g,'R',x3-14,(ym+y2)/2-6,C.violet,15,'right',800); text(g,'L',x3-14,(ym+y2)/2+10,C.violet,11,'right',800); }
+  dot(g,x4,ym,5,C.fg); dot(g,x4,y2,5,C.fg); arrow(g,x4+16,y2-6,x4+16,ym+6,C.accent3,2.5,9); text(g,'U',x4+26,(ym+y2)/2,C.accent3,18,'left',800); text(g,'wy',x4+40,(ym+y2)/2+7,C.accent3,12,'left',800);
+  text(g,fmt(S.Uw,2)+' V',x4+26,(ym+y2)/2+30,C.accent3,16,'left',800); };
+
+/* ===== 22. węzeł ===== */
+let K1={};
+function k1Upd(){ const a=+$('#k1-a').value, b=+$('#k1-b').value, c=+$('#k1-c').value, d=a+b-c; K1={a,b,c,d}; $('#k1-av').textContent=fmt(a,1)+' A'; $('#k1-bv').textContent=fmt(b,1)+' A'; $('#k1-cv').textContent=fmt(c,1)+' A';
+  $('#k1-d').textContent=fmt(d,1)+' A'; $('#k1-msg').innerHTML=d<0?`<span class="bad">Wynik ujemny</span> — prąd I<sub>4</sub> płynie <b>do</b> węzła (w przeciwną stronę niż założona strzałka).`:`${fmt(a,1)} + ${fmt(b,1)} = ${fmt(c,1)} + ${fmt(d,1)} ✔`; }
+$('#s-k1').addEventListener('input',k1Upd); k1Upd();
+frame['s-k1']=()=>{ const {g,w,h}=fit($('#cv-k1')); const cx=w/2, cy=h/2, L=Math.min(w,h)*0.38, S=K1;
+  const br=[[-1,-0.7,'I₁',S.a,true,C.accent],[-1,0.7,'I₂',S.b,true,C.accent3],[1,-0.7,'I₃',S.c,false,C.violet],[1,0.7,'I₄',S.d,false,C.accent2]];
+  br.forEach(([dx,dy,lab,v,inn,col],k)=>{ const ex=cx+dx*L*1.3, ey=cy+dy*L; line(g,ex,ey,cx,cy,C.fg,2.5);
+    const into=inn?v>=0:v<0, mx=(ex+cx)/2, my=(ey+cy)/2, ux=(cx-ex), uy=(cy-ey), n=Math.hypot(ux,uy), s=into?1:-1;
+    arrow(g,mx-s*ux/n*22,my-s*uy/n*22,mx+s*ux/n*22,my+s*uy/n*22,col,4,14);
+    const pts=into?[[ex,ey],[cx,cy]]:[[cx,cy],[ex,ey]]; flow(g,'k1'+k,pts,false,30*Math.abs(v),col,26,4);
+    text(g,lab+' = '+fmt(Math.abs(v),1)+' A',ex+(dx<0?-8:8),ey-22,col,17,dx<0?'left':'right',800); });
+  dot(g,cx,cy,9,C.fg); text(g,'węzeł',cx,cy+28,C.muted,13,'center',600); };
+
+/* ===== 23. oczko ===== */
+function k2Upd(){ const b=num($('#k2-b')), r=num($('#k2-r')), l=num($('#k2-l')); if(![b,r,l].every(isFinite)){ $('#k2-out').innerHTML='<span class="info">Wpisz trzy zmierzone napięcia.</span>'; return; }
+  const s=r+l, d=b-s; $('#k2-out').innerHTML=`U<sub>R</sub> + U<sub>LED</sub> = <b>${fmt(s,2)} V</b>; U<sub>bat</sub> − suma = <b>${fmt(d,2)} V</b> ${Math.abs(d)<=0.05*b?'<span style="color:var(--accent3);font-weight:800">✔ zgodne</span>':'<span class="bad">— sprawdź pomiar</span>'}<br>prąd: I = U<sub>R</sub> / 470 Ω = <b>${fmt(r/470*1000,1)} mA</b>`; }
+$('#s-k2').addEventListener('input',k2Upd); $('#k2-demo').onclick=()=>{ $('#k2-b').value=9.38; $('#k2-r').value=7.45; $('#k2-l').value=1.92; k2Upd(); }; k2Upd();
+frame['s-k2']=()=>{ const {g,w,h}=fit($('#cv-k2')); const x1=w*0.22,x2=w*0.8,y1=h*0.2,y2=h*0.8,ym=(y1+y2)/2; const loop=[[x1,y2],[x1,y1],[x2,y1],[x2,y2]];
+  poly(g,loop,C.fg,2.5,true); const ub=num($('#k2-b')), ur=num($('#k2-r')), ul=num($('#k2-l'));
+  flow(g,'k2',loop,true,60,C.accent2); battery(g,x1,ym,''); text(g,'U',x1-60,ym,C.accent,18,'right',800); text(g,'bat',x1-46,ym+7,C.accent,12,'left',800);
+  resistor(g,(x1+x2)/2,y1,false,'470 Ω'); led(g,x2,ym,true,Math.PI/2);
+  // strzałki napięć
+  arrow(g,(x1+x2)/2+30,y1+26,(x1+x2)/2-30,y1+26,C.violet,2.5,9); text(g,'U R = '+(isFinite(ur)?fmt(ur,2)+' V':'?'),(x1+x2)/2,y1+46,C.violet,15,'center',800);
+  arrow(g,x2-30,ym+30,x2-30,ym-30,C.danger,2.5,9); text(g,'U LED = '+(isFinite(ul)?fmt(ul,2)+' V':'?'),x2-40,ym+50,C.danger,15,'right',800);
+  text(g,isFinite(ub)?fmt(ub,2)+' V':'?',x1-30,ym+28,C.accent,15,'right',800); };
+
+/* ===== 24. źródło rzeczywiste ===== */
+const zrR=v=>v<=0?0:(v>=100?Infinity:0.2*Math.pow(10,v/100*3.4)); // 0.2…~500 Ω, 100 = ∞
+let ZR={};
+function zrUpd(){ const E=+$('#zr-e').value, Rw=+$('#zr-w').value, Ro=zrR(+$('#zr-o').value); const I=isFinite(Ro)?E/(Rw+Ro):0, U=E-I*Rw, P=U*I, eta=isFinite(Ro)&&Ro+Rw>0?Ro/(Ro+Rw):1;
+  ZR={E,Rw,Ro,I,U,P,eta}; $('#zr-ev').textContent=fmt(E,1)+' V'; $('#zr-wv').textContent=fmt(Rw,1)+' Ω'; $('#zr-ov').textContent=isFinite(Ro)?(Ro===0?'0 Ω (zwarcie)':ohm(Ro)):'∞ (stan jałowy)';
+  $('#zr-out').innerHTML=`I = <b>${fmt(I,2)} A</b> · U = <b>${fmt(U,2)} V</b> · spadek na R<sub>w</sub> = <b>${fmt(I*Rw,2)} V</b> · moc w odbiorniku <b>${fmt(P,1)} W</b> · sprawność <b>${fmt(eta*100,0)}%</b>`; }
+$('#s-zrodlo').addEventListener('input',zrUpd); zrUpd();
+frame['s-zrodlo']=()=>{ { const {g,w,h}=fit($('#cv-zr')); const S=ZR, bx0=w*0.08,bx1=w*0.5,y1=h*0.18,y2=h*0.82,ym=(y1+y2)/2, xs=w*0.18, xt=w*0.5, xl=w*0.82, xv=w*0.66;
+    g.strokeStyle=C.muted; g.setLineDash([6,5]); g.lineWidth=1.5; g.strokeRect(bx0,y1-28,bx1-bx0-14,y2-y1+56); g.setLineDash([]); text(g,'rzeczywiste źródło',bx0+6,y1-40,C.muted,13,'left',600);
+    poly(g,[[xt,y1],[xs,y1],[xs,y2],[xt,y2]],C.fg,2.5); const open=!isFinite(S.Ro);
+    line(g,xt,y1,xl,y1,C.fg,2.5); line(g,xt,y2,xl,y2,C.fg,2.5); if(!open) line(g,xl,y1,xl,y2,C.fg,2.5); else { line(g,xl,y1,xl,y1+30,C.fg,2.5); line(g,xl,y2,xl,y2-30,C.fg,2.5); }
+    line(g,xv,y1,xv,y2,C.muted,2); node(g,xv,y1); node(g,xv,y2);
+    if(!open) flow(g,'zr',[[xs,y2],[xs,y1],[xl,y1],[xl,y2]],true,spd(S.I,S.E/S.Rw/4),C.accent2);
+    battery(g,xs,ym+40,'E'); resistor(g,xs,ym-45,true,''); text(g,'R',xs+16,ym-48,C.fg,15,'left',800); text(g,'w',xs+27,ym-42,C.fg,11,'left',800);
+    dot(g,xt,y1,5,C.fg); dot(g,xt,y2,5,C.fg); meter(g,xv,ym,'V',fmt(S.U,2)+' V');
+    if(!open){ resistor(g,xl,ym,true,''); text(g,'R obc',xl+16,ym,C.fg,14,'left',800); } else text(g,'(rozwarte)',xl+8,ym,C.muted,13,'left',600); }
+  { const {g,w,h}=fit($('#cv-zr2')); const S=ZR, x0=56,x1=w-16, ya0=h*0.5-24, ya1=14, yb0=h-28, yb1=h*0.5+18, Iz=S.E/S.Rw;
+    const X=i=>x0+(x1-x0)*i/Iz, Y=u=>ya0-(ya0-ya1)*u/S.E; axes(g,x0,ya0,x1,ya1,Iz,S.E,'I [A]','U [V]',4,4,v=>fmt(v,1),v=>fmt(v,1));
+    poly(g,[[X(0),Y(S.E)],[X(Iz),Y(0)]],C.accent,3); dot(g,X(S.I),Y(S.U),7,C.accent2); text(g,'E',X(0)+8,Y(S.E)+12,C.accent,14,'left',800); text(g,'Iz',X(Iz)-4,Y(0)-12,C.accent,14,'right',800);
+    // P(Robc) — log
+    const rmin=0.1, rmax=1000, LX=r=>x0+(x1-x0)*(Math.log10(r)-Math.log10(rmin))/(Math.log10(rmax)-Math.log10(rmin)), Pm=S.E*S.E/(4*S.Rw), PY=p=>yb0-(yb0-yb1)*p/Pm;
+    line(g,x0,yb0,x1,yb0,C.muted,1.5); line(g,x0,yb0,x0,yb1,C.muted,1.5); [0.1,1,10,100,1000].forEach(r=>{ line(g,LX(r),yb0,LX(r),yb1,C.grid,1); text(g,fmt(r,1),LX(r),yb0+13,C.muted,11,'center',500); });
+    text(g,'R obc [Ω]',x1,yb0+24,C.fg,12,'right',700); text(g,'P obc',x0+6,yb1-8,C.fg,12,'left',700);
+    const pts=[]; for(let k=0;k<=200;k++){ const r=rmin*Math.pow(rmax/rmin,k/200), p=S.E*S.E*r/((r+S.Rw)**2); pts.push([LX(r),PY(p)]); } poly(g,pts,C.accent3,3);
+    line(g,LX(S.Rw),yb0,LX(S.Rw),yb1,C.accent3,1,[4,4]); text(g,'max przy Robc = Rw',LX(S.Rw)+6,yb1+4,C.accent3,12,'left',700);
+    if(isFinite(S.Ro)&&S.Ro>=rmin&&S.Ro<=rmax) dot(g,LX(S.Ro),PY(S.P),7,C.accent2); } };
+
+/* ===== 25. mini-lab ===== */
+const LB=['∞ (jałowo)','2,2 kΩ','1 kΩ','470 Ω','220 Ω','inne'];
+$('#lb-tab').insertAdjacentHTML('beforeend',LB.map((r,i)=>`<tr><td>${r}</td><td><input type="number" step="0.01" data-bu2="${i}"></td><td><input type="number" step="0.1" data-bi2="${i}"></td></tr>`).join(''));
+let LBP=[], LBF=null;
+function lbUpd(){ LBP=[]; LB.forEach((r,i)=>{ const U=num($(`[data-bu2="${i}"]`)), I=num($(`[data-bi2="${i}"]`)); if(isFinite(U)&&isFinite(I)) LBP.push([I/1000,U]); });
+  LBF=null; if(LBP.length>=2){ const n=LBP.length, sx=LBP.reduce((a,p)=>a+p[0],0), sy=LBP.reduce((a,p)=>a+p[1],0), sxx=LBP.reduce((a,p)=>a+p[0]*p[0],0), sxy=LBP.reduce((a,p)=>a+p[0]*p[1],0), den=n*sxx-sx*sx;
+    if(Math.abs(den)>1e-15){ const b=(n*sxy-sx*sy)/den, a=(sy-b*sx)/n; LBF={E:a,Rw:-b}; } }
+  $('#lb-out').innerHTML=LBF?`E ≈ <span class="res">${fmt(LBF.E,2)} V</span> &nbsp; R<sub>w</sub> ≈ <span class="res">${fmt(LBF.Rw,1)} Ω</span> &nbsp; <span class="info">(prosta najlepszego dopasowania, ${LBP.length} pkt)</span>`:'<span class="info">Wpisz co najmniej 2 pomiary.</span>'; }
+$('#s-lab').addEventListener('input',lbUpd);
+$('#lb-demo').onclick=()=>{ const E=9.5, Rw=101.5, loads=[Infinity,2200,1000,470,220]; loads.forEach((R,i)=>{ const I=isFinite(R)?E/(Rw+R):0, U=E-I*Rw; const nU=U*(1+(Math.random()-0.5)*0.004), nI=I*1000*(1+(Math.random()-0.5)*0.01);
+  $(`[data-bu2="${i}"]`).value=nU.toFixed(2); $(`[data-bi2="${i}"]`).value=nI.toFixed(1); }); $(`[data-bu2="5"]`).value=''; $(`[data-bi2="5"]`).value=''; lbUpd(); };
+$('#lb-clr').onclick=()=>{ $$('#lb-tab input').forEach(x=>x.value=''); lbUpd(); }; lbUpd();
+frame['s-lab']=()=>{ const {g,w,h}=fit($('#cv-lab')); const x0=56,y0=h-36,x1=w-20,y1=20; const Umax=Math.max(10,...LBP.map(p=>p[1]))*1.05, Imax=Math.max(0.04,LBF&&LBF.Rw>0?LBF.E/LBF.Rw*0.5:0,...LBP.map(p=>p[0]*1.2));
+  const X=i=>x0+(x1-x0)*i/Imax, Y=u=>y0-(y0-y1)*u/Umax; axes(g,x0,y0,x1,y1,Imax,Umax,'I [mA]','U [V]',5,5,v=>fmt(v*1000,0),v=>fmt(v,1));
+  if(LBF){ g.save(); g.beginPath(); g.rect(x0,y1,x1-x0,y0-y1); g.clip(); line(g,X(0),Y(LBF.E),X(Imax),Y(LBF.E-LBF.Rw*Imax),C.accent,2.5,[7,5]); g.restore(); dot(g,X(0),Y(LBF.E),6,C.accent); text(g,'E',X(0)+10,Y(LBF.E)-12,C.accent,15,'left',800); }
+  LBP.forEach(p=>{ dot(g,X(p[0]),Y(p[1]),6,C.accent2); }); };
+
+/* ---------------- nawigacja ---------------- */
+const slides=$$('.slide'); let cur=0, spk=null;
+const title=i=>slides[i].querySelector('h1,h2').textContent;
+function notesHTML(i){const n=slides[i].querySelector('.notes'); return n?n.innerHTML:'<p>(brak komentarza)</p>';}
+function updSpeaker(){ if(!spk||spk.closed) return; const nx=slides[cur+1]?title(cur+1):'— koniec —';
+  spk.document.body.innerHTML=`<p style="color:#777;margin:0">${slides[cur].dataset.blok||''}</p><h3 style="margin:.1em 0 .4em">Slajd ${cur+1}/${slides.length}: ${title(cur)}</h3>${notesHTML(cur)}<hr><p style="color:#777">Następny: ${nx}</p>`; }
+function show(i){ i=Math.max(0,Math.min(slides.length-1,i)); slides[cur].classList.remove('active'); cur=i; slides[cur].classList.add('active');
+  $('#prog div').style.width=(100*(cur+1)/slides.length)+'%'; $('#cnt').textContent=(cur+1)+' / '+slides.length; $('#blk').textContent=slides[cur].dataset.blok||''; updSpeaker(); history.replaceState(null,'','#'+(cur+1)); }
+const next=()=>show(cur+1), prev=()=>show(cur-1);
+$('#b-next').onclick=next; $('#b-prev').onclick=prev; $('#b-theme').onclick=toggleTheme;
+const fsToggle=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen(); $('#b-fs').onclick=fsToggle;
+function openSpeaker(){ return; spk=window.open('','komentarze_el1','width=760,height=640'); if(!spk) return; spk.document.title='Komentarze do slajdów';
+  spk.document.head.innerHTML='<meta charset="utf-8"><style>body{font:18px/1.5 system-ui,sans-serif;padding:16px 22px;background:#fffdf6;color:#222}b{color:#b5520c}.mono{font-family:monospace}</style>'; updSpeaker(); }
+
+document.addEventListener('keydown',e=>{ const tag=e.target.tagName, k=e.key;
+  if(tag==='INPUT'&&(e.target.type==='text'||e.target.type==='number'||k.startsWith('Arrow'))) return; if(tag==='SELECT') return;
+  if(k==='ArrowRight'||k==='PageDown'||(k===' '&&tag!=='BUTTON'&&tag!=='SUMMARY')){e.preventDefault();next();}
+  else if(k==='ArrowLeft'||k==='PageUp'){e.preventDefault();prev();}
+  else if(k==='Home') show(0); else if(k==='End') show(slides.length-1);
+  else if(k==='s'||k==='S') openSpeaker(); else if(k==='f'||k==='F') fsToggle(); else if(k==='t'||k==='T') toggleTheme(); });
+document.addEventListener('click',e=>{ if(e.target.tagName==='BUTTON') e.target.blur(); });
+function loop(now){ DT=Math.min(0.05,(now-LAST)/1000||0); LAST=now; NOW=now/1000; const f=frame[slides[cur].id]; if(f){ readColors(); try{f(NOW);}catch(err){console.error(err);} } requestAnimationFrame(loop); }
+show((parseInt(location.hash.slice(1))||1)-1); requestAnimationFrame(loop);
+</script>
+</body>
+</html>

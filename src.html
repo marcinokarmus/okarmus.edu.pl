@@ -89,6 +89,8 @@ ul.plain { list-style: none; padding: 0; margin: 0; }
 ul.plain li { padding: 7px 0 7px 18px; position: relative; font-size: 15.5px; }
 ul.plain li::before { content: ""; position: absolute; left: 0; top: 17px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); opacity: .7; }
 .src { color: var(--muted); }
+.subj { font-size: 16px; margin: 0 0 4px; }
+.note { font-size: 14px; color: var(--muted); margin-top: 10px; }
 
 .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; font-size: 15px; }
 .facts h3 { font-size: 13px; color: var(--muted); font-weight: 600; margin: 0 0 4px; }
@@ -145,6 +147,15 @@ footer { margin-top: 48px; padding: 24px 0 40px; border-top: 1px solid var(--lin
         <p>Bazy danych (SQL, Oracle, PostgreSQL), programowanie w C/C++ i Pythonie, akwizycja i wizualizacja danych przemysłowych, zastosowania AI w inżynierii.</p>
       </div>
     </div>
+  </section>
+
+  <section id="materialy">
+    <h2>Materiały do zajęć</h2>
+    <h3 class="subj">Elektrotechnika I — Energetyka, I rok</h3>
+    <ul class="plain">
+      <li><a href="/elektrotechnika-i/lab-1/">Podstawowe prawa obwodów elektrycznych</a> <span class="src">| laboratorium 1</span></li>
+    </ul>
+    <p class="note">Materiały są interaktywne i działają najlepiej w przeglądarce Chrome lub Edge na komputerze. Strzałki przewijają slajdy.</p>
   </section>
 
   <section id="doswiadczenie">
