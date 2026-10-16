@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Akwizycja danych — ćwiczenia 1</title>
+<style>
+:root{
+  --bg:#f7f7f4; --panel:#ffffff; --fg:#1d2330; --muted:#5d6675; --grid:#d9dce2;
+  --accent:#1f6fd1; --accent2:#e2741d; --accent3:#1f9a5a; --danger:#d23b3b; --violet:#7a4cc9; --gold:#c49a00;
+  --chip:#eef2f8;
+}
+:root[data-theme="dark"]{
+  --bg:#12151b; --panel:#1b2029; --fg:#e9edf3; --muted:#9aa4b4; --grid:#323a47;
+  --accent:#5aa2ff; --accent2:#ff9a4a; --accent3:#43c785; --danger:#ff6464; --violet:#ae8cff; --gold:#e8c040;
+  --chip:#232a36;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;overflow:hidden}
+.slide{position:absolute;inset:0;padding:3.2vh 5vw 9vh;display:none;flex-direction:column;gap:1.4vh;overflow:auto}
+.slide.active{display:flex}
+.kicker{font-size:clamp(13px,1.05vw,18px);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{font-size:clamp(32px,4.4vw,76px);margin:0;line-height:1.05}
+h2{font-size:clamp(24px,2.8vw,46px);margin:0;line-height:1.1}
+p,li,td,th,label,.txt{font-size:clamp(16px,1.45vw,25px);line-height:1.4}
+p{margin:.2em 0}
+ul,ol{margin:.2em 0;padding-left:1.3em} li{margin:.2em 0}
+.muted{color:var(--muted)}
+.big{font-size:clamp(21px,2vw,34px)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:2vw;align-items:start}
+.cols.c3{grid-template-columns:1fr 1fr 1fr}
+.cols.c64{grid-template-columns:1.5fr 1fr}
+.cols.c46{grid-template-columns:1fr 1.5fr}
+.card{background:var(--panel);border:1px solid var(--grid);border-radius:14px;padding:1.2vh 1.2vw}
+.card h3{margin:.1em 0 .3em;font-size:clamp(17px,1.5vw,27px)}
+.card p,.card li,.card td,.card th{font-size:clamp(14px,1.25vw,21px)}
+.def{border-left:6px solid var(--accent);background:var(--panel);border-radius:10px;padding:.9vh 1.3vw}
+.def p{font-size:clamp(17px,1.6vw,28px)}
+.formula{font-family:"Cambria Math","Times New Roman",serif;font-size:clamp(20px,2.1vw,36px);background:var(--panel);border:2px solid var(--grid);border-radius:12px;padding:.25em .7em;display:inline-block}
+canvas.viz{width:100%;height:44vh;display:block;background:var(--panel);border:1px solid var(--grid);border-radius:14px}
+canvas.short{height:30vh}
+canvas.tall{height:54vh}
+.ctrl{display:flex;gap:.9vw;align-items:center;flex-wrap:wrap}
+.ctrl label{display:flex;align-items:center;gap:.5em;font-size:clamp(14px,1.2vw,20px)}
+input[type=range]{width:clamp(140px,14vw,280px);accent-color:var(--accent);height:28px}
+input[type=checkbox]{width:1.2em;height:1.2em;accent-color:var(--accent3)}
+button,select,input[type=text],input[type=number]{font:inherit;font-size:clamp(14px,1.2vw,20px);padding:.3em .7em;border-radius:10px;border:1px solid var(--grid);background:var(--panel);color:var(--fg)}
+input[type=number]{width:6.5em}
+button,select{cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+button.sel{background:var(--accent);color:#fff;border-color:var(--accent)}
+.val{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent)}
+.res{font-variant-numeric:tabular-nums;font-weight:800;color:var(--accent3);font-size:clamp(20px,2vw,34px)}
+.bad{color:var(--danger);font-weight:800}
+.info{font-size:clamp(14px,1.2vw,20px);color:var(--muted)}
+.info b{color:var(--fg)}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+table{border-collapse:collapse;width:100%}
+th,td{border-bottom:1px solid var(--grid);padding:.3em .55em;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+.ex{background:var(--panel);border:1px solid var(--grid);border-left:6px solid var(--accent2);border-radius:12px;padding:.9vh 1.2vw}
+.ex h3{margin:0 0 .3em;font-size:clamp(16px,1.45vw,25px);color:var(--accent2)}
+.ex ol li{display:none}
+.ex ol li.on{display:list-item}
+.ex .step{margin-top:.4em}
+.you{background:var(--panel);border:1px dashed var(--accent3);border-radius:12px;padding:.8vh 1.2vw}
+.you h3{margin:0 0 .3em;font-size:clamp(16px,1.45vw,25px);color:var(--accent3)}
+details summary{cursor:pointer;font-weight:600;font-size:clamp(15px,1.3vw,22px)}
+details p{color:var(--accent3);font-weight:700}
+.plan{display:grid;grid-template-columns:repeat(4,1fr);gap:.8vw}
+.plan .card{border-top:6px solid var(--accent)}
+.plan .card:nth-child(2){border-top-color:var(--accent2)}
+.plan .card:nth-child(3){border-top-color:var(--accent3)}
+.plan .card:nth-child(4){border-top-color:var(--violet)}
+.plan .time{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;font-size:clamp(13px,1.1vw,18px)}
+.pyr{display:flex;flex-direction:column;align-items:center;gap:6px}
+.pyr button{display:block;text-align:center;font-weight:700;border-width:2px;padding:.55em .5em;font-size:clamp(14px,1.25vw,21px)}
+.pyr button.sel{box-shadow:0 0 0 4px var(--accent2)}
+.chain{display:flex;align-items:stretch;gap:.4vw;flex-wrap:wrap}
+.chain button{flex:1;min-width:110px;text-align:center;font-weight:700;padding:.6em .4em;font-size:clamp(13px,1.1vw,19px);line-height:1.25}
+.chain .arr{align-self:center;color:var(--muted);font-size:clamp(18px,1.8vw,30px)}
+.chain button small{display:block;font-weight:500;color:var(--muted);font-size:.8em}
+.chain button.sel small{color:#fff}
+.title-wrap{margin:auto 0;display:flex;flex-direction:column;gap:2vh}
+.hint{position:fixed;right:1.2vw;top:1vh;font-size:13px;color:var(--muted);opacity:.7}
+#bar{position:fixed;left:0;right:0;bottom:0;height:6vh;min-height:44px;display:flex;align-items:center;gap:.8vw;padding:0 1.2vw;background:var(--panel);border-top:1px solid var(--grid);z-index:10}
+#bar button{padding:.2em .7em}
+#prog{flex:1;height:6px;background:var(--grid);border-radius:4px;overflow:hidden}
+#prog div{height:100%;background:var(--accent);width:0}
+#cnt{font-variant-numeric:tabular-nums;color:var(--muted);font-size:15px;min-width:5ch;text-align:right}
+#blk{color:var(--muted);font-size:15px;white-space:nowrap}
+.notes{display:none}
+#notes{position:fixed;left:0;right:0;bottom:6vh;max-height:42vh;overflow:auto;background:var(--panel);border-top:3px solid var(--accent2);padding:1.2vh 2vw;display:none;z-index:9;box-shadow:0 -8px 24px rgba(0,0,0,.15)}
+#notes.show{display:block}
+#notes, #notes *{font-size:clamp(14px,1.12vw,19px)}
+@media (max-width:800px){.cols,.cols.c3,.cols.c64,.cols.c46,.plan{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hint">← → przewijanie · F pełny ekran · T motyw</div>
+
+<!-- ======================= BLOK 1 ======================= -->
+
+<!-- 1 -->
+<section class="slide" id="s-title" data-blok="Blok 1 · po co zbierać dane">
+  <div class="title-wrap">
+    <div class="kicker">Akwizycja i wizualizacja danych w procesach przemysłowych · ćwiczenia 1</div>
+    <h1>Od czujnika do danych</h1>
+    <p class="big muted">Po co zbierać dane · tor pomiarowy · sygnały 4–20 mA · przetwornik A/C · próbkowanie · tagi, zapis i ilość danych</p>
+    <p class="muted">Zarządzanie i inżynieria produkcji · IV rok · specjalność: Inżynier procesu · studia niestacjonarne · mgr inż. M. Okarmus</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="slide" id="s-plan" data-blok="Blok 1 · po co zbierać dane">
+  <div class="kicker">Plan</div>
+  <h2>Dziś: 15:00–18:15</h2>
+  <div class="plan">
+    <div class="card"><div class="time">15:00–15:45</div><h3>1. Po co zbierać dane</h3><p>Raport papierowy a dane z maszyny. Piramida automatyki: od czujnika do ERP.</p></div>
+    <div class="card"><div class="time">15:45–16:30</div><h3>2. Tor pomiarowy</h3><p>Czujnik → sygnał 4–20 mA → przetwornik A/C → liczba → jednostki. Skalowanie.</p></div>
+    <div class="card"><div class="time">16:45–17:30</div><h3>3. Próbkowanie</h3><p>Jak często mierzyć? Aliasing. Stany maszyny i liczniki sztuk.</p></div>
+    <div class="card"><div class="time">17:30–18:15</div><h3>4. Tagi i zapis</h3><p>Protokoły, tag, zapis cykliczny i z martwą strefą, ilość danych, historian. Projekt listy tagów.</p></div>
+  </div>
+  <p class="muted">16:30–16:45 przerwa</p>
+  <div class="def"><p><b>Jutro</b> (niedziela, 15:00–18:15): od danych do decyzji — OEE, energia na sztukę, jakość danych, projektowanie dashboardów, alarmy i karta kontrolna.</p></div>
+</section>
+
+<!-- 3 -->
+<section class="slide" id="s-raport" data-blok="Blok 1 · po co zbierać dane">
+  <div class="kicker">Po co zbierać dane</div>
+  <h2>Raport operatora a dane z maszyny</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz short" id="cv-raport"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <button data-rv="op" class="sel">co widzi raport operatora</button>
+        <button data-rv="mc">co rejestruje maszyna</button>
+      </div>
+    </div>
+    <div class="card">
+      <table id="rp-tab"></table>
+      <p class="info" style="margin-top:1vh">Ta sama zmiana (8 h). Operator zapisuje postoje „dłuższe” — krótkie zatrzymania (mikropostoje) giną, a to one często zabierają najwięcej czasu.</p>
+    </div>
+  </div>
+  <div class="def"><p>Dane z maszyny są <b>pełne, dokładne co do sekundy i bez wysiłku operatora</b>. Decyzje (inwestycja, zmiana organizacji pracy) opierają się wtedy na faktach, a nie na wrażeniu.</p></div>
+</section>
+
+<!-- 4 -->
+<section class="slide" id="s-pyr" data-blok="Blok 1 · po co zbierać dane">
+  <div class="kicker">Piramida automatyki (model ISA-95 / PN-EN 62264)</div>
+  <h2>Gdzie powstają dane i kto z nich korzysta</h2>
+  <div class="cols c46">
+    <div class="pyr" id="pyr"></div>
+    <div class="card" id="pyr-d"></div>
+  </div>
+  <p class="info">Im wyżej, tym dane są bardziej <b>zagregowane</b> i rzadsze (ms → sekundy → zmiany → miesiące). Akwizycja danych to „podnoszenie” danych z poziomów 0–1 do 2–3.</p>
+</section>
+
+<!-- 5 -->
+<section class="slide" id="s-dysk" data-blok="Blok 1 · po co zbierać dane">
+  <div class="kicker">Dyskusja</div>
+  <h2>Jakie dane zbiera się w Waszym zakładzie?</h2>
+  <div class="cols c3">
+    <div class="card"><h3>1. Co jest mierzone?</h3><ul><li>wielkości procesowe (temperatura, ciśnienie…)</li><li>stany maszyn, liczniki sztuk</li><li>energia, media</li><li>jakość (pomiary, braki)</li></ul></div>
+    <div class="card"><h3>2. Jak trafia do systemu?</h3><ul><li>ręcznie (kartka, Excel)</li><li>automatycznie ze sterownika</li><li>terminal operatora / skaner</li><li>wcale</li></ul></div>
+    <div class="card"><h3>3. Kto z tego korzysta?</h3><ul><li>operator, mistrz, utrzymanie ruchu</li><li>jakość, technolog, planista</li><li>kierownictwo</li><li>… nikt?</li></ul></div>
+  </div>
+  <div class="def"><p>Wnioski zapisujemy na tablicy: <b>jakie decyzje</b> można by podejmować lepiej, gdyby dane były automatyczne?</p></div>
+</section>
+
+<!-- ======================= BLOK 2 ======================= -->
+
+<!-- 6 -->
+<section class="slide" id="s-tor" data-blok="Blok 2 · tor pomiarowy">
+  <div class="kicker">Blok 2 · tor pomiarowy</div>
+  <h2>Droga pomiaru: od temperatury do rekordu w bazie</h2>
+  <div class="chain" id="chain"></div>
+  <div class="cols c64">
+    <div class="card" id="chain-d"></div>
+    <div class="card">
+      <h3>Przykład: temperatura w piecu</h3>
+      <p class="mono" id="chain-v" style="font-size:clamp(16px,1.5vw,26px)"></p>
+      <p class="info">Na każdym etapie może pojawić się błąd: zły czujnik, przerwa w przewodzie, złe skalowanie, zła strefa czasowa. Dlatego trzeba znać całą drogę.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="slide" id="s-420" data-blok="Blok 2 · tor pomiarowy">
+  <div class="kicker">Sygnały standardowe</div>
+  <h2>Dlaczego 4–20 mA, a nie 0–20 mA?</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-420"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <label>temperatura <input type="range" id="s4-t" min="0" max="150" step="0.5" value="85"> <span class="val" id="s4-tv"></span></label>
+        <label><input type="checkbox" id="s4-br"> przerwa w przewodzie</label>
+      </div>
+    </div>
+    <div class="card">
+      <h3>4–20 mA („żywe zero”)</h3>
+      <ul>
+        <li>4 mA = początek zakresu, 20 mA = koniec,</li>
+        <li><b>0 mA = awaria</b> (przerwa przewodu, brak zasilania) — system to <b>wykrywa</b>,</li>
+        <li>prąd nie maleje na długim przewodzie (odporny na zakłócenia, setki metrów),</li>
+        <li>z tych 4 mA może się zasilać sam przetwornik (2 przewody).</li>
+      </ul>
+      <h3>0–10 V</h3>
+      <ul><li>prosty, popularny w automatyce budynkowej i krótkich połączeniach,</li><li>0 V = początek zakresu <b>albo</b> przerwa — nie da się odróżnić.</li></ul>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="slide" id="s-skal" data-blok="Blok 2 · tor pomiarowy">
+  <div class="kicker">Skalowanie</div>
+  <h2>Z miliamperów na jednostki techniczne</h2>
+  <div class="cols">
+    <div class="card">
+      <p style="text-align:center"><span class="formula">x = x<sub>min</sub> + (I − 4) / 16 · (x<sub>max</sub> − x<sub>min</sub>)</span></p>
+      <p style="text-align:center"><span class="formula">I = 4 + 16 · (x − x<sub>min</sub>) / (x<sub>max</sub> − x<sub>min</sub>)</span></p>
+      <p class="info">16 = 20 − 4 mA (szerokość zakresu sygnału). Dla 0–10 V: x = x<sub>min</sub> + U/10 · (x<sub>max</sub> − x<sub>min</sub>).</p>
+      <canvas class="viz short" id="cv-skal"></canvas>
+    </div>
+    <div class="ex" data-steps>
+      <h3>Przetwornik ciśnienia 0–10 bar, 4–20 mA. Sterownik mierzy 12,8 mA. Jakie jest ciśnienie? Jaki prąd będzie przy 2,5 bar?</h3>
+      <ol>
+        <li>Dane: x<sub>min</sub> = 0 bar, x<sub>max</sub> = 10 bar, I = 12,8 mA.</li>
+        <li>Ile „ponad zero”: I − 4 = 8,8 mA.</li>
+        <li>Jaka część zakresu: 8,8 / 16 = 0,55 (55%).</li>
+        <li>x = 0 + 0,55 · 10 bar = <b>5,5 bar</b></li>
+        <li>Odwrotnie: 2,5 bar to 25% zakresu → I = 4 + 0,25 · 16 = <b>8 mA</b></li>
+        <li>Kontrola: 4 mA → 0 bar, 12 mA → 5 bar (połowa), 20 mA → 10 bar ✔</li>
+      </ol>
+      <div class="step ctrl"><button class="primary" data-next>Następny krok ▶</button><button data-reset>Od początku</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="slide" id="s-twoja1" data-blok="Blok 2 · tor pomiarowy">
+  <div class="kicker">Zadania dla Was</div>
+  <h2>Skalowanie sygnałów</h2>
+  <div class="cols c3">
+    <div class="you"><h3>1. Poziom w zbiorniku</h3><p>Czujnik poziomu 0–3 m, 4–20 mA. Odczyt: 14 mA. Jaki jest poziom?</p>
+      <details><summary>odpowiedź</summary><p>(14 − 4)/16 = 0,625 → 0,625 · 3 m = 1,875 m</p></details></div>
+    <div class="you"><h3>2. Ile mA?</h3><p>Przetwornik temperatury 0–200 °C, 4–20 mA. Jaki prąd przy 80 °C? A przy przerwie w przewodzie?</p>
+      <details><summary>odpowiedź</summary><p>80/200 = 0,4 → I = 4 + 0,4 · 16 = 10,4 mA; przerwa: ok. 0 mA (alarm)</p></details></div>
+    <div class="you"><h3>3. Przepływ, 0–10 V</h3><p>Przepływomierz 0–50 m³/h, sygnał 0–10 V. Odczyt 3,2 V. Jaki przepływ? Ile m³ w ciągu zmiany (8 h), jeśli jest stały?</p>
+      <details><summary>odpowiedź</summary><p>3,2/10 · 50 = 16 m³/h; 16 · 8 = 128 m³</p></details></div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide" id="s-adc" data-blok="Blok 2 · tor pomiarowy">
+  <div class="kicker">Przetwornik analogowo-cyfrowy (A/C)</div>
+  <h2>Rozdzielczość: ile „schodków” ma pomiar</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-adc"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <label>liczba bitów n <input type="range" id="ad-n" min="2" max="16" step="1" value="4"> <span class="val" id="ad-nv"></span></label>
+      </div>
+    </div>
+    <div class="card">
+      <p style="text-align:center"><span class="formula">poziomy = 2<sup>n</sup></span></p>
+      <p style="text-align:center"><span class="formula">krok = zakres / 2<sup>n</sup></span></p>
+      <p>Zakres 0–150 °C, n = <b id="ad-n2"></b> bit:</p>
+      <p>poziomów: <span class="res" id="ad-lv"></span></p>
+      <p>krok: <span class="res" id="ad-st"></span></p>
+      <p class="info">Moduły wejść analogowych w sterownikach mają zwykle 12–16 bitów. Wtedy krok jest mniejszy niż błąd samego czujnika — o dokładności decyduje <b>czujnik</b>, nie przetwornik.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="slide" id="s-twoja2" data-blok="Blok 2 · tor pomiarowy">
+  <div class="kicker">Zadania dla Was</div>
+  <h2>Od liczby w sterowniku do wartości</h2>
+  <div class="cols c3">
+    <div class="you"><h3>4. Liczba z modułu</h3><p>Moduł wejść (jak Siemens S7) zamienia 4–20 mA na liczbę 0–27 648. Przetwornik ciśnienia 0–10 bar. Sterownik odczytał 13 824, a potem 20 736. Jakie to ciśnienia?</p>
+      <details><summary>odpowiedź</summary><p>13 824 / 27 648 = 0,5 → 5 bar; 20 736 / 27 648 = 0,75 → 7,5 bar</p></details></div>
+    <div class="you"><h3>5. Rozdzielczość</h3><p>Ile wynosi krok pomiaru temperatury 0–150 °C dla przetwornika 8-bitowego, a ile dla 12-bitowego?</p>
+      <details><summary>odpowiedź</summary><p>8 bit: 150/256 ≈ 0,59 °C; 12 bit: 150/4096 ≈ 0,037 °C</p></details></div>
+    <div class="you"><h3>6. Czy wystarczy?</h3><p>Wagę 0–60 kg podłączono przez przetwornik 10-bitowy. Czy da się ważyć porcje z dokładnością do 10 g?</p>
+      <details><summary>odpowiedź</summary><p>krok = 60 kg / 1024 ≈ 58,6 g &gt; 10 g — nie; potrzeba co najmniej 13 bitów (60 kg / 8192 ≈ 7,3 g)</p></details></div>
+  </div>
+</section>
+
+<!-- ======================= BLOK 3 ======================= -->
+
+<!-- 12 -->
+<section class="slide" id="s-prob" data-blok="Blok 3 · próbkowanie">
+  <div class="kicker">Blok 3 · próbkowanie</div>
+  <h2>Jak często mierzyć?</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-prob"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <label>częstotliwość sygnału f <input type="range" id="pb-f" min="0.5" max="6" step="0.1" value="1"> <span class="val" id="pb-fv"></span></label>
+        <label>częstotliwość próbkowania f<sub>p</sub> <input type="range" id="pb-s" min="1" max="40" step="0.5" value="10"> <span class="val" id="pb-sv"></span></label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="def"><p><b>Twierdzenie o próbkowaniu (Nyquista–Shannona):</b> trzeba próbkować co najmniej <b>2 razy szybciej</b> niż najszybsza zmiana sygnału.</p></div>
+      <p style="text-align:center;margin:1vh 0"><span class="formula">f<sub>p</sub> &gt; 2 · f<sub>max</sub></span></p>
+      <p id="pb-msg" class="big"></p>
+      <p class="info">W praktyce przemysłowej próbkuje się 5–10 razy szybciej niż najszybsza interesująca zmiana.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="slide" id="s-tab" data-blok="Blok 3 · próbkowanie">
+  <div class="kicker">Dobór interwału</div>
+  <h2>Różne wielkości — różne tempo zmian</h2>
+  <div class="cols c64">
+    <div class="card">
+      <table>
+        <tr><th>wielkość</th><th>jak szybko się zmienia</th><th>typowy interwał</th></tr>
+        <tr><td>temperatura pieca, zbiornika</td><td>minuty</td><td>1–10 s</td></tr>
+        <tr><td>ciśnienie, przepływ w instalacji</td><td>sekundy</td><td>0,1–1 s</td></tr>
+        <tr><td>moc, energia (licznik)</td><td>sekundy / rozliczeniowo</td><td>1 s – 15 min</td></tr>
+        <tr><td>stan maszyny (praca/postój)</td><td>zdarzenie</td><td>przy zmianie</td></tr>
+        <tr><td>licznik sztuk</td><td>zdarzenie (np. co 0,5 s)</td><td>licznik w PLC, odczyt co 1–60 s</td></tr>
+        <tr><td>drgania łożyska (diagnostyka)</td><td>setki–tysiące Hz</td><td>kilka–kilkadziesiąt kHz, osobny system</td></tr>
+      </table>
+    </div>
+    <div class="you">
+      <h3>7. Dobierz interwał</h3>
+      <p>a) Interesuje nas składowa drgań silnika o częstotliwości 200 Hz. Z jaką minimalną częstotliwością trzeba próbkować? Jaką przyjąć w praktyce?</p>
+      <details><summary>odpowiedź</summary><p>teoretycznie &gt; 400 Hz; w praktyce 1–2 kHz (5–10 ×)</p></details>
+      <p>b) Temperatura zbiornika zmienia się najszybciej o 1 °C na minutę, interesuje nas dokładność 0,5 °C. Jak często zapisywać?</p>
+      <details><summary>odpowiedź</summary><p>0,5 °C zmienia się w 30 s → zapis co ok. 10–30 s wystarczy (co 1 s to marnowanie miejsca)</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- 14 -->
+<section class="slide" id="s-dysk2" data-blok="Blok 3 · próbkowanie">
+  <div class="kicker">Sygnały dyskretne</div>
+  <h2>Licznik sztuk: dlaczego „odpytywanie” gubi sztuki</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz tall" id="cv-cnt"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <label>sztuk na sekundę <input type="range" id="ct-r" min="0.5" max="4" step="0.1" value="2"> <span class="val" id="ct-rv"></span></label>
+        <label>odczyt czujnika co <input type="range" id="ct-p" min="0.05" max="1" step="0.05" value="0.3"> <span class="val" id="ct-pv"></span></label>
+      </div>
+    </div>
+    <div class="card">
+      <p>W ciągu 5 s przejechało sztuk: <span class="res" id="ct-t"></span></p>
+      <p>System policzył (zielone): <span class="res" id="ct-c"></span></p>
+      <p id="ct-msg" class="info"></p>
+      <div class="def"><p>Rozwiązanie: <b>licznik w sterowniku</b> (zlicza każdy impuls), a system nadrzędny odczytuje tylko stan licznika, np. co 10 s. Podobnie stany maszyny: sterownik zapamiętuje zmianę z dokładnym czasem.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 -->
+<section class="slide" id="s-stany" data-blok="Blok 3 · próbkowanie">
+  <div class="kicker">Stany maszyny</div>
+  <h2>Z bitów sterownika do stanu maszyny</h2>
+  <div class="cols c46">
+    <div class="card">
+      <table id="st-tab">
+        <tr><th>praca</th><th>awaria</th><th>przezbrojenie</th><th>→ stan</th></tr>
+      </table>
+      <p class="info">Sterownik ma sygnały (bity). Stan maszyny wyznacza się z nich regułą — ustala to technolog razem z automatykiem.</p>
+    </div>
+    <div class="you">
+      <h3>8. Wasze reguły</h3>
+      <p>Maszyna ma sygnały: <b>praca</b> (1 = wrzeciono się kręci), <b>awaria</b> (1 = aktywny alarm krytyczny), <b>przezbrojenie</b> (1 = operator wybrał tryb przezbrojenia na panelu), <b>brak materiału</b> (1 = pusty podajnik).</p>
+      <p>a) Jakie stany maszyny chcielibyście rozróżnić w raporcie?</p>
+      <p>b) Co, jeśli jednocześnie jest „awaria” i „brak materiału”? Który stan wygrywa i dlaczego?</p>
+      <details><summary>przykładowa odpowiedź</summary><p>stany: praca, awaria, przezbrojenie, brak materiału (postój organizacyjny), postój niezidentyfikowany; priorytet zwykle: awaria &gt; przezbrojenie &gt; brak materiału &gt; postój — bo awaria wymaga reakcji utrzymania ruchu</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= BLOK 4 ======================= -->
+
+<!-- 16 -->
+<section class="slide" id="s-prot" data-blok="Blok 4 · tagi, zapis, ilość danych">
+  <div class="kicker">Blok 4 · skąd system bierze dane</div>
+  <h2>Protokoły komunikacyjne — co trzeba wiedzieć</h2>
+  <table>
+    <tr><th>protokół</th><th>jak działa</th><th>gdzie spotkacie</th><th>uwagi</th></tr>
+    <tr><td><b>Modbus</b> (RTU, TCP)</td><td>system pyta urządzenie o rejestry (liczby) pod adresami</td><td>liczniki energii, falowniki, starsze sterowniki</td><td>prosty, popularny; same liczby — trzeba wiedzieć, co oznacza rejestr</td></tr>
+    <tr><td><b>OPC UA</b></td><td>urządzenie udostępnia uporządkowany model danych (nazwy, jednostki, typy)</td><td>nowe sterowniki i maszyny, SCADA, MES</td><td>standard Przemysłu 4.0, wbudowane bezpieczeństwo</td></tr>
+    <tr><td><b>MQTT</b></td><td>urządzenie publikuje wiadomości do pośrednika (brokera), odbiorcy je subskrybują</td><td>IIoT, czujniki bezprzewodowe, chmura</td><td>lekki; wysyła tylko zmiany</td></tr>
+    <tr><td>protokoły producentów (S7, EtherNet/IP…)</td><td>komunikacja z konkretnymi sterownikami</td><td>linie produkcyjne</td><td>wymagają sterowników komunikacyjnych w SCADA</td></tr>
+  </table>
+  <div class="def"><p>Inżynier procesu nie programuje komunikacji, ale musi umieć <b>zapytać integratora</b>: skąd biorą się dane, jak często, w jakich jednostkach i co się dzieje, gdy połączenie zniknie.</p></div>
+</section>
+
+<!-- 17 -->
+<section class="slide" id="s-tag" data-blok="Blok 4 · tagi, zapis, ilość danych">
+  <div class="kicker">Tag — podstawowa jednostka danych</div>
+  <h2>Co zawiera jeden pomiar w systemie</h2>
+  <div class="card">
+    <table>
+      <tr><th>nazwa (tag)</th><th>wartość</th><th>jednostka</th><th>znacznik czasu</th><th>jakość</th></tr>
+      <tr><td class="mono">Zaklad1.L2.Piec01.Temp</td><td>85,3</td><td>°C</td><td class="mono">2026-10-17 15:02:11.250</td><td style="color:var(--accent3);font-weight:700">Good</td></tr>
+      <tr><td class="mono">Zaklad1.L2.Piec01.Temp</td><td>0,0</td><td>°C</td><td class="mono">2026-10-17 15:02:12.250</td><td style="color:var(--danger);font-weight:700">Bad (błąd czujnika)</td></tr>
+      <tr><td class="mono">Zaklad1.L2.Pak01.LicznikSzt</td><td>15 482</td><td>szt.</td><td class="mono">2026-10-17 15:02:10.000</td><td style="color:var(--accent3);font-weight:700">Good</td></tr>
+      <tr><td class="mono">Zaklad1.L2.Pak01.Stan</td><td>2</td><td>(kod: 2 = awaria)</td><td class="mono">2026-10-17 14:58:41.120</td><td style="color:var(--accent3);font-weight:700">Good</td></tr>
+    </table>
+  </div>
+  <div class="cols c3">
+    <div class="card"><h3>Nazwa</h3><p>Spójna konwencja: zakład.linia.maszyna.wielkość — inaczej po roku nikt nie wie, co oznacza „AI_17”.</p></div>
+    <div class="card"><h3>Znacznik czasu</h3><p>Kiedy zmierzono (nie: kiedy zapisano). Jedna strefa czasowa, uwaga na zmianę czasu letni/zimowy.</p></div>
+    <div class="card"><h3>Jakość</h3><p>Czy wartości można ufać. Rekordy „Bad” nie powinny trafiać do raportów i średnich.</p></div>
+  </div>
+</section>
+
+<!-- 18 -->
+<section class="slide" id="s-db" data-blok="Blok 4 · tagi, zapis, ilość danych">
+  <div class="kicker">Sposoby zapisu</div>
+  <h2>Zapis cykliczny, przy zmianie i z martwą strefą</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-db"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <button data-dm="cyc" class="sel">cyklicznie</button><button data-dm="chg">przy każdej zmianie</button><button data-dm="db">martwa strefa</button>
+        <label id="db-l1">co <input type="range" id="db-c" min="1" max="30" step="1" value="5"> <span class="val" id="db-cv"></span></label>
+        <label id="db-l2">strefa ± <input type="range" id="db-d" min="0.1" max="3" step="0.1" value="0.5"> <span class="val" id="db-dv"></span></label>
+      </div>
+    </div>
+    <div class="card">
+      <p>Zapisanych punktów: <span class="res" id="db-n"></span> z 600</p>
+      <p>Największy błąd odtworzenia: <span class="res" id="db-e"></span></p>
+      <p id="db-msg" class="info"></p>
+    </div>
+  </div>
+</section>
+
+<!-- 19 -->
+<section class="slide" id="s-ile" data-blok="Blok 4 · tagi, zapis, ilość danych">
+  <div class="kicker">Ile danych</div>
+  <h2>Kalkulator: ile miejsca zajmie historia</h2>
+  <div class="cols">
+    <div class="card">
+      <table>
+        <tr><td>liczba maszyn</td><td><input type="number" id="il-m" value="10" min="1"></td></tr>
+        <tr><td>tagów na maszynę</td><td><input type="number" id="il-t" value="50" min="1"></td></tr>
+        <tr><td>interwał zapisu [s]</td><td><input type="number" id="il-i" value="1" min="0.01" step="0.1"></td></tr>
+        <tr><td>bajtów na rekord</td><td><input type="number" id="il-b" value="16" min="1"></td></tr>
+        <tr><td>martwa strefa — zapisujemy % próbek</td><td><input type="number" id="il-p" value="100" min="1" max="100"></td></tr>
+      </table>
+      <p class="info">16 B ≈ czas (8 B) + wartość (4 B) + jakość i identyfikator tagu (4 B).</p>
+    </div>
+    <div class="card">
+      <p>rekordów na dobę: <span class="res" id="il-r"></span></p>
+      <p>na dobę: <span class="res" id="il-d"></span></p>
+      <p>na rok: <span class="res" id="il-y"></span></p>
+      <div class="ex" data-steps style="margin-top:1vh">
+        <h3>Krok po kroku (wartości domyślne)</h3>
+        <ol>
+          <li>tagów razem: 10 · 50 = 500</li>
+          <li>próbek na dobę na tag: 86 400 s / 1 s = 86 400</li>
+          <li>rekordów na dobę: 500 · 86 400 = 43,2 mln</li>
+          <li>bajtów: 43,2 mln · 16 B ≈ 691 MB na dobę → ok. 252 GB na rok</li>
+          <li>z martwą strefą (zapis 10% próbek): ok. 25 GB na rok</li>
+        </ol>
+        <div class="step ctrl"><button class="primary" data-next>Następny krok ▶</button><button data-reset>Od początku</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 20 -->
+<section class="slide" id="s-hist" data-blok="Blok 4 · tagi, zapis, ilość danych">
+  <div class="kicker">Historian i raport zmianowy</div>
+  <h2>Jak z tysięcy rekordów powstaje kilka liczb w raporcie</h2>
+  <div class="cols c46">
+    <div class="card">
+      <h3>Raport zmiany I (6:00–14:00) — Pakowaczka 01</h3>
+      <table id="hs-rep"></table>
+      <p class="info">Kliknij wiersz raportu → po prawej: z jakiego tagu, ile rekordów i jak policzono.</p>
+    </div>
+    <div class="card">
+      <table>
+        <tr><td style="width:9em" class="muted">tag w historianie</td><td class="mono" id="hs-tag"></td></tr>
+        <tr><td class="muted">rekordów w zmianie</td><td id="hs-rec"></td></tr>
+        <tr><td class="muted">reguła (agregacja)</td><td id="hs-rule" style="font-weight:700"></td></tr>
+      </table>
+      <canvas class="viz short" id="cv-hist" style="margin-top:.8vh"></canvas>
+    </div>
+  </div>
+  <p class="info"><b>Historian</b> = przemysłowa baza szeregów czasowych (np. AVEVA PI, Ignition, InfluxDB). Przechowuje surowe rekordy latami i liczy z nich <b>agregaty</b> dla dowolnego okresu: różnicę licznika, czas w stanie, min / średnią / max.</p>
+</section>
+
+<!-- 21 -->
+<section class="slide" id="s-proj" data-blok="Blok 4 · tagi, zapis, ilość danych">
+  <div class="kicker">Zadanie projektowe · grupy 3–4 osoby · 15 min</div>
+  <h2>Zaprojektujcie listę tagów dla maszyny</h2>
+  <div class="cols c46">
+    <div class="card">
+      <h3>Krok po kroku</h3>
+      <ol>
+        <li><b>Wybierzcie maszynę</b> (wtryskarka, pakowaczka, piec, sprężarkownia albo Wasza linia). <span class="muted">2 min</span></li>
+        <li><b>Wypiszcie 8–12 tagów</b> — po 2–3 do każdego pytania kierownika: <i>ile produkuje? dlaczego stoi? czy dobrze? ile zużywa?</i> <span class="muted">8 min</span></li>
+        <li>Dla każdego tagu: <b>typ, jednostka, sposób zapisu</b> i <b>jaka decyzja</b> z niego wynika.</li>
+        <li><b>Policzcie ilość danych</b> na rok (jak w zad. 9). <span class="muted">3 min</span></li>
+        <li><b>1 minuta prezentacji</b> na grupę.</li>
+      </ol>
+      <h3>Ściąga: jaki sposób zapisu?</h3>
+      <table>
+        <tr><td><b>stan</b> (praca, awaria…)</td><td>przy zmianie</td></tr>
+        <tr><td><b>licznik</b> (sztuki, kWh)</td><td>cyklicznie, co 10–60 s</td></tr>
+        <tr><td><b>analog</b> (°C, bar…)</td><td>martwa strefa: większa niż szum, mniejsza niż istotna zmiana</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Przykład: wtryskarka</h3>
+      <table>
+        <tr><th>pytanie</th><th>tag</th><th>typ</th><th>zapis</th><th>decyzja</th></tr>
+        <tr><td><b>ile?</b></td><td class="mono">Wtr01.LicznikDobre</td><td>licznik, szt.</td><td>co 10 s</td><td>czy zlecenie zdąży na czas</td></tr>
+        <tr><td><b>ile?</b></td><td class="mono">Wtr01.CzasCyklu</td><td>analog, s</td><td>± 0,2 s</td><td>czy maszyna zwalnia</td></tr>
+        <tr><td><b>dlaczego stoi?</b></td><td class="mono">Wtr01.Stan</td><td>stan (kod)</td><td>przy zmianie</td><td>które postoje usuwać najpierw</td></tr>
+        <tr><td><b>czy dobrze?</b></td><td class="mono">Wtr01.LicznikBraki</td><td>licznik, szt.</td><td>co 10 s</td><td>kiedy zatrzymać i sprawdzić formę</td></tr>
+        <tr><td><b>czy dobrze?</b></td><td class="mono">Wtr01.TempForma</td><td>analog, °C</td><td>± 1 °C</td><td>przyczyna braków</td></tr>
+        <tr><td><b>ile zużywa?</b></td><td class="mono">Wtr01.Energia</td><td>licznik, kWh</td><td>co 1 min</td><td>koszt energii na sztukę</td></tr>
+      </table>
+      <p class="info">Tag, przy którym nie umiecie wpisać decyzji, prawdopodobnie jest zbędny — kosztuje, a nic nie wnosi.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 22 -->
+<section class="slide" id="s-pods" data-blok="Blok 4 · tagi, zapis, ilość danych">
+  <div class="kicker">Podsumowanie</div>
+  <h2>Co zapamiętać z dzisiaj</h2>
+  <div class="cols c3">
+    <div class="card"><h3>Tor pomiarowy</h3><p>czujnik → 4–20 mA → A/C → liczba → skalowanie → tag</p><p>x = x<sub>min</sub> + (I − 4)/16 · (x<sub>max</sub> − x<sub>min</sub>)</p><p>krok = zakres / 2<sup>n</sup></p></div>
+    <div class="card"><h3>Próbkowanie</h3><p>f<sub>p</sub> &gt; 2 · f<sub>max</sub> (w praktyce 5–10 ×)</p><p>impulsy zliczamy w sterowniku, nie przez odpytywanie</p><p>stan maszyny = reguła z priorytetami</p></div>
+    <div class="card"><h3>Tagi i zapis</h3><p>nazwa · wartość · jednostka · czas · jakość</p><p>cyklicznie / przy zmianie / martwa strefa</p><p>dane = tagi × próbki × bajty</p></div>
+  </div>
+  <p class="big" style="text-align:center;margin-top:2vh">Jutro: od danych do decyzji — OEE, jakość danych, dashboardy.</p>
+</section>
+
+<div id="bar">
+  <button id="b-prev" title="poprzedni (←)">◀</button>
+  <button id="b-next" title="następny (→)">▶</button>
+  <span id="blk"></span>
+  <div id="prog"><div></div></div>
+  <span id="cnt"></span>
+  <button id="b-theme" title="motyw (T)">◐</button>
+  <button id="b-fs" title="pełny ekran (F)">⛶</button>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const TAU=Math.PI*2;
+let C={}, NOW=0, DT=0, LAST=0;
+function readColors(){ const cs=getComputedStyle(document.documentElement); for(const k of ['bg','panel','fg','muted','grid','accent','accent2','accent3','danger','violet','gold','chip']) C[k]=cs.getPropertyValue('--'+k).trim(); }
+function toggleTheme(){ const r=document.documentElement; r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'; try{localStorage.setItem('akw-theme',r.dataset.theme);}catch(e){} }
+try{ const t=localStorage.getItem('akw-theme'); if(t) document.documentElement.dataset.theme=t; }catch(e){}
+readColors();
+
+/* ---------- liczby i rysowanie ---------- */
+function fmt(x,d=2){ if(!isFinite(x)) return '—'; const neg=x<0; x=Math.abs(x); const s=(Math.round(x*10**d)/10**d).toFixed(d); let [a,b]=s.split('.');
+  a=a.replace(/\B(?=(\d{3})+(?!\d))/g,' '); b=b?b.replace(/0+$/,''):''; return (neg?'−':'')+(b?a+','+b:a); }
+const num=el=>{ const v=parseFloat(String(el.value).replace(',','.')); return isFinite(v)?v:NaN; };
+function bytes(b){ const U=[[1e12,'TB'],[1e9,'GB'],[1e6,'MB'],[1e3,'kB']]; for(const [m,u] of U) if(b>=m) return fmt(b/m,b/m<10?2:(b/m<100?1:0))+' '+u; return fmt(b,0)+' B'; }
+function fit(cv){ const r=cv.getBoundingClientRect(), d=window.devicePixelRatio||1; const W=Math.max(10,r.width), H=Math.max(10,r.height);
+  if(cv.width!==Math.round(W*d)||cv.height!==Math.round(H*d)){ cv.width=Math.round(W*d); cv.height=Math.round(H*d); }
+  const g=cv.getContext('2d'); g.setTransform(d,0,0,d,0,0); g.clearRect(0,0,W,H); return {g,w:W,h:H}; }
+function line(g,x1,y1,x2,y2,col,w=2,dash){ g.strokeStyle=col; g.lineWidth=w; g.setLineDash(dash||[]); g.beginPath(); g.moveTo(x1,y1); g.lineTo(x2,y2); g.stroke(); g.setLineDash([]); }
+function poly(g,pts,col,w=2.5){ if(!pts.length) return; g.strokeStyle=col; g.lineWidth=w; g.lineJoin='round'; g.beginPath(); pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1])); g.stroke(); }
+function text(g,s,x,y,col,size=14,align='left',weight=600){ g.fillStyle=col; g.font=`${weight} ${size}px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif`; g.textAlign=align; g.textBaseline='middle'; g.fillText(s,x,y); }
+function dot(g,x,y,r,col){ g.fillStyle=col; g.beginPath(); g.arc(x,y,r,0,TAU); g.fill(); }
+function axes(g,x0,y0,x1,y1,xmax,ymax,xl,yl,xt,yt,fx,fy,xmin=0,ymin=0){ line(g,x0,y0,x1,y0,C.muted,1.5); line(g,x0,y0,x0,y1,C.muted,1.5);
+  for(let i=0;i<=xt;i++){ const x=x0+(x1-x0)*i/xt; line(g,x,y0,x,y1,C.grid,1); text(g,fx(xmin+(xmax-xmin)*i/xt),x,y0+14,C.muted,12,'center',500); }
+  for(let i=0;i<=yt;i++){ const y=y0+(y1-y0)*i/yt; line(g,x0,y,x1,y,C.grid,1); text(g,fy(ymin+(ymax-ymin)*i/yt),x0-6,y,C.muted,12,'right',500); }
+  text(g,xl,x1,y0+30,C.fg,13,'right',700); text(g,yl,x0+6,y1-10,C.fg,13,'left',700); }
+function rng(seed){ let a=seed>>>0; return ()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}; }
+const frame={};
+
+/* kroki w przykładach */
+$$('[data-steps]').forEach(ex=>{ const li=[...ex.querySelectorAll('ol li')]; let k=0; const upd=()=>li.forEach((l,i)=>l.classList.toggle('on',i<k));
+  ex.querySelector('[data-next]').onclick=()=>{ k=Math.min(li.length,k+1); upd(); }; ex.querySelector('[data-reset]').onclick=()=>{ k=0; upd(); }; upd(); });
+
+/* ===== 3. raport operatora a maszyna ===== */
+// postoje [start min, długość min, typ]; zmiana 480 min
+const STOPS=(()=>{ const big=[[95,18,'awaria'],[300,27,'przezbrojenie']]; const R=rng(7), small=[]; let t=20;
+  while(t<470){ t+=12+R()*35; const d=0.6+R()*1.6; if(t<470 && !big.some(b=>t>b[0]-3&&t<b[0]+b[1]+3)) small.push([t,d,'mikropostój']); }
+  return {big,small}; })();
+let RV='op';
+function rpUpd(){ const sb=STOPS.big.reduce((a,s)=>a+s[1],0), ss=STOPS.small.reduce((a,s)=>a+s[1],0), op=RV==='op';
+  const all=op?sb:sb+ss, n=op?STOPS.big.length:STOPS.big.length+STOPS.small.length;
+  $('#rp-tab').innerHTML=`<tr><th></th><th>${op?'raport operatora':'dane z maszyny'}</th></tr><tr><td>liczba postojów</td><td><b>${n}</b></td></tr><tr><td>czas postojów</td><td><b>${fmt(all,0)} min</b></td></tr><tr><td>czas pracy</td><td><b>${fmt(480-all,0)} min</b></td></tr>${op?'':`<tr><td>w tym mikropostoje</td><td class="bad">${STOPS.small.length} · ${fmt(ss,0)} min</td></tr>`}`; }
+$$('[data-rv]').forEach(b=>b.onclick=()=>{ RV=b.dataset.rv; $$('[data-rv]').forEach(x=>x.classList.toggle('sel',x===b)); rpUpd(); }); rpUpd();
+frame['s-raport']=()=>{ const {g,w,h}=fit($('#cv-raport')); const x0=30,x1=w-20,y=h*0.42,bh=h*0.26, X=m=>x0+(x1-x0)*m/480;
+  g.fillStyle=C.accent3; g.globalAlpha=.8; g.fillRect(x0,y-bh/2,x1-x0,bh); g.globalAlpha=1;
+  const show=RV==='op'?STOPS.big:[...STOPS.big,...STOPS.small];
+  show.forEach(s=>{ g.fillStyle=s[2]==='mikropostój'?C.danger:C.accent2; g.fillRect(X(s[0]),y-bh/2,Math.max(2,X(s[0]+s[1])-X(s[0])),bh); });
+  STOPS.big.forEach(s=>text(g,s[2]+' '+s[1]+' min',X(s[0]+s[1]/2),y-bh/2-14,C.accent2,13,'center',700));
+  for(let hh=0;hh<=8;hh++){ const x=X(hh*60); line(g,x,y+bh/2,x,y+bh/2+6,C.muted,1); text(g,(6+hh)+':00',x,y+bh/2+18,C.muted,12,'center',500); }
+  text(g,'praca',x0+4,y,'#fff',13,'left',700); };
+
+/* ===== 4. piramida ===== */
+const PYR=[
+ ['4','ERP — planowanie biznesowe','dni – miesiące','zlecenia klientów, zamówienia materiałów, koszty, plan produkcji','SAP, Comarch ERP, enova365, IFS','kierownictwo, planowanie, finanse, zakupy',C.violet,46],
+ ['3','MES / MOM — zarządzanie produkcją','zmiany, godziny – minuty','realizacja zleceń na maszynach, OEE, postoje i ich przyczyny, genealogia partii, jakość','systemy MES, systemy OEE, CMMS (utrzymanie ruchu)','kierownik produkcji, mistrz, jakość, utrzymanie ruchu',C.accent,62],
+ ['2','SCADA / HMI — nadzór i wizualizacja','sekundy','ekrany procesu, alarmy, trendy, historia (historian), receptury','WinCC, AVEVA (Wonderware), Ignition, panele HMI','operator, automatyk, technolog',C.accent3,78],
+ ['1','PLC — sterowanie','milisekundy','logika i sekwencje, regulacja, liczniki, blokady bezpieczeństwa','sterowniki PLC (Siemens, Allen-Bradley, Mitsubishi…)','automatyk (programista PLC)',C.accent2,90],
+ ['0','Proces — czujniki i elementy wykonawcze','mikro – milisekundy','temperatura, ciśnienie, położenie, obecność detalu; silniki, zawory, grzałki','czujniki, przetworniki, napędy, zawory','— (to tu powstają dane)',C.gold,100],
+];
+function pyrShow(i){ const p=PYR[i]; $$('#pyr button').forEach((b,k)=>b.classList.toggle('sel',k===i));
+  $('#pyr-d').innerHTML=`<h3>Poziom ${p[0]}: ${p[1]}</h3><table><tr><td>horyzont czasu</td><td><b>${p[2]}</b></td></tr><tr><td>przykładowe dane</td><td>${p[3]}</td></tr><tr><td>przykładowe systemy</td><td>${p[4]}</td></tr><tr><td>kto korzysta</td><td>${p[5]}</td></tr></table>`; }
+$('#pyr').innerHTML=PYR.map((p,i)=>`<button data-py="${i}" style="width:${p[7]}%;border-color:${p[6]}">${p[0]} · ${p[1].split(' — ')[0]}</button>`).join('');
+$$('#pyr button').forEach(b=>b.onclick=()=>pyrShow(+b.dataset.py)); pyrShow(4);
+
+/* ===== 6. tor pomiarowy ===== */
+const CHAIN=[
+ ['Wielkość fizyczna','temperatura','Coś, co chcemy znać: temperatura, ciśnienie, poziom, obecność detalu. Na razie istnieje tylko w procesie.','85,3 °C'],
+ ['Czujnik','Pt100','Zamienia wielkość fizyczną na wielkość elektryczną. Pt100 to rezystor platynowy: 100 Ω w 0 °C, rezystancja rośnie z temperaturą.','132,9 Ω'],
+ ['Przetwornik','4–20 mA','Zamienia sygnał czujnika na <b>sygnał standardowy</b>, który można przesłać na duże odległości. Tu: zakres 0–150 °C → 4–20 mA.','13,10 mA'],
+ ['Moduł wejść PLC','przetwornik A/C','Mierzy prąd i zamienia go na liczbę całkowitą. W sterownikach Siemens S7: 4–20 mA → 0–27 648.','15 723'],
+ ['Skalowanie','w PLC lub SCADA','Przelicza liczbę na jednostki techniczne: 15 723 / 27 648 · 150 °C.','85,3 °C'],
+ ['Zapis','historian / baza','Zapisuje <b>tag</b>: nazwę, wartość, jednostkę, znacznik czasu i jakość pomiaru.','Piec01.Temp = 85,3 °C · 15:02:11 · Good'],
+];
+function chainShow(i){ $$('#chain button').forEach((b,k)=>b.classList.toggle('sel',k===i)); const c=CHAIN[i];
+  $('#chain-d').innerHTML=`<h3>${i+1}. ${c[0]}</h3><p>${c[2]}</p>`; $('#chain-v').innerHTML=CHAIN.slice(0,i+1).map((x,k)=>k===i?`<b style="color:var(--accent2)">${x[3]}</b>`:`<span class="muted">${x[3]}</span>`).join(' → '); }
+$('#chain').innerHTML=CHAIN.map((c,i)=>(i?'<span class="arr">→</span>':'')+`<button data-ch="${i}">${c[0]}<small>${c[1]}</small></button>`).join('');
+$$('#chain button').forEach(b=>b.onclick=()=>chainShow(+b.dataset.ch)); chainShow(0);
+
+/* ===== 7. 4–20 mA ===== */
+function s4Upd(){ $('#s4-tv').textContent=fmt(+$('#s4-t').value,1)+' °C'; }
+$('#s4-t').addEventListener('input',s4Upd); s4Upd();
+frame['s-420']=()=>{ const {g,w,h}=fit($('#cv-420')); const T=+$('#s4-t').value, br=$('#s4-br').checked, I=br?0:4+16*T/150, U=br?0:10*T/150;
+  const bw=Math.min(90,w*0.12), y0=h-50, y1=66, col=[w*0.22,w*0.62];
+  [[I,24,'4–20 mA','mA',[4,20],col[0]],[U,12,'0–10 V','V',[0,10],col[1]]].forEach(([v,max,lab,u,rg,x])=>{
+    const Y=q=>y0-(y0-y1)*q/max; g.strokeStyle=C.grid; g.lineWidth=1.5; g.strokeRect(x-bw/2,y1,bw,y0-y1);
+    g.fillStyle=C.chip; g.fillRect(x-bw/2,Y(rg[1]),bw,Y(rg[0])-Y(rg[1]));
+    g.fillStyle=br?C.danger:C.accent; g.fillRect(x-bw/2+6,Y(v),bw-12,y0-Y(v));
+    [0,...rg].forEach(q=>{ line(g,x-bw/2-6,Y(q),x-bw/2,Y(q),C.muted,1.5); text(g,fmt(q,0),x-bw/2-10,Y(q),C.muted,12,'right',600); });
+    text(g,lab,x,y0+18,C.fg,15,'center',800); text(g,fmt(v,2)+' '+u,x+bw/2+10,Y(v),br?C.danger:C.accent,16,'left',800); });
+  const r1=br?'BŁĄD CZUJNIKA (I < 3,6 mA)':'T = '+fmt((I-4)/16*150,1)+' °C', r2='T = '+fmt(U/10*150,1)+' °C'+(br?'  ← fałszywy odczyt!':'');
+  text(g,'system odczytuje:',12,16,C.muted,13,'left',600);
+  text(g,r1,col[0],40,br?C.danger:C.accent3,15,'center',800); text(g,r2,col[1],40,br?C.danger:C.accent3,15,'center',800); };
+
+/* ===== 8. skalowanie ===== */
+frame['s-skal']=()=>{ const {g,w,h}=fit($('#cv-skal')); const x0=46,y0=h-34,x1=w-14,y1=14, X=i=>x0+(x1-x0)*i/20, Y=p=>y0-(y0-y1)*p/10;
+  axes(g,x0,y0,x1,y1,20,10,'I [mA]','p [bar]',5,5,v=>fmt(v,0),v=>fmt(v,0));
+  line(g,X(4),y0,X(4),y1,C.grid,1,[4,4]); poly(g,[[X(4),Y(0)],[X(20),Y(10)]],C.accent,3);
+  line(g,X(12.8),y0,X(12.8),Y(5.5),C.accent2,1.5,[5,4]); line(g,x0,Y(5.5),X(12.8),Y(5.5),C.accent2,1.5,[5,4]); dot(g,X(12.8),Y(5.5),6,C.accent2);
+  text(g,'12,8 mA → 5,5 bar',X(12.8)+8,Y(5.5)+14,C.accent2,13,'left',700); };
+
+/* ===== 10. A/C ===== */
+function adUpd(){ const n=+$('#ad-n').value, L=2**n; $('#ad-nv').textContent=n+' bit'; $('#ad-n2').textContent=n; $('#ad-lv').textContent=fmt(L,0); const st=150/L; $('#ad-st').textContent=(st>=0.1?fmt(st,2):fmt(st,4))+' °C'; }
+$('#ad-n').addEventListener('input',adUpd); adUpd();
+frame['s-adc']=()=>{ const {g,w,h}=fit($('#cv-adc')); const n=+$('#ad-n').value, L=2**n, x0=50,y0=h-34,x1=w-14,y1=16, X=t=>x0+(x1-x0)*t, Y=v=>y0-(y0-y1)*v/150;
+  axes(g,x0,y0,x1,y1,1,150,'czas','T [°C]',4,5,v=>'',v=>fmt(v,0));
+  const sig=t=>75+50*Math.sin(TAU*t*1.2)+12*Math.sin(TAU*t*3.7+1); const pts=[], q=[];
+  for(let k=0;k<=400;k++){ const t=k/400, v=sig(t); pts.push([X(t),Y(v)]); const lv=Math.min(L-1,Math.floor(v/150*L)); q.push([X(t),Y((lv+0.5)*150/L)]); }
+  poly(g,pts,C.muted,1.5); g.strokeStyle=C.accent2; g.lineWidth=2.5; g.beginPath(); q.forEach((p,i)=>{ if(!i) g.moveTo(p[0],p[1]); else { g.lineTo(p[0],q[i-1][1]); g.lineTo(p[0],p[1]); } }); g.stroke();
+  if(n<=5) for(let k=1;k<L;k++) line(g,x0,Y(k*150/L),x1,Y(k*150/L),C.grid,1,[2,4]);
+  text(g,'sygnał rzeczywisty',x1-6,y1+6,C.muted,12,'right',600); text(g,'wartość po przetworniku',x1-6,y1+22,C.accent2,12,'right',700); };
+
+/* ===== 12. próbkowanie ===== */
+function pbUpd(){ const f=+$('#pb-f').value, s=+$('#pb-s').value; $('#pb-fv').textContent=fmt(f,1)+' Hz'; $('#pb-sv').textContent=fmt(s,1)+' Hz';
+  const ok=s>2*f; let alias=Math.abs(f-Math.round(f/s)*s);
+  $('#pb-msg').innerHTML=ok?`<span style="color:var(--accent3);font-weight:800">✔ ${fmt(s,1)} &gt; 2 · ${fmt(f,1)} Hz</span> — próbki odwzorowują sygnał`:`<span class="bad">✘ ${fmt(s,1)} ≤ 2 · ${fmt(f,1)} Hz</span> — aliasing: próbki wyglądają jak sygnał ${fmt(alias,2)} Hz`; }
+['#pb-f','#pb-s'].forEach(s=>$(s).addEventListener('input',pbUpd)); pbUpd();
+frame['s-prob']=()=>{ const {g,w,h}=fit($('#cv-prob')); const f=+$('#pb-f').value, s=+$('#pb-s').value, T=3, x0=40,x1=w-14,ym=h/2,A=h*0.36, X=t=>x0+(x1-x0)*t/T, Y=v=>ym-A*v;
+  line(g,x0,ym,x1,ym,C.grid,1); for(let k=0;k<=T;k++){ line(g,X(k),ym-A-6,X(k),ym+A+6,C.grid,1,[3,5]); text(g,k+' s',X(k),h-10,C.muted,12,'center',500); }
+  const pts=[]; for(let k=0;k<=900;k++){ const t=k/900*T; pts.push([X(t),Y(Math.sin(TAU*f*t))]); } poly(g,pts,C.muted,2);
+  const sm=[]; for(let t=0;t<=T+1e-9;t+=1/s) sm.push([X(t),Y(Math.sin(TAU*f*t))]); poly(g,sm,s>2*f?C.accent3:C.danger,2.5); sm.forEach(p=>dot(g,p[0],p[1],5,C.accent2));
+  text(g,'sygnał',x0+6,14,C.muted,13,'left',700); text(g,'odtworzony z próbek',x0+70,14,s>2*f?C.accent3:C.danger,13,'left',700); };
+
+/* ===== 14. licznik sztuk ===== */
+let CT={};
+function ctCalc(){ const r=+$('#ct-r').value, p=+$('#ct-p').value, T=5, W=0.1, R=rng(5); const P=[];
+  for(let t=0.13+R()*0.2; t<T-W; t+=(1/r)*(0.8+R()*0.4)) P.push(t);   // początki impulsów, rozrzut ±20%
+  const pulseAt=t=>P.findIndex(t0=>t>=t0&&t<t0+W), cnt=P.map(()=>false); let prev=false, c=0; const samples=[];
+  for(let k=0; k*p<=T+1e-9; k++){ const t=k*p, i=pulseAt(t), v=i>=0; samples.push([t,v]); if(v&&!prev){ c++; cnt[i]=true; } prev=v; }
+  CT={r,p,T,W,P,cnt,samples,c,tot:P.length};
+  $('#ct-rv').textContent=fmt(r,1)+' szt./s'; $('#ct-pv').textContent=fmt(p,2)+' s'; $('#ct-t').textContent=CT.tot; $('#ct-c').textContent=c;
+  const lost=CT.tot-c; $('#ct-msg').innerHTML=lost>0?`<span class="bad">Zgubiono ${lost} szt. (${fmt(lost/CT.tot*100,0)}%)</span> — czerwone sztuki wypadły między odczytami: impuls trwa 0,1 s, a odczyt jest co ${fmt(p,2)} s.`:`Wszystkie sztuki policzone — odczyt co ${fmt(p,2)} s jest częstszy niż czas trwania impulsu (0,1 s).`; }
+['#ct-r','#ct-p'].forEach(s=>$(s).addEventListener('input',ctCalc)); ctCalc();
+frame['s-dysk2']=()=>{ const {g,w,h}=fit($('#cv-cnt')); const S=CT, x0=16,x1=w-16, X=t=>x0+(x1-x0)*t/S.T, hh=Math.min(56,h*0.18), ya=h*0.42, yb=h*0.82;
+  // legenda
+  let lx=x0; const leg=(col,lab)=>{ g.fillStyle=col; g.fillRect(lx,8,14,14); text(g,lab,lx+20,15,C.fg,14,'left',600); lx+=g.measureText(lab).width+44; };
+  g.font='600 14px system-ui'; leg(C.accent3,'sztuka policzona'); leg(C.danger,'sztuka zgubiona'); 
+  dot(g,lx+6,15,5,C.accent2); text(g,'odczyt systemu',lx+16,15,C.fg,14,'left',600);
+  // wiersz 1: czujnik
+  text(g,'1. Czujnik przy taśmie — impuls 0,1 s na każdą sztukę',x0,ya-hh-16,C.fg,15,'left',700);
+  line(g,x0,ya,x1,ya,C.muted,1.5);
+  S.P.forEach((t0,i)=>{ g.fillStyle=S.cnt[i]?C.accent3:C.danger; g.fillRect(X(t0),ya-hh,Math.max(3,X(t0+S.W)-X(t0)),hh); });
+  // odczyty: pionowe kreski przez oba wiersze
+  S.samples.forEach(([t,v])=>{ const x=X(t); line(g,x,ya-hh-4,x,yb+2,C.accent2,1,[2,3]); dot(g,x,ya+6,4,C.accent2); });
+  // wiersz 2: co widzi system (wartość trzymana między odczytami)
+  text(g,'2. Co widzi system (stan czujnika tylko w chwilach odczytu)',x0,yb-hh-16,C.fg,15,'left',700);
+  const pts=[]; S.samples.forEach(([t,v],k)=>{ const x=X(t), y=v?yb-hh:yb; if(k) pts.push([x,pts[pts.length-1][1]]); pts.push([x,y]); }); pts.push([x1,pts[pts.length-1][1]]); poly(g,pts,C.accent,2.5);
+  S.samples.forEach(([t,v])=>dot(g,X(t),v?yb-hh:yb,4.5,C.accent2));
+  for(let k=0;k<=S.T;k++) text(g,k+' s',X(k),h-8,C.muted,12,'center',500); };
+
+/* ===== 15. stany ===== */
+const STT=[[1,0,0,'praca',C.accent3],[0,0,0,'postój (przyczyna nieznana)',C.gold],[0,1,0,'awaria',C.danger],[0,0,1,'przezbrojenie',C.violet],[0,1,1,'awaria (priorytet)',C.danger],[1,1,0,'awaria (priorytet)',C.danger]];
+$('#st-tab').insertAdjacentHTML('beforeend',STT.map(s=>`<tr><td>${s[0]}</td><td>${s[1]}</td><td>${s[2]}</td><td style="color:${s[4]};font-weight:800">${s[3]}</td></tr>`).join(''));
+
+/* ===== 18. sposoby zapisu ===== */
+const DBS=(()=>{ const R=rng(11), v=[]; let drift=60; for(let i=0;i<600;i++){ drift+=(R()-0.5)*0.08; let x=drift+(i>=330?6:0)+(i>=330&&i<345?(345-i)*0.25:0); x+= (R()-0.5)*0.6; v.push(x); } return v; })();
+let DM='cyc', DBR={};
+function dbCalc(){ const c=+$('#db-c').value, d=+$('#db-d').value; $('#db-cv').textContent=c+' s'; $('#db-dv').textContent=fmt(d,1)+' °C';
+  $('#db-l1').style.display=DM==='cyc'?'':'none'; $('#db-l2').style.display=DM==='db'?'':'none';
+  const st=[]; let last=null; DBS.forEach((v,i)=>{ let keep=false; if(DM==='cyc') keep=i%c===0; else if(DM==='chg') keep=last===null||Math.round(v*10)!==Math.round(last*10); else keep=last===null||Math.abs(v-last)>d; if(keep){ st.push([i,v]); last=v; } });
+  let err=0, k=0; DBS.forEach((v,i)=>{ while(k+1<st.length&&st[k+1][0]<=i) k++; err=Math.max(err,Math.abs(v-st[k][1])); });
+  DBR={st,err}; $('#db-n').textContent=st.length; $('#db-e').textContent=fmt(err,2)+' °C';
+  $('#db-msg').innerHTML=DM==='cyc'?`Co ${c} s: liczba punktów stała, ale skok o 6 °C (ok. 5,5 min) zapisuje się z opóźnieniem do ${c} s.`:DM==='chg'?'Każda zmiana o 0,1 °C (rozdzielczość zapisu) — przy szumie zapisuje się prawie wszystko.':`Zapis tylko po zmianie o więcej niż ±${fmt(d,1)} °C — błąd odtworzenia nie przekracza strefy.`; }
+$$('[data-dm]').forEach(b=>b.onclick=()=>{ DM=b.dataset.dm; $$('[data-dm]').forEach(x=>x.classList.toggle('sel',x===b)); dbCalc(); });
+['#db-c','#db-d'].forEach(s=>$(s).addEventListener('input',dbCalc)); dbCalc();
+frame['s-db']=()=>{ const {g,w,h}=fit($('#cv-db')); const x0=46,y0=h-32,x1=w-14,y1=14, mn=56, mx=70, X=i=>x0+(x1-x0)*i/600, Y=v=>y0-(y0-y1)*(v-mn)/(mx-mn);
+  axes(g,x0,y0,x1,y1,10,mx,'czas [min]','T [°C]',10,7,v=>fmt(v,0),v=>fmt(v,0),0,mn);
+  poly(g,DBS.map((v,i)=>[X(i),Y(v)]),C.muted,1.2);
+  const st=DBR.st; g.strokeStyle=C.accent2; g.lineWidth=2.2; g.beginPath(); st.forEach((p,k)=>{ const x=X(p[0]), y=Y(p[1]); if(!k) g.moveTo(x,y); else { g.lineTo(x,Y(st[k-1][1])); g.lineTo(x,y); } }); g.lineTo(X(599),Y(st[st.length-1][1])); g.stroke();
+  st.forEach(p=>dot(g,X(p[0]),Y(p[1]),st.length>200?1.8:3.5,C.accent2)); };
+
+/* ===== 19. kalkulator ===== */
+function ilUpd(){ const m=num($('#il-m')), t=num($('#il-t')), i=num($('#il-i')), b=num($('#il-b')), p=num($('#il-p'))/100; const r=m*t*86400/i*p, d=r*b;
+  $('#il-r').textContent=r>=1e6?fmt(r/1e6,1)+' mln':fmt(r,0); $('#il-d').textContent=bytes(d); $('#il-y').textContent=bytes(d*365); }
+$('#s-ile').addEventListener('input',ilUpd); ilUpd();
+
+/* ===== 20. historian → raport ===== */
+const HS=(()=>{ // jedna zmiana 6:00–14:00 (480 min), spójna z raportem
+  const longS=[[52,12],[131,9],[205,18],[318,15],[402,11]], shortD=[1.2,0.8,1.5,1.0,1.4,0.9,1.3,1.1,1.6,1.0,1.2,1.0], shortT=[24,77,98,160,182,240,262,281,349,371,438,461];
+  const stops=[...longS.map(s=>[s[0],s[1]]),...shortT.map((t,i)=>[t,shortD[i]])].sort((a,b)=>a[0]-b[0]);
+  const run=t=>!stops.some(s=>t>=s[0]&&t<s[0]+s[1]);
+  const R=rng(21), temp=[]; for(let i=0;i<=480;i++){ let v=0.3+(R()-0.5)*0.12; if(i<12) v=(i/12)*0.3; if(i>=223&&i<240) v+=0.7*Math.exp(-(i-223)/5); temp.push(v); }
+  const tmin=Math.min(...temp), tmax=Math.max(...temp); const T=temp.map(v=>168+(v-tmin)/(tmax-tmin)*13); const tavg=T.reduce((a,b)=>a+b,0)/T.length;
+  return {stops,run,T,tavg}; })();
+const HSR=[
+ {lab:'sztuki dobre / złe',val:'11 840 / 212',tag:'Pak01.LicznikDobre<br>Pak01.LicznikZle',rec:'2 × 2 880 (zapis co 10 s)',rule:'stan licznika na koniec zmiany − stan na początku',viz:'cnt'},
+ {lab:'czas pracy / postoju',val:'6 h 41 min / 1 h 19 min',tag:'Pak01.Stan',rec:'35 (zapis przy zmianie stanu)',rule:'suma czasów trwania każdego stanu',viz:'state'},
+ {lab:'liczba postojów (w tym &lt; 2 min)',val:'17 (12)',tag:'Pak01.Stan',rec:'35 (zapis przy zmianie stanu)',rule:'liczba przejść praca → postój; podział według czasu trwania',viz:'state2'},
+ {lab:'temperatura zgrzewu min / śr / max',val:`168 / ${fmt(HS.tavg,0)} / 181 °C`,tag:'Pak01.TempZgrzew',rec:'ok. 900 (martwa strefa ± 0,5 °C)',rule:'minimum, średnia (ważona czasem), maksimum',viz:'temp'},
+ {lab:'energia',val:'96 kWh (8,0 Wh/szt.)',tag:'Pak01.Energia (licznik kWh)',rec:'480 (zapis co 1 min)',rule:'stan licznika kWh: koniec − początek; na sztukę: 96 kWh / 12 052 szt.',viz:'en'},
+];
+let HSI=0;
+function hsShow(i){ HSI=i; $$('#hs-rep tr').forEach((r,k)=>{ r.style.background=k===i?'var(--chip)':''; r.style.outline=k===i?'2px solid var(--accent2)':''; });
+  const r=HSR[i]; $('#hs-tag').innerHTML=r.tag; $('#hs-rec').textContent=r.rec; $('#hs-rule').textContent=r.rule; }
+$('#hs-rep').innerHTML=HSR.map((r,i)=>`<tr data-hs="${i}" style="cursor:pointer"><td>${r.lab}</td><td><b>${r.val}</b></td></tr>`).join('');
+$$('#hs-rep tr').forEach(r=>r.onclick=()=>hsShow(+r.dataset.hs)); hsShow(0);
+frame['s-hist']=()=>{ const {g,w,h}=fit($('#cv-hist')); const x0=50,x1=w-12,y0=h-24,y1=14, X=m=>x0+(x1-x0)*m/480, v=HSR[HSI].viz;
+  for(let hh=0;hh<=8;hh+=2){ const x=X(hh*60); line(g,x,y1,x,y0,C.grid,1); text(g,(6+hh)+':00',x,y0+12,C.muted,11,'center',500); }
+  if(v==='state'||v==='state2'){ const yb=(y0+y1)/2, bh=(y0-y1)*0.45; g.fillStyle=C.accent3; g.fillRect(x0,yb-bh/2,x1-x0,bh);
+    HS.stops.forEach(s=>{ const sh=s[1]<2; g.fillStyle=sh?C.danger:C.accent2; g.fillRect(X(s[0]),yb-bh/2,Math.max(2,X(s[0]+s[1])-X(s[0])),bh); });
+    if(v==='state') text(g,'praca 401 min · postoje 79 min',x0,y1+4,C.fg,13,'left',700);
+    else { HS.stops.forEach((s,k)=>text(g,String(k+1),X(s[0]+s[1]/2),yb-bh/2-9,s[1]<2?C.danger:C.accent2,11,'center',800)); text(g,'pomarańczowe: ≥ 2 min (5) · czerwone: < 2 min (12)',x0,y0-6,C.fg,12,'left',700); } }
+  else { let pts=[], lo, hi, f, lab;
+    if(v==='cnt'){ lo=1254300; hi=1266140; let c=lo; for(let m=0;m<=480;m++){ if(m && HS.run(m)) c+=11840/401; pts.push([m,c]); } f=x=>fmt(x/1000,0)+' k'; lab=['1 254 300','1 266 140','różnica: 11 840 szt.']; }
+    else if(v==='en'){ lo=48213; hi=48309; let c=lo; const tot=[...Array(480).keys()].reduce((a,m)=>a+(HS.run(m)?1:0.25),0); for(let m=0;m<=480;m++){ if(m) c+=96*(HS.run(m)?1:0.25)/tot; pts.push([m,c]); } f=x=>fmt(x,0); lab=['48 213 kWh','48 309 kWh','różnica: 96 kWh']; }
+    else { lo=165; hi=184; pts=HS.T.map((t,m)=>[m,t]); f=x=>fmt(x,0); }
+    const Y=q=>y0-(y0-y1)*(q-lo)/(hi-lo||1); for(let k=0;k<=3;k++){ const q=lo+(hi-lo)*k/3; text(g,f(q),x0-4,Y(q),C.muted,11,'right',500); }
+    poly(g,pts.map(p=>[X(p[0]),Y(p[1])]),C.accent,2);
+    if(v==='temp'){ [[168,'min 168',C.accent3],[HS.tavg,'śr. '+fmt(HS.tavg,0),C.accent2],[181,'max 181',C.danger]].forEach(([q,l,c])=>{ line(g,x0,Y(q),x1,Y(q),c,1.5,[6,4]); text(g,l+' °C',x1-4,Y(q)-9,c,12,'right',800); }); }
+    else { dot(g,X(0),Y(pts[0][1]),6,C.accent2); dot(g,X(480),Y(pts[480][1]),6,C.accent2); text(g,lab[0],X(0)+10,Y(pts[0][1])-10,C.accent2,12,'left',800); text(g,lab[1],X(480)-8,Y(pts[480][1])+14,C.accent2,12,'right',800); text(g,lab[2],(x0+x1)/2,y1+6,C.fg,13,'center',800); } } };
+
+/* ---------------- nawigacja ---------------- */
+const slides=$$('.slide'); let cur=0, spk=null;
+const title=i=>slides[i].querySelector('h1,h2').textContent;
+function notesHTML(i){const n=slides[i].querySelector('.notes'); return n?n.innerHTML:'<p>(brak komentarza)</p>';}
+function updSpeaker(){ if(!spk||spk.closed) return; const nx=slides[cur+1]?title(cur+1):'— koniec —';
+  spk.document.body.innerHTML=`<p style="color:#777;margin:0">${slides[cur].dataset.blok||''}</p><h3 style="margin:.1em 0 .4em">Slajd ${cur+1}/${slides.length}: ${title(cur)}</h3>${notesHTML(cur)}<hr><p style="color:#777">Następny: ${nx}</p>`; }
+function show(i){ i=Math.max(0,Math.min(slides.length-1,i)); slides[cur].classList.remove('active'); cur=i; slides[cur].classList.add('active');
+  $('#prog div').style.width=(100*(cur+1)/slides.length)+'%'; $('#cnt').textContent=(cur+1)+' / '+slides.length; $('#blk').textContent=slides[cur].dataset.blok||''; updSpeaker(); history.replaceState(null,'','#'+(cur+1)); }
+const next=()=>show(cur+1), prev=()=>show(cur-1);
+$('#b-next').onclick=next; $('#b-prev').onclick=prev; $('#b-theme').onclick=toggleTheme;
+const fsToggle=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen(); $('#b-fs').onclick=fsToggle;
+function openSpeaker(){ return; spk=window.open('','komentarze_akw1','width=760,height=640'); if(!spk) return; spk.document.title='Komentarze do slajdów';
+  spk.document.head.innerHTML='<meta charset="utf-8"><style>body{font:18px/1.5 system-ui,sans-serif;padding:16px 22px;background:#fffdf6;color:#222}b{color:#b5520c}.mono{font-family:monospace}</style>'; updSpeaker(); }
+
+document.addEventListener('keydown',e=>{ const tag=e.target.tagName, k=e.key;
+  if(tag==='INPUT'&&(e.target.type==='text'||e.target.type==='number'||k.startsWith('Arrow'))) return; if(tag==='SELECT') return;
+  if(k==='ArrowRight'||k==='PageDown'||(k===' '&&tag!=='BUTTON'&&tag!=='SUMMARY')){e.preventDefault();next();}
+  else if(k==='ArrowLeft'||k==='PageUp'){e.preventDefault();prev();}
+  else if(k==='Home') show(0); else if(k==='End') show(slides.length-1);
+  else if(k==='s'||k==='S') openSpeaker(); else if(k==='f'||k==='F') fsToggle(); else if(k==='t'||k==='T') toggleTheme(); });
+document.addEventListener('click',e=>{ if(e.target.tagName==='BUTTON') e.target.blur(); });
+function loop(now){ DT=Math.min(0.05,(now-LAST)/1000||0); LAST=now; NOW=now/1000; const f=frame[slides[cur].id]; if(f){ readColors(); try{f(NOW);}catch(err){console.error(err);} } requestAnimationFrame(loop); }
+show((parseInt(location.hash.slice(1))||1)-1); requestAnimationFrame(loop);
+</script>
+</body>
+</html>
