@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Akwizycja danych — ćwiczenia 2</title>
+<style>
+:root{
+  --bg:#f7f7f4; --panel:#ffffff; --fg:#1d2330; --muted:#5d6675; --grid:#d9dce2;
+  --accent:#1f6fd1; --accent2:#e2741d; --accent3:#1f9a5a; --danger:#d23b3b; --violet:#7a4cc9; --gold:#c49a00;
+  --chip:#eef2f8;
+}
+:root[data-theme="dark"]{
+  --bg:#12151b; --panel:#1b2029; --fg:#e9edf3; --muted:#9aa4b4; --grid:#323a47;
+  --accent:#5aa2ff; --accent2:#ff9a4a; --accent3:#43c785; --danger:#ff6464; --violet:#ae8cff; --gold:#e8c040;
+  --chip:#232a36;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;overflow:hidden}
+.slide{position:absolute;inset:0;padding:3.2vh 5vw 9vh;display:none;flex-direction:column;gap:1.4vh;overflow:auto}
+.slide.active{display:flex}
+.kicker{font-size:clamp(13px,1.05vw,18px);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{font-size:clamp(32px,4.4vw,76px);margin:0;line-height:1.05}
+h2{font-size:clamp(24px,2.8vw,46px);margin:0;line-height:1.1}
+p,li,td,th,label,.txt{font-size:clamp(16px,1.45vw,25px);line-height:1.4}
+p{margin:.2em 0}
+ul,ol{margin:.2em 0;padding-left:1.3em} li{margin:.2em 0}
+.muted{color:var(--muted)}
+.big{font-size:clamp(21px,2vw,34px)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:2vw;align-items:start}
+.cols.c3{grid-template-columns:1fr 1fr 1fr}
+.cols.c64{grid-template-columns:1.5fr 1fr}
+.cols.c46{grid-template-columns:1fr 1.5fr}
+.card{background:var(--panel);border:1px solid var(--grid);border-radius:14px;padding:1.2vh 1.2vw}
+.card h3{margin:.1em 0 .3em;font-size:clamp(17px,1.5vw,27px)}
+.card p,.card li,.card td,.card th{font-size:clamp(14px,1.25vw,21px)}
+.def{border-left:6px solid var(--accent);background:var(--panel);border-radius:10px;padding:.9vh 1.3vw}
+.def p{font-size:clamp(17px,1.6vw,28px)}
+.formula{font-family:"Cambria Math","Times New Roman",serif;font-size:clamp(20px,2.1vw,36px);background:var(--panel);border:2px solid var(--grid);border-radius:12px;padding:.25em .7em;display:inline-block}
+canvas.viz{width:100%;height:44vh;display:block;background:var(--panel);border:1px solid var(--grid);border-radius:14px}
+canvas.short{height:30vh}
+canvas.tall{height:54vh}
+canvas.mini{height:19vh;margin:.4vh 0}
+.ctrl{display:flex;gap:.9vw;align-items:center;flex-wrap:wrap}
+.ctrl label{display:flex;align-items:center;gap:.5em;font-size:clamp(14px,1.2vw,20px)}
+input[type=range]{width:clamp(140px,14vw,280px);accent-color:var(--accent);height:28px}
+input[type=checkbox]{width:1.2em;height:1.2em;accent-color:var(--accent3)}
+button,select,input[type=text],input[type=number]{font:inherit;font-size:clamp(14px,1.2vw,20px);padding:.3em .7em;border-radius:10px;border:1px solid var(--grid);background:var(--panel);color:var(--fg)}
+input[type=number]{width:6.5em}
+button,select{cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+button.sel{background:var(--accent);color:#fff;border-color:var(--accent)}
+.val{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent)}
+.res{font-variant-numeric:tabular-nums;font-weight:800;color:var(--accent3);font-size:clamp(20px,2vw,34px)}
+.bad{color:var(--danger);font-weight:800}
+.info{font-size:clamp(14px,1.2vw,20px);color:var(--muted)}
+.info b{color:var(--fg)}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+table{border-collapse:collapse;width:100%}
+th,td{border-bottom:1px solid var(--grid);padding:.3em .55em;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+.ex{background:var(--panel);border:1px solid var(--grid);border-left:6px solid var(--accent2);border-radius:12px;padding:.9vh 1.2vw}
+.ex h3{margin:0 0 .3em;font-size:clamp(16px,1.45vw,25px);color:var(--accent2)}
+.ex ol li{display:none}
+.ex ol li.on{display:list-item}
+.ex .step{margin-top:.4em}
+.you{background:var(--panel);border:1px dashed var(--accent3);border-radius:12px;padding:.8vh 1.2vw}
+.you h3{margin:0 0 .3em;font-size:clamp(16px,1.45vw,25px);color:var(--accent3)}
+details summary{cursor:pointer;font-weight:600;font-size:clamp(15px,1.3vw,22px)}
+details p{color:var(--accent3);font-weight:700}
+.plan{display:grid;grid-template-columns:repeat(4,1fr);gap:.8vw}
+.plan .card{border-top:6px solid var(--accent)}
+.plan .card:nth-child(2){border-top-color:var(--accent2)}
+.plan .card:nth-child(3){border-top-color:var(--accent3)}
+.plan .card:nth-child(4){border-top-color:var(--violet)}
+.plan .time{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;font-size:clamp(13px,1.1vw,18px)}
+.pyr{display:flex;flex-direction:column;align-items:center;gap:6px}
+.pyr button{display:block;text-align:center;font-weight:700;border-width:2px;padding:.55em .5em;font-size:clamp(14px,1.25vw,21px)}
+.pyr button.sel{box-shadow:0 0 0 4px var(--accent2)}
+.chain{display:flex;align-items:stretch;gap:.4vw;flex-wrap:wrap}
+.chain button{flex:1;min-width:110px;text-align:center;font-weight:700;padding:.6em .4em;font-size:clamp(13px,1.1vw,19px);line-height:1.25}
+.chain .arr{align-self:center;color:var(--muted);font-size:clamp(18px,1.8vw,30px)}
+.chain button small{display:block;font-weight:500;color:var(--muted);font-size:.8em}
+.chain button.sel small{color:#fff}
+.title-wrap{margin:auto 0;display:flex;flex-direction:column;gap:2vh}
+.hint{position:fixed;right:1.2vw;top:1vh;font-size:13px;color:var(--muted);opacity:.7}
+#bar{position:fixed;left:0;right:0;bottom:0;height:6vh;min-height:44px;display:flex;align-items:center;gap:.8vw;padding:0 1.2vw;background:var(--panel);border-top:1px solid var(--grid);z-index:10}
+#bar button{padding:.2em .7em}
+#prog{flex:1;height:6px;background:var(--grid);border-radius:4px;overflow:hidden}
+#prog div{height:100%;background:var(--accent);width:0}
+#cnt{font-variant-numeric:tabular-nums;color:var(--muted);font-size:15px;min-width:5ch;text-align:right}
+#blk{color:var(--muted);font-size:15px;white-space:nowrap}
+.notes{display:none}
+#notes{position:fixed;left:0;right:0;bottom:6vh;max-height:42vh;overflow:auto;background:var(--panel);border-top:3px solid var(--accent2);padding:1.2vh 2vw;display:none;z-index:9;box-shadow:0 -8px 24px rgba(0,0,0,.15)}
+#notes.show{display:block}
+#notes, #notes *{font-size:clamp(14px,1.12vw,19px)}
+@media (max-width:800px){.cols,.cols.c3,.cols.c64,.cols.c46,.plan{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hint">← → przewijanie · N notatki · S notatki w osobnym oknie · F pełny ekran · T motyw</div>
+
+<!-- ======================= BLOK 5 ======================= -->
+
+<!-- 1 -->
+<section class="slide" id="s-title" data-blok="Blok 5 · OEE i energia">
+  <div class="title-wrap">
+    <div class="kicker">Akwizycja i wizualizacja danych w procesach przemysłowych · ćwiczenia 2</div>
+    <h1>Od danych do decyzji</h1>
+    <p class="big muted">OEE · energia na sztukę · Pareto postojów · jakość danych · karta kontrolna · dashboardy · alarmy</p>
+    <p class="muted">Zarządzanie i inżynieria produkcji · IV rok · specjalność: Inżynier procesu · studia niestacjonarne · mgr inż. M. Okarmus</p>
+  </div>
+  <aside class="notes">
+    <p><b>O czym są te zajęcia.</b> Wczoraj: skąd biorą się dane — czujnik → sygnał → tag → historian → raport zmianowy. Dziś: co z nimi zrobić, żeby służyły decyzjom:</p>
+<ul><li>wskaźniki — OEE i energia na sztukę,</li><li>analiza postojów — wykres Pareto,</li><li>ocena, czy danym można ufać — typowe błędy i karta kontrolna,</li><li>pokazanie danych — dashboardy, ekrany HMI, alarmy.</li></ul>
+<p><b>Sterowanie prezentacją:</b> ← → slajdy, N — notatki pod slajdem, F — pełny ekran, T — motyw jasny/ciemny.</p>
+  </aside>
+</section>
+
+<!-- 2 -->
+<section class="slide" id="s-plan" data-blok="Blok 5 · OEE i energia">
+  <div class="kicker">Plan</div>
+  <h2>Dziś: 15:00–18:15</h2>
+  <div class="plan">
+    <div class="card"><div class="time">15:00–15:45</div><h3>5. OEE i energia</h3><p>Dostępność, wydajność, jakość. OEE z raportu zmiany. Energia na sztukę.</p></div>
+    <div class="card"><div class="time">15:45–16:30</div><h3>6. Analiza postojów</h3><p>Wykres Pareto: czas czy liczba zdarzeń? Zadania z OEE. Pułapki wskaźników.</p></div>
+    <div class="card"><div class="time">16:45–17:30</div><h3>7. Czy danym można ufać?</h3><p>Typowe błędy w danych. Znajdź błędy. Karta kontrolna: kiedy reagować.</p></div>
+    <div class="card"><div class="time">17:30–18:15</div><h3>8. Wizualizacja</h3><p>Kto patrzy na dane, dobór wykresu, zasady HMI, alarmy. Projekt dashboardu.</p></div>
+  </div>
+  <p class="muted">16:30–16:45 przerwa</p>
+  <div class="def"><p>Raport zmiany Pakowaczki 01 (slajd 3) — <b>11 840 dobrych, 212 złych, 401 min pracy, 79 min postojów, 96 kWh</b> — dziś zamienimy na wskaźniki i decyzje.</p></div>
+  <div class="def" style="border-left-color:var(--accent3)"><p><b>Karta zadań:</b> rozwiązujecie ją przy slajdach „Zadania dla Was”, poprawiacie po omówieniu i <b>oddajecie podpisaną na koniec zajęć</b> (potwierdza obecność i aktywność). <b>Ocena z ćwiczeń</b> = projekt grupowy: dashboard (dzisiaj, na koniec zajęć); warunek: karty oddane.</p></div>
+  <aside class="notes">
+    <p><b>Plan.</b> Cztery bloki po 45 min. Przez cały dzień wracamy do jednego przykładu — raportu zmiany Pakowaczki 01 (slajd 3) (11 840 dobrych, 212 złych, 401 min pracy, 79 min postojów, 96 kWh).</p>
+<p><b>Karta zadań</b> zawiera zadania omawiane na slajdach „Zadania dla Was”: najpierw liczymy samodzielnie, potem porównujemy z rozwiązaniem.</p>
+  </aside>
+</section>
+
+<!-- 2b: raport zmiany (z ćw. 1) -->
+<section class="slide" id="s-hist" data-blok="Blok 5 · OEE i energia">
+  <div class="kicker">Punkt wyjścia: raport zmiany</div>
+  <h2>Jak z tysięcy rekordów powstaje kilka liczb w raporcie</h2>
+  <div class="cols c46">
+    <div class="card">
+      <h3>Raport zmiany I (6:00–14:00) — Pakowaczka 01</h3>
+      <table id="hs-rep"></table>
+      <p class="info">Kliknij wiersz raportu → po prawej: z jakiego tagu, ile rekordów i jak policzono.</p>
+    </div>
+    <div class="card">
+      <table>
+        <tr><td style="width:9em" class="muted">tag w historianie</td><td class="mono" id="hs-tag"></td></tr>
+        <tr><td class="muted">rekordów w zmianie</td><td id="hs-rec"></td></tr>
+        <tr><td class="muted">reguła (agregacja)</td><td id="hs-rule" style="font-weight:700"></td></tr>
+      </table>
+      <canvas class="viz short" id="cv-hist" style="margin-top:.8vh"></canvas>
+    </div>
+  </div>
+  <p class="info"><b>Historian</b> = przemysłowa baza szeregów czasowych (np. AVEVA PI, Ignition, InfluxDB). Przechowuje surowe rekordy latami i liczy z nich <b>agregaty</b> dla dowolnego okresu: różnicę licznika, czas w stanie, min / średnią / max.</p>
+  <aside class="notes">
+    <p><b>Raport zmiany</b> nie pokazuje surowych danych, tylko <b>agregaty</b> — kilka liczb policzonych z tysięcy rekordów zapisanych w historianie (przemysłowej bazie szeregów czasowych). Każdy wiersz powstaje z innego typu tagu inną regułą:</p>
+<ul><li><b>licznik sztuk</b> → stan licznika na koniec zmiany − stan na początku,</li><li><b>stan maszyny</b> → suma czasów w każdym stanie oraz liczba przejść praca → postój,</li><li><b>wielkość analogowa</b> (temperatura) → minimum, średnia ważona czasem, maksimum,</li><li><b>licznik energii</b> → różnica stanu licznika kWh; na sztukę — podzielona przez liczbę sztuk.</li></ul>
+<p><b>Na slajdzie:</b> kliknij wiersz raportu — po prawej pojawia się tag, liczba rekordów w zmianie, reguła i wykres z całej zmiany (np. dla licznika: wartości na początku i końcu; dla stanu: oś czasu z ponumerowanymi postojami; dla temperatury: przebieg z liniami min / średnia / max).</p>
+<p><b>Ważne:</b> ta sama zmiana może dać różne liczby zależnie od reguły — np. czy zatrzymanie krótsze niż 2 min liczyć jako postój. Reguły trzeba ustalić i zapisać, zanim zacznie się porównywać zmiany i linie. Z liczb tego raportu liczymy na kolejnych slajdach OEE i energię na sztukę.</p>
+  </aside>
+</section>
+
+<!-- 3 -->
+<section class="slide" id="s-oee" data-blok="Blok 5 · OEE i energia">
+  <div class="kicker">Blok 5 · OEE — całkowita efektywność wyposażenia</div>
+  <h2>OEE = dostępność × wydajność × jakość</h2>
+  <div class="cols c3">
+    <div class="card" style="border-top:6px solid var(--accent)"><h3>Dostępność (A)</h3><p style="text-align:center"><span class="formula">A = czas pracy / czas planowany</span></p><p>Straty: <b>awarie, przezbrojenia, braki materiału</b> — maszyna stoi.</p></div>
+    <div class="card" style="border-top:6px solid var(--accent2)"><h3>Wydajność (P)</h3><p style="text-align:center"><span class="formula">P = sztuki wyprodukowane / sztuki możliwe w czasie pracy</span></p><p>Straty: <b>mikropostoje, praca wolniej niż nominalnie</b> — maszyna pracuje, ale za wolno.</p></div>
+    <div class="card" style="border-top:6px solid var(--accent3)"><h3>Jakość (Q)</h3><p style="text-align:center"><span class="formula">Q = sztuki dobre / sztuki wyprodukowane</span></p><p>Straty: <b>braki, poprawki, odpad przy rozruchu</b> — maszyna wyprodukowała, ale źle.</p></div>
+  </div>
+  <div class="def"><p>Sprawdzenie jednym wzorem: <b>OEE = sztuki dobre × czas cyklu idealnego / czas planowany</b>. Jako punkt odniesienia często podaje się 85% („poziom światowy” wg S. Nakajimy), typowo w zakładach: 40–65%.</p></div>
+  <aside class="notes">
+    <p><b>OEE</b> (ang. <i>Overall Equipment Effectiveness</i>, całkowita efektywność wyposażenia) pochodzi z TPM (<i>Total Productive Maintenance</i>, S. Nakajima). Mówi, jaka część czasu planowanego została zamieniona na <b>dobre sztuki produkowane z prędkością idealną</b>.</p>
+<p>Trzy czynniki odpowiadają trzem rodzajom strat:</p>
+<ul><li><b>A — dostępność:</b> maszyna stoi (awarie, przezbrojenia, brak materiału),</li><li><b>P — wydajność:</b> maszyna pracuje, ale za wolno (mikropostoje, praca poniżej prędkości nominalnej),</li><li><b>Q — jakość:</b> maszyna wyprodukowała, ale źle (braki, poprawki, odpad przy rozruchu).</li></ul>
+<p><b>Najważniejsza jest struktura strat, a nie sama liczba OEE</b> — wskazuje, gdzie szukać poprawy.</p>
+<p><b>Warto wiedzieć:</b> 85% to wartość orientacyjna z literatury TPM (ok. 90% × 95% × 99,9%). OEE różnych zakładów i maszyn rzadko da się wprost porównać, bo różnią się definicje czasu planowanego i cyklu idealnego — więcej na slajdzie 11. Najbardziej wartościowe jest porównanie tej samej maszyny w czasie.</p>
+  </aside>
+</section>
+
+<!-- 4 -->
+<section class="slide" id="s-oee-ex" data-blok="Blok 5 · OEE i energia">
+  <div class="kicker">Przykład krok po kroku</div>
+  <h2>OEE z raportu zmiany (slajd 3)</h2>
+  <div class="cols c46">
+    <div class="card">
+      <h3>Raport zmiany I — Pakowaczka 01</h3>
+      <table>
+        <tr><td>czas planowany (zmiana bez przerw planowanych)</td><td><b>480 min</b></td></tr>
+        <tr><td>czas pracy / postojów</td><td><b>401 / 79 min</b></td></tr>
+        <tr><td>wydajność nominalna (cykl idealny 1,5 s)</td><td><b>40 szt./min</b></td></tr>
+        <tr><td>sztuki dobre / złe</td><td><b>11 840 / 212</b></td></tr>
+      </table>
+    </div>
+    <div class="ex" data-steps>
+      <h3>Oblicz A, P, Q i OEE.</h3>
+      <ol>
+        <li>A = 401 / 480 = <b>83,5%</b></li>
+        <li>sztuki możliwe w czasie pracy: 401 min · 40 szt./min = 16 040 szt.</li>
+        <li>wyprodukowano: 11 840 + 212 = 12 052 szt. → P = 12 052 / 16 040 = <b>75,1%</b></li>
+        <li>Q = 11 840 / 12 052 = <b>98,2%</b></li>
+        <li>OEE = 0,835 · 0,751 · 0,982 = <b>61,7%</b></li>
+        <li>Sprawdzenie: 11 840 · 1,5 s / (480 · 60 s) = 17 760 / 28 800 = 61,7% ✔</li>
+        <li>Wniosek: największa strata to <b>wydajność</b> (25%) — mikropostoje i spowolnienia, nie awarie.</li>
+      </ol>
+      <div class="step ctrl"><button class="primary" data-next>Następny krok ▶</button><button data-reset>Od początku</button></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Rachunek</b> (dane z raportu zmiany):</p>
+<ul><li>A = czas pracy / czas planowany = 401 / 480 = 83,5%,</li><li>P = wyprodukowane / możliwe w czasie pracy = 12 052 / (401 · 40) = 75,1%,</li><li>Q = dobre / wyprodukowane = 11 840 / 12 052 = 98,2%,</li><li>OEE = 0,835 · 0,751 · 0,982 = 61,7%.</li></ul>
+<p><b>Sprawdzenie jednym wzorem:</b> OEE = sztuki dobre × czas cyklu idealnego / czas planowany = 11 840 · 1,5 s / 28 800 s = 61,7%.</p>
+<p><b>Wniosek:</b> intuicyjnie za głównego winowajcę uważa się awarie, bo są najbardziej widoczne. Dane pokazują co innego — największa strata (ok. 25%) to <b>wydajność</b>: kilkanaście mikropostojów i praca wolniej niż nominalnie.</p>
+<p><b>Uwaga na czas planowany:</b> tu zmiana 480 min bez przerw planowanych. Jeśli w zakładzie obowiązuje np. 30-minutowa przerwa, czas planowany wynosi 450 min. Taką regułę trzeba ustalić i stosować konsekwentnie.</p>
+  </aside>
+</section>
+
+<!-- 5 -->
+<section class="slide" id="s-oee-calc" data-blok="Blok 5 · OEE i energia">
+  <div class="kicker">Kalkulator OEE</div>
+  <h2>Gdzie ucieka czas zmiany</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-oee"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <label>postoje [min] <input type="range" id="oe-s" min="0" max="200" step="1" value="79"> <span class="val" id="oe-sv"></span></label>
+        <label>wyprodukowano [szt.] <input type="range" id="oe-n" min="4000" max="19200" step="1" value="12052"> <span class="val" id="oe-nv"></span></label>
+        <label>braki [szt.] <input type="range" id="oe-b" min="0" max="2000" step="1" value="212"> <span class="val" id="oe-bv"></span></label>
+      </div>
+    </div>
+    <div class="card">
+      <p>A = <span class="res" id="oe-a"></span></p>
+      <p>P = <span class="res" id="oe-p"></span></p>
+      <p>Q = <span class="res" id="oe-q"></span></p>
+      <p>OEE = <span class="res" id="oe-o" style="font-size:clamp(26px,2.8vw,46px)"></span></p>
+      <p class="info" id="oe-msg"></p>
+      <p class="info">Czas planowany 480 min, wydajność nominalna 40 szt./min.</p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Wykres kaskadowy czasu</b> (ang. <i>waterfall</i>): od 480 min planowanych odejmowane są kolejno straty:</p>
+<ul><li>dostępności — postoje,</li><li>wydajności — czas „zjedzony” przez spowolnienia: czas pracy − (sztuki / prędkość nominalna),</li><li>jakości — czas zużyty na wyprodukowanie braków.</li></ul>
+<p>Zostaje <b>czas efektywny</b>; jego udział w czasie planowanym to OEE.</p>
+<p><b>Na slajdzie:</b> sprawdź suwakami, co daje więcej — skrócenie postojów o 30 min czy zwiększenie liczby sztuk o 10%. Kalkulator nie pozwala wyprodukować więcej, niż pozwala czas pracy (wydajność nie przekroczy 100%).</p>
+  </aside>
+</section>
+
+<!-- 6 -->
+<section class="slide" id="s-energy" data-blok="Blok 5 · OEE i energia">
+  <div class="kicker">Energia na sztukę</div>
+  <h2>Dlaczego postoje podnoszą koszt energii każdej sztuki</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-en"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <label>postoje [min] <input type="range" id="en-s" min="0" max="240" step="1" value="79"> <span class="val" id="en-sv"></span></label>
+        <label>moc w postoju [kW] <input type="range" id="en-p" min="0" max="13.7" step="0.1" value="3.4"> <span class="val" id="en-pv"></span></label>
+      </div>
+    </div>
+    <div class="card">
+      <p>energia w zmianie: <span class="res" id="en-e"></span></p>
+      <p>sztuki dobre: <span class="res" id="en-n"></span></p>
+      <p>energia na dobrą sztukę: <span class="res" id="en-w" style="font-size:clamp(26px,2.8vw,46px)"></span></p>
+      <p class="info">Moc podczas pracy 13,7 kW; w czasie pracy 30 szt./min, 98,2% dobrych. W postoju maszyna nadal pobiera energię (grzałki zgrzewu, sterowanie, sprężone powietrze).</p>
+    </div>
+  </div>
+  <div class="def"><p>Z raportu zmiany (slajd 3): 96 kWh / 11 840 dobrych sztuk ≈ <b>8,1 Wh na dobrą sztukę</b>. Wskaźnik łączy OEE z kosztami — i z wymaganiami raportowania zużycia energii.</p></div>
+  <aside class="notes">
+    <p><b>Energia na dobrą sztukę</b> = energia zużyta w okresie / liczba dobrych sztuk. Wskaźnik łączy efektywność produkcji z kosztami i jest potrzebny m.in. w raportowaniu zużycia energii i śladu węglowego wyrobu.</p>
+<p><b>Postoje działają podwójnie:</b> zmniejszają liczbę sztuk, a jednocześnie maszyna w gotowości nadal pobiera energię (grzałki, sterowanie, sprężone powietrze). Dlatego poprawa OEE zwykle obniża też energochłonność.</p>
+<p><b>Na slajdzie:</b> zwiększ postoje do 200 min — energia na sztukę rośnie. Ustaw moc w postoju na 0 kW (maszyna wyłączana na czas postoju) — to efekt procedur „wyłącz w postoju” i trybów oszczędzania energii.</p>
+<p><b>Model:</b> 13,7 kW podczas pracy i 3,4 kW w postoju daje 96 kWh dla 401 min pracy i 79 min postojów — jak w raporcie.</p>
+  </aside>
+</section>
+
+<!-- ======================= BLOK 6 ======================= -->
+
+<!-- 7 -->
+<section class="slide" id="s-pareto" data-blok="Blok 6 · analiza postojów">
+  <div class="kicker">Blok 6 · analiza postojów</div>
+  <h2>Wykres Pareto: od czego zacząć poprawę</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-par"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <button data-pm="raw">kolejność z raportu</button><button data-pm="min" class="sel">Pareto: czas [min]</button><button data-pm="cnt">Pareto: liczba zdarzeń</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Postoje Pakowaczki 01 — tydzień (5 dni, 3 zmiany)</h3>
+      <p id="par-msg"></p>
+      <p class="info">Zasada Pareto (80/20): kilka przyczyn odpowiada za większość strat. Słupki malejąco + linia skumulowana; przyczyny do lewej od 80% atakujemy najpierw.</p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Wykres Pareto</b> porządkuje przyczyny malejąco; linia skumulowana pokazuje, jaką część strat obejmują kolejne przyczyny. Zasada 80/20: zwykle kilka przyczyn odpowiada za większość strat.</p>
+<p><b>Wybór miary zmienia priorytety:</b></p>
+<ul><li>wg <b>czasu</b> prowadzą: brak materiału, przezbrojenie, zacięcie folii (razem ok. 66% czasu postojów) — to straty dostępności i wydajności,</li><li>wg <b>liczby zdarzeń</b> prowadzi zacięcie folii (62 krótkie zatrzymania) — to uciążliwość dla operatora i mikropostoje.</li></ul>
+<p><b>Warto wiedzieć:</b> „brak materiału” na szczycie listy to częsty przypadek. To strata zgłaszana na maszynie, ale jej przyczyna leży zwykle w logistyce wewnętrznej lub planowaniu — przy analizie trzeba ustalić, kto jest właścicielem problemu.</p>
+  </aside>
+</section>
+
+<!-- 8 -->
+<section class="slide" id="s-twoja1" data-blok="Blok 6 · analiza postojów">
+  <div class="kicker">Zadania dla Was · ok. 8 min</div>
+  <h2>Zadania 1–2: OEE wtryskarki</h2>
+  <div class="cols">
+    <div class="you">
+      <h3>Dane — jedna zmiana</h3>
+      <table>
+        <tr><td>długość zmiany</td><td style="white-space:nowrap"><b>480 min</b> (8 h)</td></tr>
+        <tr><td>przerwa planowana (nie wlicza się do czasu planowanego)</td><td style="white-space:nowrap"><b>30 min</b></td></tr>
+        <tr><td>postoje nieplanowane</td><td style="white-space:nowrap"><b>45 min</b></td></tr>
+        <tr><td>cykl idealny (1 sztuka na cykl)</td><td style="white-space:nowrap"><b>30 s</b></td></tr>
+        <tr><td>wyprodukowano</td><td style="white-space:nowrap"><b>640 szt.</b></td></tr>
+        <tr><td>w tym braki</td><td style="white-space:nowrap"><b>32 szt.</b></td></tr>
+      </table>
+      <p style="margin-top:1vh"><b>1.</b> Oblicz A, P, Q i OEE.</p>
+      <p><b>2.</b> Która strata jest największa? Jakie dane z maszyny pomogą znaleźć jej przyczynę?</p>
+    </div>
+    <div class="ex" data-steps>
+      <h3>Rozwiązanie krok po kroku</h3>
+      <ol>
+        <li>czas planowany = 480 − 30 = <b>450 min</b></li>
+        <li>czas pracy = 450 − 45 = <b>405 min</b> → A = 405 / 450 = <b>90%</b></li>
+        <li>cykl 30 s = 2 szt./min → możliwe: 405 · 2 = 810 szt. → P = 640 / 810 = <b>79,0%</b></li>
+        <li>Q = (640 − 32) / 640 = 608 / 640 = <b>95%</b></li>
+        <li>OEE = 0,90 · 0,79 · 0,95 ≈ <b>67,5%</b></li>
+        <li>sprawdzenie: 608 szt. · 30 s / (450 · 60 s) = 18 240 / 27 000 ≈ 67,5% ✔</li>
+        <li>zad. 2: największa strata — <b>wydajność</b> (21%). Potrzebne dane: rzeczywisty czas każdego cyklu i krótkie zatrzymania z dokładnym czasem.</li>
+      </ol>
+      <div class="step ctrl"><button class="primary" data-next>Następny krok ▶</button><button data-reset>Od początku</button></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Zadania 1–2.</b> Dane w tabeli, rozwiązanie krok po kroku po prawej stronie.</p>
+<p><b>Częste błędy:</b></p>
+<ul><li>liczenie dostępności od 480 min zamiast od 450 min — przerwa planowana nie należy do czasu planowanego produkcji,</li><li>przeliczenie cyklu: 30 s na sztukę to 2 sztuki na minutę.</li></ul>
+<p><b>Wniosek z zad. 2:</b> największa strata to wydajność. Do znalezienia jej przyczyny potrzebne są rzeczywiste czasy cykli i krótkie zatrzymania zapisane z dokładnym czasem — czyli dane zbierane w sterowniku (licznik impulsów, stan maszyny zapisywany przy zmianie) — temat ćwiczeń 1.</p>
+  </aside>
+</section>
+
+<!-- 8b -->
+<section class="slide" id="s-twoja1b" data-blok="Blok 6 · analiza postojów">
+  <div class="kicker">Zadania dla Was · ok. 7 min</div>
+  <h2>Zadania 3–4: od czego zacząć i ile kosztuje postój</h2>
+  <div class="cols">
+    <div class="you">
+      <h3>3. Pareto — czas czy liczba zdarzeń?</h3>
+      <p>Postoje w tygodniu:</p>
+      <table>
+        <tr><th>przyczyna</th><th>zdarzeń</th><th>minut</th></tr>
+        <tr><td><b>A</b></td><td>4</td><td>120</td></tr>
+        <tr><td><b>B</b></td><td>40</td><td>60</td></tr>
+        <tr><td><b>C</b></td><td>2</td><td>90</td></tr>
+      </table>
+      <p style="margin-top:1vh">Którą przyczynę atakujesz najpierw, jeśli celem jest:<br>a) poprawa <b>dostępności</b>, b) <b>odciążenie operatora</b>?</p>
+      <details><summary>odpowiedź</summary><p>a) A (najwięcej minut), potem C<br>b) B — 40 przerw w pracy (mikropostoje)</p></details>
+    </div>
+    <div class="you">
+      <h3>4. Energia na sztukę</h3>
+      <table>
+        <tr><td>moc podczas pracy</td><td><b>12 kW</b></td></tr>
+        <tr><td>moc w postoju</td><td><b>4 kW</b></td></tr>
+        <tr><td>zmiana / czas pracy</td><td><b>480 / 420 min</b></td></tr>
+        <tr><td>sztuki dobre</td><td><b>12 600</b></td></tr>
+      </table>
+      <p style="margin-top:1vh">a) Ile energii zużyła maszyna w zmianie? b) Ile Wh na dobrą sztukę? c) Ile, gdyby wyłączać maszynę na czas postojów?</p>
+      <details><summary>odpowiedź</summary><p>a) 12 kW · 7 h + 4 kW · 1 h = 88 kWh<br>b) 88 000 Wh / 12 600 ≈ 6,98 Wh/szt.<br>c) 84 kWh / 12 600 ≈ 6,67 Wh/szt. (ok. 4,5% mniej)</p></details>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Zadanie 3</b> utrwala wniosek ze slajdu 8: minuty postojów mówią o dostępności, liczba zdarzeń — o uciążliwości i mikropostojach. Przy celu „dostępność” zaczynamy od przyczyny A, przy celu „odciążenie operatora” — od B.</p>
+<p><b>Zadanie 4</b> powtarza logikę ze slajdu 7: energia zużyta w postoju rozkłada się na sztuki wyprodukowane w czasie pracy, więc podnosi koszt każdej z nich.</p>
+  </aside>
+</section>
+
+<!-- 9 -->
+<section class="slide" id="s-pulapki" data-blok="Blok 6 · analiza postojów">
+  <div class="kicker">Dyskusja</div>
+  <h2>Pułapki wskaźników: jak „poprawić” OEE bez poprawy produkcji</h2>
+  <div class="cols c3">
+    <div class="card"><h3>1. Czas planowany</h3><p>Przezbrojenia i przeglądy „przeniesione” do postojów planowanych znikają z dostępności. OEE rośnie, produkcja — nie.</p></div>
+    <div class="card"><h3>2. Cykl idealny</h3><p>Wpisanie wolniejszego „idealnego” cyklu podnosi wydajność na papierze. Cykl idealny = maksymalny konstrukcyjny lub najlepszy osiągnięty, nie „średni”.</p></div>
+    <div class="card"><h3>3. Porównywanie maszyn</h3><p>Różne maszyny, produkty i reguły → OEE nieporównywalne. Porównuj tę samą maszynę w czasie, przy tych samych regułach.</p></div>
+  </div>
+  <div class="def"><p>Wskaźnik jest tak dobry jak <b>dane i reguły</b>, z których powstaje. Reguły (co jest postojem planowanym, jaki cykl idealny, od ilu sekund liczymy postój) trzeba spisać i nie zmieniać po cichu.</p></div>
+  <aside class="notes">
+    <p><b>OEE jest tak wiarygodne jak dane i reguły, z których powstaje.</b> Typowe sposoby „poprawienia” wskaźnika bez poprawy produkcji:</p>
+<ul><li>przeniesienie przezbrojeń i przeglądów do postojów planowanych — znikają z dostępności,</li><li>przyjęcie wolniejszego „idealnego” cyklu — rośnie wydajność na papierze; cykl idealny to maksymalny konstrukcyjny lub najlepszy osiągnięty, a nie średni,</li><li>porównywanie różnych maszyn i produktów — przy innych regułach wyniki są nieporównywalne.</li></ul>
+<p><b>Wniosek:</b> reguły (co jest postojem planowanym, jaki jest cykl idealny, od ilu sekund zatrzymanie liczy się jako postój) trzeba spisać i nie zmieniać po cichu. Gdy od wskaźnika zależą premie, presja na „korzystne” definicje jest szczególnie duża.</p>
+  </aside>
+</section>
+
+<!-- ======================= BLOK 7 ======================= -->
+
+<!-- 10 -->
+<section class="slide" id="s-errs" data-blok="Blok 7 · czy danym można ufać">
+  <div class="kicker">Blok 7 · jakość danych</div>
+  <h2>Typowe błędy w danych z produkcji</h2>
+  <table>
+    <tr><th>błąd</th><th>jak wygląda</th><th>typowa przyczyna</th><th>co zrobić</th></tr>
+    <tr><td><b>luka</b></td><td>brak rekordów przez pewien czas</td><td>przerwa w komunikacji, restart serwera</td><td>oznaczyć jako brak; nie interpolować długich luk</td></tr>
+    <tr><td><b>zamrożona wartość</b></td><td>idealnie stała wartość przez długi czas</td><td>zerwane połączenie, system powtarza ostatnią wartość</td><td>wykrywać „zero zmian”; sprawdzić jakość tagu</td></tr>
+    <tr><td><b>pojedynczy skok</b></td><td>jeden punkt fizycznie niemożliwy</td><td>zakłócenie, błąd transmisji</td><td>filtr zakresu i szybkości zmian</td></tr>
+    <tr><td><b>zero zamiast awarii</b></td><td>spadek do 0 lub minimum zakresu</td><td>przerwa w przewodzie (zwłaszcza 0–10 V)</td><td>używać jakości „Bad”; nie liczyć do średnich</td></tr>
+    <tr><td><b>złe skalowanie</b></td><td>wartości przesunięte lub w złej skali od pewnej chwili</td><td>wymiana czujnika, zmiana zakresu przetwornika</td><td>porównać z pomiarem kontrolnym; poprawić skalowanie</td></tr>
+    <tr><td><b>licznik maleje</b></td><td>licznik spada do małej wartości</td><td>restart sterownika, przepełnienie licznika</td><td>liczyć przyrosty z obsługą resetu</td></tr>
+    <tr><td><b>problemy z czasem</b></td><td>duplikaty, godzina dwa razy, przesunięcie</td><td>zmiana czasu, nieustawiony zegar sterownika</td><td>przechowywać czas w UTC; synchronizacja zegarów (NTP)</td></tr>
+  </table>
+  <aside class="notes">
+    <p><b>Każdy z tych błędów może zafałszować OEE, energię na sztukę albo raport jakości.</b> Część z nich wynika z toru pomiarowego (przerwa w przewodzie, skalowanie), część z komunikacji i systemów (luki, zamrożenia, duplikaty), a część z obsługi czasu.</p>
+<p><b>Zmiana czasu:</b> w nocy z 24 na 25 października 2026 zegary cofa się z 3:00 na 2:00 — godzina 2:00–3:00 występuje w czasie lokalnym dwa razy. Dlatego systemy przemysłowe przechowują czas w UTC, a czas lokalny pokazują tylko na ekranie.</p>
+<p><b>Licznik a reset:</b> przy restarcie sterownika licznik zaczyna od zera; przyrost trzeba wtedy liczyć w dwóch odcinkach (przed i po restarcie).</p>
+  </aside>
+</section>
+
+<!-- 11 -->
+<section class="slide" id="s-find" data-blok="Blok 7 · czy danym można ufać">
+  <div class="kicker">Znajdź błędy</div>
+  <h2>Temperatura zbiornika — jedna doba z historiana</h2>
+  <canvas class="viz tall" id="cv-find"></canvas>
+  <div class="ctrl"><button class="primary" id="fd-show">Pokaż błędy</button><button id="fd-hide">Ukryj</button><span class="info">Proces: zbiornik ok. 60–66 °C, temperatura zmienia się powoli. Ile błędów widzicie i jakiego typu?</span></div>
+  <aside class="notes">
+    <p><b>Rozwiązanie</b> (przycisk „Pokaż błędy”):</p>
+<ol><li>luka 2:10–3:40 — brak danych (np. przerwa w komunikacji),</li><li>zamrożona wartość 9:00–11:30 — idealnie płaska linia, system powtarzał ostatnią wartość,</li><li>pojedynczy skok do 95 °C o 14:20 — fizycznie niemożliwa zmiana w ciągu minuty (zakłócenie),</li><li>spadek do 0 °C 17:05–17:20 — przerwa w przewodzie,</li><li>od 20:00 wartości o ok. 15% za wysokie — złe skalowanie po wymianie czujnika.</li></ol>
+<p><b>Najtrudniejsze do zauważenia</b> są zamrożona wartość i złe skalowanie — wyglądają wiarygodnie.</p>
+<p><b>Jak policzyć średnią z tej doby?</b> Pominąć lukę, zera i skok; zamrożony fragment i okres po 20:00 oznaczyć jako niepewne (najlepiej wyjaśnić i poprawić skalowanie u źródła).</p>
+  </aside>
+</section>
+
+<!-- 12 -->
+<section class="slide" id="s-rec" data-blok="Blok 7 · czy danym można ufać">
+  <div class="kicker">Znajdź błędy</div>
+  <h2>Surowe rekordy z historiana</h2>
+  <div class="card">
+    <table id="rc-tab"></table>
+  </div>
+  <div class="ctrl"><button class="primary" id="rc-show">Pokaż błędy</button><button id="rc-hide">Ukryj</button><span class="info">Ile rekordów jest podejrzanych i dlaczego?</span></div>
+  <aside class="notes">
+    <p><b>Te same typy błędów w tabeli rekordów</b> — tak dane wyglądają w eksporcie z historiana do Excela. Podejrzane rekordy:</p>
+<ul><li>duplikat (ten sam czas i wartość),</li><li>licznik spada do 12 — restart sterownika; przyrost liczymy od 12, inaczej raport pokaże „−1 266 128 sztuk”,</li><li>ujemny przepływ — fizycznie niemożliwy (przesunięcie zera lub błąd czujnika),</li><li>wartość 0 z jakością „Bad” — nie wchodzi do średnich,</li><li>czas wraca do 02:30 — zmiana czasu z letniego na zimowy,</li><li>40 minut bez rekordów — luka.</li></ul>
+<p><b>Wniosek:</b> przed liczeniem wskaźników dane trzeba sprawdzić — automatycznie (reguły zakresu, szybkości zmian, jakości tagu) i „okiem” na wykresie.</p>
+  </aside>
+</section>
+
+<!-- 13 -->
+<section class="slide" id="s-spc" data-blok="Blok 7 · czy danym można ufać">
+  <div class="kicker">Karta kontrolna (Shewharta)</div>
+  <h2>Zwykła zmienność czy sygnał, że coś się zmieniło?</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-spc"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <button data-sc="ok" class="sel">proces stabilny</button><button data-sc="out">punkt poza granicą</button><button data-sc="shift">przesunięcie średniej</button><button data-sc="new">nowe losowanie</button>
+      </div>
+    </div>
+    <div class="card">
+      <p style="text-align:center"><span class="formula">UCL / LCL = x̄ ± 3σ</span></p>
+      <table style="margin:.4vh 0">
+        <tr><td><b>x̄</b></td><td>średnia z pomiarów procesu, gdy działał stabilnie (linia centralna)</td></tr>
+        <tr><td><b>σ</b></td><td>odchylenie standardowe — o ile typowo pomiar różni się od średniej (miara rozrzutu)</td></tr>
+        <tr><td><b>UCL / LCL</b></td><td>górna / dolna granica kontrolna (ang. <i>upper / lower control limit</i>)</td></tr>
+      </table>
+      <p class="info">W granicach ±3σ mieści się ok. 99,7% wyników stabilnego procesu — punkt poza nimi raczej nie jest przypadkiem.</p>
+      <p><b>Sygnały (wg PN-ISO 7870-2):</b></p>
+      <ul><li>punkt poza granicami kontrolnymi,</li><li>9 kolejnych punktów po jednej stronie linii centralnej.</li></ul>
+      <p id="sc-msg" class="big"></p>
+      <p class="info">Punkty wewnątrz granic to zwykła zmienność procesu — <b>nie reagujemy</b> na każde wahnięcie (przeregulowanie pogarsza proces).</p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Oznaczenia:</b> x̄ — średnia z pomiarów procesu stabilnego (linia centralna); σ — odchylenie standardowe, czyli typowa odległość pomiaru od średniej (w Excelu: funkcja ODCH.STANDARDOWE.PRÓBKI); UCL / LCL — górna / dolna granica kontrolna. Przy rozkładzie normalnym w ±1σ mieści się ok. 68% wyników, w ±2σ ok. 95%, w ±3σ ok. 99,7%. Przykład ze slajdu: x̄ = 172 °C, σ = 1,2 °C → granice 168,4 i 175,6 °C.</p>
+<p><b>Do czego służy karta kontrolna:</b> odróżnia zmienność przypadkową (suma wielu drobnych przyczyn — jest zawsze) od przyczyn specjalnych (zmiana materiału, zużycie narzędzia, rozregulowanie). Reagujemy tylko na sygnały; regulowanie procesu przy każdym wahnięciu w granicach (przeregulowanie) zwiększa zmienność.</p>
+<p><b>Na slajdzie:</b> „proces stabilny” — wahania w granicach, brak sygnału; „punkt poza granicą” — jeden punkt poza UCL; „przesunięcie średniej” — od punktu 15 średnia rośnie o 1,5σ: żaden punkt nie wychodzi poza granice, ale seria 9 punktów nad linią centralną jest sygnałem.</p>
+<p><b>Granice kontrolne ≠ tolerancja:</b> granice wynikają z procesu („co proces robi”), tolerancja — z wymagań klienta („co proces powinien robić”).</p>
+<p><b>PN-ISO 7870-2</b> — polska wersja normy ISO 7870-2 „Karty kontrolne — Część 2: Karty kontrolne Shewharta”. Opisuje budowę kart (x̄, R, s, wartości indywidualnych) i testy sygnałów, w tym regułę 9 punktów po jednej stronie. W niektórych firmach stosuje się reguły 7 lub 8 punktów (np. reguły Western Electric).</p>
+  </aside>
+</section>
+
+<!-- 14 -->
+<section class="slide" id="s-twoja2" data-blok="Blok 7 · czy danym można ufać">
+  <div class="kicker">Zadania dla Was</div>
+  <h2>Jakość danych i karta kontrolna</h2>
+  <div class="cols c3">
+    <div class="you"><h3>5. Średnia z błędem</h3><canvas class="viz mini" id="cv-t5"></canvas><p>Temperatura z 8 h: 7 h średnio 62 °C, a przez 1 h przerwa w przewodzie zapisała 0 °C. Jaką średnią pokaże raport bez czyszczenia danych? Jaka jest prawdziwa?</p>
+      <details><summary>odpowiedź</summary><p>(7 · 62 + 1 · 0) / 8 = 54,25 °C; prawdziwa ok. 62 °C (z 7 h ważnych danych)</p></details></div>
+    <div class="you"><h3>6. Licznik z resetem</h3><canvas class="viz mini" id="cv-t6"></canvas><p>Licznik sztuk o 6:00 = 48 200, o 10:30 restart sterownika (ostatni odczyt przed restartem 52 950, po restarcie 0), o 14:00 = 4 010. Ile sztuk wyprodukowano w zmianie?</p>
+      <details><summary>odpowiedź</summary><p>(52 950 − 48 200) + (4 010 − 0) = 4 750 + 4 010 = 8 760 szt. (naiwnie: 4 010 − 48 200 = −44 190)</p></details></div>
+    <div class="you"><h3>7. Karta kontrolna</h3><canvas class="viz mini" id="cv-t7"></canvas><p>Średnia temperatura zgrzewu 172 °C, σ = 1,5 °C. Jakie są granice kontrolne? Czy pomiar 176 °C jest sygnałem? A 9 kolejnych pomiarów 173–174 °C?</p>
+      <details><summary>odpowiedź</summary><p>UCL = 176,5 °C, LCL = 167,5 °C; 176 °C — nie (w granicach); 9 punktów powyżej 172 °C — tak (seria po jednej stronie)</p></details></div>
+  </div>
+  <aside class="notes">
+    <p><b>Zadania 5–7</b> pokazują skutki błędów w danych na konkretnych liczbach:</p>
+<ul><li>zad. 5 — jedna godzina zer z przerwanego przewodu zaniża średnią zmiany o ok. 8 °C,</li><li>zad. 6 — licznik po restarcie trzeba liczyć w dwóch odcinkach; naiwne odejmowanie daje ujemną produkcję,</li><li>zad. 7 — pomiar w granicach kontrolnych nie jest sygnałem, ale seria 9 pomiarów po jednej stronie średniej — tak.</li></ul>
+<p><b>Mini wykresy</b> pokazują same dane; po rozwinięciu „odpowiedź” pojawia się na nich rozwiązanie.</p>
+  </aside>
+</section>
+
+<!-- ======================= BLOK 8 ======================= -->
+
+<!-- 15 -->
+<section class="slide" id="s-who" data-blok="Blok 8 · wizualizacja">
+  <div class="kicker">Blok 8 · wizualizacja</div>
+  <h2>Kto patrzy na dane — i jakie ma pytanie</h2>
+  <table>
+    <tr><th></th><th>operator</th><th>mistrz / lider zmiany</th><th>kierownik produkcji</th></tr>
+    <tr><td><b>pytanie</b></td><td>czy teraz wszystko działa? co mam zrobić?</td><td>czy zrobimy plan zmiany? co nas dziś hamuje?</td><td>gdzie tracimy w tym tygodniu/miesiącu? czy działania przynoszą efekt?</td></tr>
+    <tr><td><b>horyzont</b></td><td>sekundy – minuty</td><td>zmiana</td><td>tygodnie – miesiące</td></tr>
+    <tr><td><b>forma</b></td><td>ekran HMI przy maszynie, alarmy</td><td>tablica / monitor na hali: plan vs wykonanie, postoje</td><td>dashboard: trendy OEE, Pareto, energia na sztukę</td></tr>
+    <tr><td><b>odświeżanie</b></td><td>na żywo</td><td>co kilka minut</td><td>raz dziennie / na żądanie</td></tr>
+  </table>
+  <div class="def"><p>Jeden ekran „dla wszystkich” zwykle nie służy nikomu. Projekt zaczynamy od pytania: <b>kto patrzy i jaką decyzję ma podjąć?</b></p></div>
+  <aside class="notes">
+    <p><b>Ta sama baza danych, trzy różne widoki.</b> Operator potrzebuje informacji „teraz” i wskazówki, co zrobić; mistrz — obrazu zmiany względem planu; kierownik — trendów i efektów działań w tygodniach i miesiącach.</p>
+<p><b>Projektowanie wizualizacji zaczyna się od odbiorcy i decyzji</b>, a nie od listy dostępnych danych — to ta sama zasada co pytanie „po co?” przy wyborze tagów: każda dana ma służyć jakiejś decyzji. Jeden ekran „dla wszystkich” zwykle nie służy nikomu.</p>
+  </aside>
+</section>
+
+<!-- 16 -->
+<section class="slide" id="s-quiz" data-blok="Blok 8 · wizualizacja">
+  <div class="kicker">Quiz</div>
+  <h2>Jaki wykres odpowiada na to pytanie?</h2>
+  <div class="card">
+    <p class="big" id="qz-q"></p>
+    <div class="ctrl" id="qz-opts" style="margin:1vh 0"></div>
+    <p id="qz-a"></p>
+    <div class="ctrl"><button id="qz-prev">◀ poprzednie</button><span class="info" id="qz-n"></span><button id="qz-next" class="primary">następne ▶</button></div>
+  </div>
+  <canvas class="viz short" id="cv-quiz"></canvas>
+  <aside class="notes">
+    <p><b>Dobór wykresu do pytania:</b></p>
+<ul><li><b>trend</b> (wykres liniowy) — jak zmieniała się wielkość w czasie; warto dodać zakres normalny jako tło,</li><li><b>Pareto / słupki</b> — porównanie kategorii, malejąco,</li><li><b>oś czasu stanów</b> — kiedy i jak długo maszyna była w danym stanie,</li><li><b>karta kontrolna</b> — czy proces jest stabilny,</li><li><b>kafel KPI z celem</b> — jedna liczba w porównaniu z celem.</li></ul>
+<p><b>Wykres kołowy</b> jest przeznaczony do pokazywania udziału w całości i sprawdza się najlepiej przy 2–5 częściach. Przy wielu kategoriach (np. 8 linii) słupki posortowane z wartościami w % są czytelniejsze, bo długości porównujemy łatwiej niż kąty — w pytaniu 6 obie odpowiedzi są do obrony.</p>
+  </aside>
+</section>
+
+<!-- 17 -->
+<section class="slide" id="s-hmi" data-blok="Blok 8 · wizualizacja">
+  <div class="kicker">HMI wysokiej wydajności (ISA-101)</div>
+  <h2>Gdzie jest problem? Znajdź go w 5 sekund</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-hmi"></canvas>
+      <div class="ctrl" style="margin-top:1vh"><button data-hm="bad" class="sel">ekran „kolorowy”</button><button data-hm="good">ekran wg zasad ISA-101</button></div>
+    </div>
+    <div class="card">
+      <h3>Zasady</h3>
+      <ul>
+        <li><b>szare tło</b>, stonowane kolory dla stanu normalnego,</li>
+        <li><b>kolor tylko dla nieprawidłowości</b> (alarm, odchyłka),</li>
+        <li>liczby z <b>zakresem normalnym</b> i krótkim trendem — widać, czy wartość jest dobra i dokąd zmierza,</li>
+        <li>bez 3D, ozdobników, animacji „dla efektu”,</li>
+        <li>hierarchia ekranów: przegląd → obszar → szczegół.</li>
+      </ul>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>ISA-101</b> to norma o projektowaniu interfejsów operatorskich (HMI) w automatyce; koncepcja „High Performance HMI” zakłada, że operator ma zauważyć nieprawidłowość w kilka sekund.</p>
+<p><b>Na slajdzie:</b> na ekranie „kolorowym” problem (temperatura zgrzewu 184 °C, powyżej zakresu 165–180 °C i rośnie) ginie wśród czerwonego — a czerwona jest tam zatrzymana pompa rezerwowa, czyli stan normalny — i zielonego. Na ekranie wg zasad ISA-101 jedyny wyróżniony element to właśnie temperatura zgrzewu, z zakresem normalnym i trendem.</p>
+<p><b>Warto wiedzieć:</b> czerwony = „zatrzymany” to tradycja z energetyki i przemysłu procesowego. W HMI wysokiej wydajności kolor czerwony rezerwuje się dla alarmów wysokiego priorytetu, a stany urządzeń pokazuje się stonowanie (kształtem, tekstem, odcieniem szarości).</p>
+  </aside>
+</section>
+
+<!-- 18 -->
+<section class="slide" id="s-alarm" data-blok="Blok 8 · wizualizacja">
+  <div class="kicker">Alarmy (ISA-18.2, EEMUA 191)</div>
+  <h2>Zalew alarmów: kiedy operator przestaje reagować</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-alarm"></canvas>
+      <div class="ctrl" style="margin-top:1vh"><button data-al="before" class="sel">przed porządkowaniem alarmów</button><button data-al="after">po porządkowaniu</button></div>
+    </div>
+    <div class="card">
+      <p>alarmów w zmianie: <span class="res" id="al-n"></span></p>
+      <p>średnio na godzinę: <span class="res" id="al-h"></span></p>
+      <p>okresów zalewu (&gt; 10 w 10 min): <span class="res" id="al-f"></span></p>
+      <p class="info">Orientacyjne wartości z ISA-18.2: ok. 6 alarmów/h — akceptowalne, ok. 12/h — maksimum do opanowania; zalew = ponad 10 alarmów w 10 min.</p>
+      <div class="def"><p>Zasada: <b>każdy alarm wymaga działania operatora.</b> Jeśli nie wymaga — to komunikat, a nie alarm.</p></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>ISA-18.2</b> (zarządzanie alarmami w przemyśle procesowym) i wytyczne <b>EEMUA 191</b> wskazują, że operator może sensownie obsłużyć kilka alarmów na godzinę (orientacyjnie: ok. 6/h — akceptowalne, ok. 12/h — maksimum do opanowania). Ponad 10 alarmów w 10 minut to <b>zalew alarmów</b>: operator zaczyna potwierdzać je odruchowo i przeocza ten ważny.</p>
+<p><b>Na slajdzie:</b> „przed porządkowaniem” — 200 alarmów w zmianie i kilka okresów zalewu. „Po porządkowaniu” — usunięto alarmy niewymagające działania, dodano histerezę dla alarmów „migających”, połączono duplikaty: 19 alarmów, bez zalewu.</p>
+<p><b>Związek z kartą kontrolną:</b> alarm ustawiony na każde wyjście poza wąski zakres to reagowanie na zwykłą zmienność procesu — częste źródło zalewu alarmów.</p>
+<p><b>Zasada:</b> każdy alarm musi wymagać działania operatora. Jeśli nie wymaga — powinien być komunikatem albo zapisem w historii.</p>
+  </aside>
+</section>
+
+<!-- 19 -->
+<section class="slide" id="s-dash" data-blok="Blok 8 · wizualizacja">
+  <div class="kicker">Zadanie projektowe · grupy · 15 min</div>
+  <h2>Zaprojektujcie dashboard na kartce</h2>
+  <div class="cols c46">
+    <div class="card">
+      <h3>Krok po kroku</h3>
+      <ol>
+        <li>Maszyna: <b>Pakowaczka 01</b> — lista jej tagów jest na karcie (zad. 9): stan, przyczyna postoju, liczniki dobrych i złych, plan zmiany, czas cyklu, temperatura zgrzewu, ciśnienie powietrza, energia.</li>
+        <li>Wybierzcie <b>odbiorcę</b>: operator, mistrz albo kierownik.</li>
+        <li>Wypiszcie <b>3–5 pytań</b>, na które ekran ma odpowiadać.</li>
+        <li>Do każdego pytania: <b>element ekranu</b> (kafel KPI, trend, Pareto, oś czasu, karta kontrolna) i tagi, z których powstaje.</li>
+        <li>Narysujcie układ na A4. Kolor — tylko dla odchyłek.</li>
+        <li><b>1 minuta prezentacji</b>: odbiorca, pytania, „co zrobi, gdy zobaczy…”.</li>
+      </ol>
+    </div>
+    <div>
+      <canvas class="viz tall" id="cv-dash"></canvas>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Zadanie łączy oba dni:</b> tagi maszyny (przykładowa lista Pakowaczki 01) → wskaźniki (OEE, energia na sztukę, postoje) → wizualizacja dla konkretnego odbiorcy.</p>
+<p><b>Dobry dashboard:</b></p>
+<ul><li>każdy element odpowiada na konkretne pytanie odbiorcy,</li><li>każdy wskaźnik ma cel lub zakres normalny — sama liczba bez punktu odniesienia nic nie mówi,</li><li>kolor tylko dla odchyłek,</li><li>horyzont czasu pasuje do odbiorcy (operator — teraz, mistrz — zmiana, kierownik — tygodnie).</li></ul>
+<p><b>Przykład po prawej</b> — dashboard mistrza: kafle OEE zmiany i plan / wykonanie (oba poniżej celu, więc wyróżnione), energia na sztukę w normie (szara), oś czasu stanów, Pareto postojów zmiany i trend temperatury z zakresem normalnym.</p>
+  </aside>
+</section>
+
+<!-- 20 -->
+<section class="slide" id="s-pods" data-blok="Blok 8 · wizualizacja">
+  <div class="kicker">Podsumowanie dwóch dni</div>
+  <h2>Od czujnika do decyzji</h2>
+  <div class="chain" id="sum-chain"></div>
+  <div class="cols c3">
+    <div class="card"><h3>Wskaźniki</h3><p>OEE = A × P × Q</p><p>= dobre × cykl idealny / czas planowany</p><p>energia na dobrą sztukę = kWh / sztuki dobre</p></div>
+    <div class="card"><h3>Wiarygodność</h3><p>luki, zamrożenia, skoki, zera, skalowanie, reset licznika, czas</p><p>karta kontrolna: x̄ ± 3σ, 9 punktów po jednej stronie</p></div>
+    <div class="card"><h3>Wizualizacja</h3><p>odbiorca → pytanie → wykres</p><p>kolor tylko dla odchyłek (ISA-101)</p><p>każdy alarm wymaga działania (ISA-18.2)</p></div>
+  </div>
+  <p class="big" style="text-align:center;margin-top:1.5vh">Na laboratorium: zbieranie i wizualizacja danych w praktyce.</p>
+  <aside class="notes">
+    <p><b>Łańcuch z obu dni:</b> czujnik → sygnał → tag → historian → agregaty i wskaźniki → wizualizacja → decyzja. Na każdym ogniwie może pojawić się błąd, który zafałszuje decyzję — dlatego inżynier procesu musi rozumieć całą drogę danych, nawet jeśli sam nie programuje sterowników ani systemów.</p>
+<p><b>Najważniejsze wzory:</b> OEE = A · P · Q = dobre × cykl idealny / czas planowany; energia na dobrą sztukę = kWh / sztuki dobre; granice kontrolne = x̄ ± 3σ.</p>
+  </aside>
+</section>
+
+<div id="notes"></div>
+<div id="bar">
+  <button id="b-prev" title="poprzedni (←)">◀</button>
+  <button id="b-next" title="następny (→)">▶</button>
+  <span id="blk"></span>
+  <div id="prog"><div></div></div>
+  <span id="cnt"></span>
+  <button id="b-notes" title="notatki pod slajdem (N)">notatki</button>
+  <button id="b-spk" title="notatki w osobnym oknie (S)">okno notatek</button>
+  <button id="b-theme" title="motyw (T)">◐</button>
+  <button id="b-fs" title="pełny ekran (F)">⛶</button>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const TAU=Math.PI*2;
+let C={}, NOW=0, DT=0, LAST=0;
+function readColors(){ const cs=getComputedStyle(document.documentElement); for(const k of ['bg','panel','fg','muted','grid','accent','accent2','accent3','danger','violet','gold','chip']) C[k]=cs.getPropertyValue('--'+k).trim(); }
+function toggleTheme(){ const r=document.documentElement; r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'; try{localStorage.setItem('akw-theme',r.dataset.theme);}catch(e){} }
+try{ const t=localStorage.getItem('akw-theme'); if(t) document.documentElement.dataset.theme=t; }catch(e){}
+readColors();
+
+/* ---------- liczby i rysowanie ---------- */
+function fmt(x,d=2){ if(!isFinite(x)) return '—'; const neg=x<0; x=Math.abs(x); const s=(Math.round(x*10**d)/10**d).toFixed(d); let [a,b]=s.split('.');
+  a=a.replace(/\B(?=(\d{3})+(?!\d))/g,' '); b=b?b.replace(/0+$/,''):''; return (neg?'−':'')+(b?a+','+b:a); }
+const num=el=>{ const v=parseFloat(String(el.value).replace(',','.')); return isFinite(v)?v:NaN; };
+function bytes(b){ const U=[[1e12,'TB'],[1e9,'GB'],[1e6,'MB'],[1e3,'kB']]; for(const [m,u] of U) if(b>=m) return fmt(b/m,b/m<10?2:(b/m<100?1:0))+' '+u; return fmt(b,0)+' B'; }
+function fit(cv){ const r=cv.getBoundingClientRect(), d=window.devicePixelRatio||1; const W=Math.max(10,r.width), H=Math.max(10,r.height);
+  if(cv.width!==Math.round(W*d)||cv.height!==Math.round(H*d)){ cv.width=Math.round(W*d); cv.height=Math.round(H*d); }
+  const g=cv.getContext('2d'); g.setTransform(d,0,0,d,0,0); g.clearRect(0,0,W,H); return {g,w:W,h:H}; }
+function line(g,x1,y1,x2,y2,col,w=2,dash){ g.strokeStyle=col; g.lineWidth=w; g.setLineDash(dash||[]); g.beginPath(); g.moveTo(x1,y1); g.lineTo(x2,y2); g.stroke(); g.setLineDash([]); }
+function poly(g,pts,col,w=2.5){ if(!pts.length) return; g.strokeStyle=col; g.lineWidth=w; g.lineJoin='round'; g.beginPath(); pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1])); g.stroke(); }
+function text(g,s,x,y,col,size=14,align='left',weight=600){ g.fillStyle=col; g.font=`${weight} ${size}px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif`; g.textAlign=align; g.textBaseline='middle'; g.fillText(s,x,y); }
+function dot(g,x,y,r,col){ g.fillStyle=col; g.beginPath(); g.arc(x,y,r,0,TAU); g.fill(); }
+function axes(g,x0,y0,x1,y1,xmax,ymax,xl,yl,xt,yt,fx,fy,xmin=0,ymin=0){ line(g,x0,y0,x1,y0,C.muted,1.5); line(g,x0,y0,x0,y1,C.muted,1.5);
+  for(let i=0;i<=xt;i++){ const x=x0+(x1-x0)*i/xt; line(g,x,y0,x,y1,C.grid,1); text(g,fx(xmin+(xmax-xmin)*i/xt),x,y0+14,C.muted,12,'center',500); }
+  for(let i=0;i<=yt;i++){ const y=y0+(y1-y0)*i/yt; line(g,x0,y,x1,y,C.grid,1); text(g,fy(ymin+(ymax-ymin)*i/yt),x0-6,y,C.muted,12,'right',500); }
+  text(g,xl,x1,y0+30,C.fg,13,'right',700); text(g,yl,x0+6,y1-10,C.fg,13,'left',700); }
+function rng(seed){ let a=seed>>>0; return ()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}; }
+const frame={};
+
+/* kroki w przykładach */
+$$('[data-steps]').forEach(ex=>{ const li=[...ex.querySelectorAll('ol li')]; let k=0; const upd=()=>li.forEach((l,i)=>l.classList.toggle('on',i<k));
+  ex.querySelector('[data-next]').onclick=()=>{ k=Math.min(li.length,k+1); upd(); }; ex.querySelector('[data-reset]').onclick=()=>{ k=0; upd(); }; upd(); });
+
+/* ===== 3. raport zmiany (z ćw. 1) ===== */
+const HS=(()=>{ // jedna zmiana 6:00–14:00 (480 min), spójna z raportem
+  const longS=[[52,12],[131,9],[205,18],[318,15],[402,11]], shortD=[1.2,0.8,1.5,1.0,1.4,0.9,1.3,1.1,1.6,1.0,1.2,1.0], shortT=[24,77,98,160,182,240,262,281,349,371,438,461];
+  const stops=[...longS.map(s=>[s[0],s[1]]),...shortT.map((t,i)=>[t,shortD[i]])].sort((a,b)=>a[0]-b[0]);
+  const run=t=>!stops.some(s=>t>=s[0]&&t<s[0]+s[1]);
+  const R=rng(21), temp=[]; for(let i=0;i<=480;i++){ let v=0.3+(R()-0.5)*0.12; if(i<12) v=(i/12)*0.3; if(i>=223&&i<240) v+=0.7*Math.exp(-(i-223)/5); temp.push(v); }
+  const tmin=Math.min(...temp), tmax=Math.max(...temp); const T=temp.map(v=>168+(v-tmin)/(tmax-tmin)*13); const tavg=T.reduce((a,b)=>a+b,0)/T.length;
+  return {stops,run,T,tavg}; })();
+const HSR=[
+ {lab:'sztuki dobre / złe',val:'11 840 / 212',tag:'Pak01.LicznikDobre<br>Pak01.LicznikZle',rec:'2 × 2 880 (zapis co 10 s)',rule:'stan licznika na koniec zmiany − stan na początku',viz:'cnt'},
+ {lab:'czas pracy / postoju',val:'6 h 41 min / 1 h 19 min',tag:'Pak01.Stan',rec:'35 (zapis przy zmianie stanu)',rule:'suma czasów trwania każdego stanu',viz:'state'},
+ {lab:'liczba postojów (w tym &lt; 2 min)',val:'17 (12)',tag:'Pak01.Stan',rec:'35 (zapis przy zmianie stanu)',rule:'liczba przejść praca → postój; podział według czasu trwania',viz:'state2'},
+ {lab:'temperatura zgrzewu min / śr / max',val:`168 / ${fmt(HS.tavg,0)} / 181 °C`,tag:'Pak01.TempZgrzew',rec:'ok. 900 (martwa strefa ± 0,5 °C)',rule:'minimum, średnia (ważona czasem), maksimum',viz:'temp'},
+ {lab:'energia',val:'96 kWh (8,0 Wh/szt.)',tag:'Pak01.Energia (licznik kWh)',rec:'480 (zapis co 1 min)',rule:'stan licznika kWh: koniec − początek; na sztukę: 96 kWh / 12 052 szt.',viz:'en'},
+];
+let HSI=0;
+function hsShow(i){ HSI=i; $$('#hs-rep tr').forEach((r,k)=>{ r.style.background=k===i?'var(--chip)':''; r.style.outline=k===i?'2px solid var(--accent2)':''; });
+  const r=HSR[i]; $('#hs-tag').innerHTML=r.tag; $('#hs-rec').textContent=r.rec; $('#hs-rule').textContent=r.rule; }
+$('#hs-rep').innerHTML=HSR.map((r,i)=>`<tr data-hs="${i}" style="cursor:pointer"><td>${r.lab}</td><td><b>${r.val}</b></td></tr>`).join('');
+$$('#hs-rep tr').forEach(r=>r.onclick=()=>hsShow(+r.dataset.hs)); hsShow(0);
+frame['s-hist']=()=>{ const {g,w,h}=fit($('#cv-hist')); const x0=50,x1=w-12,y0=h-24,y1=14, X=m=>x0+(x1-x0)*m/480, v=HSR[HSI].viz;
+  for(let hh=0;hh<=8;hh+=2){ const x=X(hh*60); line(g,x,y1,x,y0,C.grid,1); text(g,(6+hh)+':00',x,y0+12,C.muted,11,'center',500); }
+  if(v==='state'||v==='state2'){ const yb=(y0+y1)/2, bh=(y0-y1)*0.45; g.fillStyle=C.accent3; g.fillRect(x0,yb-bh/2,x1-x0,bh);
+    HS.stops.forEach(s=>{ const sh=s[1]<2; g.fillStyle=sh?C.danger:C.accent2; g.fillRect(X(s[0]),yb-bh/2,Math.max(2,X(s[0]+s[1])-X(s[0])),bh); });
+    if(v==='state') text(g,'praca 401 min · postoje 79 min',x0,y1+4,C.fg,13,'left',700);
+    else { HS.stops.forEach((s,k)=>text(g,String(k+1),X(s[0]+s[1]/2),yb-bh/2-9,s[1]<2?C.danger:C.accent2,11,'center',800)); text(g,'pomarańczowe: ≥ 2 min (5) · czerwone: < 2 min (12)',x0,y0-6,C.fg,12,'left',700); } }
+  else { let pts=[], lo, hi, f, lab;
+    if(v==='cnt'){ lo=1254300; hi=1266140; let c=lo; for(let m=0;m<=480;m++){ if(m && HS.run(m)) c+=11840/401; pts.push([m,c]); } f=x=>fmt(x/1000,0)+' k'; lab=['1 254 300','1 266 140','różnica: 11 840 szt.']; }
+    else if(v==='en'){ lo=48213; hi=48309; let c=lo; const tot=[...Array(480).keys()].reduce((a,m)=>a+(HS.run(m)?1:0.25),0); for(let m=0;m<=480;m++){ if(m) c+=96*(HS.run(m)?1:0.25)/tot; pts.push([m,c]); } f=x=>fmt(x,0); lab=['48 213 kWh','48 309 kWh','różnica: 96 kWh']; }
+    else { lo=165; hi=184; pts=HS.T.map((t,m)=>[m,t]); f=x=>fmt(x,0); }
+    const Y=q=>y0-(y0-y1)*(q-lo)/(hi-lo||1); for(let k=0;k<=3;k++){ const q=lo+(hi-lo)*k/3; text(g,f(q),x0-4,Y(q),C.muted,11,'right',500); }
+    poly(g,pts.map(p=>[X(p[0]),Y(p[1])]),C.accent,2);
+    if(v==='temp'){ [[168,'min 168',C.accent3],[HS.tavg,'śr. '+fmt(HS.tavg,0),C.accent2],[181,'max 181',C.danger]].forEach(([q,l,c])=>{ line(g,x0,Y(q),x1,Y(q),c,1.5,[6,4]); text(g,l+' °C',x1-4,Y(q)-9,c,12,'right',800); }); }
+    else { dot(g,X(0),Y(pts[0][1]),6,C.accent2); dot(g,X(480),Y(pts[480][1]),6,C.accent2); text(g,lab[0],X(0)+10,Y(pts[0][1])-10,C.accent2,12,'left',800); text(g,lab[1],X(480)-8,Y(pts[480][1])+14,C.accent2,12,'right',800); text(g,lab[2],(x0+x1)/2,y1+6,C.fg,13,'center',800); } } };
+
+/* ===== 5. kalkulator OEE ===== */
+const PLAN=480, NOM=40;
+let OE={};
+function oeUpd(){ const s=+$('#oe-s').value, run=PLAN-s; let n=+$('#oe-n').value; const nmax=run*NOM; if(n>nmax){ n=nmax; $('#oe-n').value=n; } let b=+$('#oe-b').value; if(b>n){ b=n; $('#oe-b').value=b; }
+  const A=run/PLAN, P=run?n/(run*NOM):0, Q=n?(n-b)/n:0, O=A*P*Q; OE={s,run,n,b,A,P,Q,O};
+  $('#oe-sv').textContent=s+' min'; $('#oe-nv').textContent=fmt(n,0); $('#oe-bv').textContent=fmt(b,0);
+  $('#oe-a').textContent=fmt(A*100,1)+'%'; $('#oe-p').textContent=fmt(P*100,1)+'%'; $('#oe-q').textContent=fmt(Q*100,1)+'%'; $('#oe-o').textContent=fmt(O*100,1)+'%';
+  const L=[['dostępność',1-A],['wydajność',A*(1-P)],['jakość',A*P*(1-Q)]].sort((a,b)=>b[1]-a[1]);
+  $('#oe-msg').innerHTML=`Największa strata: <b>${L[0][0]}</b> (${fmt(L[0][1]*100,1)}% czasu planowanego).`; }
+$('#s-oee-calc').addEventListener('input',oeUpd); oeUpd();
+frame['s-oee-calc']=()=>{ const {g,w,h}=fit($('#cv-oee')); const S=OE, x0=54,x1=w-14,y0=h-46,y1=18, Y=m=>y0-(y0-y1)*m/PLAN;
+  const perf=S.run-S.n/NOM, qual=S.b/NOM, eff=PLAN-S.s-perf-qual;
+  const bars=[['czas planowany',0,PLAN,C.muted],['postoje (A)',PLAN-S.s,PLAN,C.accent],['spowolnienia (P)',PLAN-S.s-perf,PLAN-S.s,C.accent2],['braki (Q)',eff,eff+qual,C.accent3],['czas efektywny = OEE',0,eff,C.violet]];
+  const bw=(x1-x0)/bars.length;
+  for(let k=0;k<=4;k++){ const m=PLAN*k/4; line(g,x0,Y(m),x1,Y(m),C.grid,1); text(g,fmt(m,0),x0-6,Y(m),C.muted,12,'right',500); }
+  text(g,'min',x0-6,y1-8,C.muted,12,'right',600);
+  bars.forEach(([lab,a,b,col],i)=>{ const x=x0+i*bw+bw*0.15, ww=bw*0.7; g.fillStyle=col; g.fillRect(x,Y(b),ww,Math.max(1,Y(a)-Y(b)));
+    if(i>0&&i<4) line(g,x-bw*0.3,Y(i===1?PLAN:(i===2?PLAN-S.s:PLAN-S.s-perf)),x,Y(i===1?PLAN:(i===2?PLAN-S.s:PLAN-S.s-perf)),C.muted,1,[3,3]);
+    text(g,fmt(b-a,0)+' min',x+ww/2,Y(b)-10,C.fg,13,'center',800);
+    const words=lab.split(' '); text(g,words.slice(0,2).join(' '),x+ww/2,y0+14,C.fg,12,'center',700); if(words.length>2) text(g,words.slice(2).join(' '),x+ww/2,y0+29,C.fg,12,'center',700); });
+  text(g,fmt(S.O*100,1)+'%',x0+4*bw+bw/2,Y(eff/2),'#fff',18,'center',800); };
+
+/* ===== 6. energia na sztukę ===== */
+const PRUN=13.7, RATE=12052/401, QR=11840/12052;
+let EN={};
+function enUpd(){ const s=+$('#en-s').value, ps=+$('#en-p').value, run=480-s, E=PRUN*run/60+ps*s/60, n=run*RATE*QR, w=n?E*1000/n:Infinity; EN={s,ps,run,E,n,w};
+  $('#en-sv').textContent=s+' min'; $('#en-pv').textContent=fmt(ps,1)+' kW'; $('#en-e').textContent=fmt(E,1)+' kWh'; $('#en-n').textContent=fmt(n,0); $('#en-w').textContent=isFinite(w)?fmt(w,2)+' Wh':'—'; }
+$('#s-energy').addEventListener('input',enUpd); enUpd();
+frame['s-energy']=()=>{ const {g,w,h}=fit($('#cv-en')); const x0=60,x1=w-20,y0=h-36,y1=20, smax=240, X=s=>x0+(x1-x0)*s/smax, wmax=14, Y=v=>y0-(y0-y1)*Math.min(v,wmax)/wmax;
+  axes(g,x0,y0,x1,y1,smax,wmax,'postoje w zmianie [min]','Wh / dobrą sztukę',6,7,v=>fmt(v,0),v=>fmt(v,0));
+  const curve=ps=>{ const p=[]; for(let s=0;s<=smax;s+=2){ const run=480-s, E=PRUN*run/60+ps*s/60, n=run*RATE*QR; p.push([X(s),Y(E*1000/n)]); } return p; };
+  poly(g,curve(0),C.accent3,2,); poly(g,curve(PRUN),C.danger,2); poly(g,curve(EN.ps),C.accent,3);
+  text(g,'maszyna wyłączana w postoju (0 kW)',X(150),Y(7.4)+16,C.accent3,12,'left',700); text(g,'w postoju pełna moc',X(130),Y(10.3)-14,C.danger,12,'left',700);
+  dot(g,X(EN.s),Y(EN.w),7,C.accent2); text(g,fmt(EN.w,2)+' Wh',X(EN.s)+10,Y(EN.w)-12,C.accent2,14,'left',800); };
+
+/* ===== 7. Pareto ===== */
+const PAR=[['brak materiału',185,6],['przezbrojenie',160,8],['zacięcie folii',140,62],['awaria zgrzewu',95,3],['brak operatora',60,4],['czyszczenie',45,5],['kontrola jakości',30,10],['inne',25,9]];
+const PAR_RAW=[4,6,0,2,7,1,5,3];
+let PM='min';
+function parUpd(){ const tot=PAR.reduce((a,p)=>a+(PM==='cnt'?p[2]:p[1]),0); const s=parOrder(); const top3=s.slice(0,3).reduce((a,i)=>a+(PM==='cnt'?PAR[i][2]:PAR[i][1]),0);
+  $('#par-msg').innerHTML= PM==='raw'?'Kolejność jak w raporcie — trudno powiedzieć, co jest najważniejsze.':`Trzy pierwsze przyczyny: <b>${s.slice(0,3).map(i=>PAR[i][0]).join(', ')}</b> — ${fmt(top3/tot*100,0)}% ${PM==='cnt'?'wszystkich zdarzeń':'czasu postojów'} (razem ${fmt(tot,0)} ${PM==='cnt'?'zdarzeń':'min'}).`; }
+function parOrder(){ const idx=[...PAR.keys()]; if(PM==='raw') return PAR_RAW; const k=PM==='cnt'?2:1; return idx.sort((a,b)=>PAR[b][k]-PAR[a][k]); }
+$$('[data-pm]').forEach(b=>b.onclick=()=>{ PM=b.dataset.pm; $$('[data-pm]').forEach(x=>x.classList.toggle('sel',x===b)); parUpd(); }); parUpd();
+frame['s-pareto']=()=>{ const {g,w,h}=fit($('#cv-par')); const k=PM==='cnt'?2:1, ord=parOrder(), vals=ord.map(i=>PAR[i][k]), tot=vals.reduce((a,b)=>a+b,0), vmax=Math.max(...vals)*1.1;
+  const x0=50,x1=w-50,y0=h-64,y1=18, bw=(x1-x0)/vals.length, Y=v=>y0-(y0-y1)*v/vmax, Yc=p=>y0-(y0-y1)*p;
+  for(let q=0;q<=4;q++){ line(g,x0,y0-(y0-y1)*q/4,x1,y0-(y0-y1)*q/4,C.grid,1); text(g,fmt(vmax*q/4,0),x0-6,y0-(y0-y1)*q/4,C.muted,11,'right',500); text(g,(q*25)+'%',x1+6,Yc(q/4),C.muted,11,'left',500); }
+  text(g,PM==='cnt'?'zdarzenia':'min',x0-6,y1-8,C.muted,12,'right',600);
+  let cum=0; const cp=[];
+  ord.forEach((i,j)=>{ const v=PAR[i][k], x=x0+j*bw+bw*0.12; cum+=v; g.fillStyle=(PM!=='raw'&&cum-v<0.8*tot)?C.accent:C.muted; g.fillRect(x,Y(v),bw*0.76,y0-Y(v)); text(g,fmt(v,0),x+bw*0.38,Y(v)-9,C.fg,12,'center',700);
+    const words=PAR[i][0].split(' '); text(g,words[0],x+bw*0.38,y0+14,C.fg,12,'center',600); if(words[1]) text(g,words[1],x+bw*0.38,y0+29,C.fg,12,'center',600); cp.push([x0+(j+1)*bw,Yc(cum/tot)]); });
+  if(PM!=='raw'){ line(g,x0,Yc(0.8),x1,Yc(0.8),C.danger,1.2,[6,4]); text(g,'80%',x1-4,Yc(0.8)-9,C.danger,12,'right',700); poly(g,[[x0,y0],...cp],C.accent2,2.5); cp.forEach(p=>dot(g,p[0],p[1],4,C.accent2)); } };
+
+/* ===== 11. znajdź błędy ===== */
+const FD=(()=>{ const R=rng(3), v=[]; for(let m=0;m<1440;m++){ let x=62+2.5*Math.sin(TAU*(m-360)/1440)+0.9*Math.sin(TAU*m/170)+(R()-0.5)*1.0; v.push(x); }
+  const out=v.slice(); for(let m=130;m<220;m++) out[m]=null; for(let m=540;m<690;m++) out[m]=out[539]; out[860]=95; for(let m=1025;m<1040;m++) out[m]=0; for(let m=1200;m<1440;m++) out[m]=v[m]*1.15; return out; })();
+const FDE=[[130,220,'1. luka — brak danych'],[540,690,'2. zamrożona wartość'],[855,866,'3. pojedynczy skok (95 °C)'],[1025,1040,'4. zero — przerwa w przewodzie'],[1200,1440,'5. złe skalowanie (+15%) po wymianie czujnika']];
+let FDS=false; $('#fd-show').onclick=()=>FDS=true; $('#fd-hide').onclick=()=>FDS=false;
+frame['s-find']=()=>{ const {g,w,h}=fit($('#cv-find')); const x0=50,x1=w-14,y0=h-30,y1=16, lo=40, hi=100, X=m=>x0+(x1-x0)*m/1440, Y=v=>y0-(y0-y1)*(Math.max(lo,v)-lo)/(hi-lo);
+  axes(g,x0,y0,x1,y1,24,hi,'godzina','T [°C]',12,6,v=>fmt(v,0)+':00',v=>fmt(v,0),0,lo);
+  if(FDS) FDE.forEach(([a,b,l],i)=>{ g.fillStyle=C.danger; g.globalAlpha=.13; g.fillRect(X(a)-3,y1,X(b)-X(a)+6,y0-y1); g.globalAlpha=1; const lx=X(a)+4, far=lx>x1-300; text(g,l,far?x1-6:lx,y1+14+(i%3)*18,C.danger,13,far?'right':'left',800); });
+  g.strokeStyle=C.accent; g.lineWidth=1.6; g.beginPath(); let pen=false; FD.forEach((v,m)=>{ if(v===null){ pen=false; return; } const x=X(m), y=Y(v); pen?g.lineTo(x,y):g.moveTo(x,y); pen=true; }); g.stroke();
+  text(g,'↓ wartości 0 °C (poza skalą)',X(1040)+6,y0-10,C.muted,11,'left',600); };
+
+/* ===== 12. surowe rekordy ===== */
+const RC=[['01:59:50','Pak01.Licznik','1 266 120','Good',''],['02:00:00','Pak01.Licznik','1 266 140','Good',''],['02:00:00','Pak01.Licznik','1 266 140','Good','duplikat rekordu (ten sam czas i wartość)'],
+ ['02:00:10','Pak01.Licznik','12','Good','licznik spadł — restart sterownika; przyrost liczyć od 12'],['02:30:00','Pak01.TempZgrzew','172,1','Good',''],['02:41:00','Pak01.Przeplyw','−3,2 m³/h','Good','ujemny przepływ — fizycznie niemożliwy (offset/błąd czujnika)'],
+ ['02:45:00','Pak01.TempZgrzew','0,0','Bad','wartość 0 z jakością Bad — nie liczyć do średnich'],['02:30:00','Pak01.TempZgrzew','171,4','Good','czas cofnął się do 02:30 — zmiana czasu z letniego na zimowy (25.10.2026)'],
+ ['02:35:00','Pak01.TempZgrzew','171,9','Good',''],['03:15:00','Pak01.TempZgrzew','172,4','Good','40 min bez rekordów — luka (przerwa w komunikacji)']];
+let RCS=false;
+function rcDraw(){ $('#rc-tab').innerHTML='<tr><th>czas (lokalny)</th><th>tag</th><th>wartość</th><th>jakość</th>'+(RCS?'<th>uwagi</th>':'')+'</tr>'+RC.map(r=>{ const bad=RCS&&r[4]; return `<tr style="${bad?'background:color-mix(in srgb,var(--danger) 12%,transparent)':''}"><td class="mono">2026-10-25 ${r[0]}</td><td class="mono">${r[1]}</td><td>${r[2]}</td><td style="color:${r[3]==='Bad'?'var(--danger)':'var(--accent3)'};font-weight:700">${r[3]}</td>${RCS?`<td class="bad" style="font-weight:600">${r[4]}</td>`:''}</tr>`; }).join(''); }
+$('#rc-show').onclick=()=>{ RCS=true; rcDraw(); }; $('#rc-hide').onclick=()=>{ RCS=false; rcDraw(); }; rcDraw();
+
+/* ===== 13. karta kontrolna ===== */
+const MU=172, SG=1.2; let SC='ok', SCSEED=1, SCP=[];
+function scGen(){ const R=rng(100+SCSEED), gz=()=>{ let u=0; for(let i=0;i<6;i++) u+=R(); return (u-3)*Math.SQRT2; };
+  let pts; for(let tries=0;tries<50;tries++){ pts=[]; for(let i=0;i<25;i++){ let z=Math.max(-2.6,Math.min(2.6,gz())); if(SC==='shift'&&i>=14) z=1.5+0.7*Math.max(-1.8,Math.min(1.8,gz())); pts.push(MU+SG*z); }
+    if(SC==='out') pts[11]=MU+SG*3.5; if(SC==='shift'||!scRuns(pts).length) break; }
+  SCP=pts; scMsg(); }
+function scRuns(p){ const f=[]; let run=0, side=0; p.forEach((v,i)=>{ const s=v>MU?1:-1; if(s===side) run++; else { side=s; run=1; } if(run>=9) f.push(i); }); return f; }
+function scMsg(){ const out=SCP.map((v,i)=>Math.abs(v-MU)>3*SG?i:-1).filter(i=>i>=0), runs=scRuns(SCP);
+  $('#sc-msg').innerHTML= out.length?`<span class="bad">Sygnał: punkt ${out.map(i=>i+1).join(', ')} poza granicą</span> — szukać przyczyny specjalnej.`: runs.length?`<span style="color:var(--accent2);font-weight:800">Sygnał: 9 punktów z rzędu nad linią centralną</span> (od punktu ${runs[0]-7}) — średnia procesu się przesunęła.`:`<span style="color:var(--accent3);font-weight:800">Brak sygnału</span> — zwykła zmienność, nie regulujemy.`; }
+$$('[data-sc]').forEach(b=>b.onclick=()=>{ if(b.dataset.sc==='new') SCSEED++; else { SC=b.dataset.sc; $$('[data-sc]').forEach(x=>x.classList.toggle('sel',x===b&&x.dataset.sc!=='new')); } scGen(); }); scGen();
+frame['s-spc']=()=>{ const {g,w,h}=fit($('#cv-spc')); const x0=58,x1=w-70,y0=h-30,y1=16, lo=MU-4.5*SG, hi=MU+4.5*SG, X=i=>x0+(x1-x0)*i/24, Y=v=>y0-(y0-y1)*(v-lo)/(hi-lo);
+  for(let i=0;i<25;i+=4) text(g,String(i+1),X(i),y0+14,C.muted,11,'center',500); text(g,'nr próbki',x1,y0+26,C.fg,12,'right',700);
+  [[MU+3*SG,'UCL '+fmt(MU+3*SG,1),C.danger,[6,4]],[MU,'x̄ '+fmt(MU,0),C.accent3,[]],[MU-3*SG,'LCL '+fmt(MU-3*SG,1),C.danger,[6,4]]].forEach(([v,l,c,d])=>{ line(g,x0,Y(v),x1,Y(v),c,1.8,d); text(g,l,x1+6,Y(v),c,12,'left',800); });
+  for(let q=lo+0.5*SG;q<hi;q+=1.5*SG) text(g,fmt(q,1),x0-6,Y(q),C.muted,11,'right',500);
+  poly(g,SCP.map((v,i)=>[X(i),Y(v)]),C.accent,2); const runs=new Set(); scRuns(SCP).forEach(i=>{ for(let j=i-8;j<=i;j++) runs.add(j); });
+  SCP.forEach((v,i)=>dot(g,X(i),Y(v),5.5,Math.abs(v-MU)>3*SG?C.danger:(runs.has(i)?C.accent2:C.accent))); };
+
+/* ===== 15. mini wykresy do zadań 5–7 ===== */
+frame['s-twoja2']=()=>{ const op=$$('#s-twoja2 details').map(d=>d.open);
+  { const {g,w,h}=fit($('#cv-t5')); const x0=34,x1=w-18,y0=h-16,y1=8, X=t=>x0+(x1-x0)*t/8, Y=v=>y0-(y0-y1)*v/70, R=rng(55);
+    [0,35,70].forEach(v=>{ line(g,x0,Y(v),x1,Y(v),C.grid,1); text(g,String(v),x0-4,Y(v),C.muted,10,'right',500); }); [0,2,4,6,8].forEach(t=>text(g,(6+t)+':00',X(t),y0+9,C.muted,10,'center',500));
+    const p=[]; for(let k=0;k<=160;k++){ const t=k/20; const v=(t>=4&&t<5)?0:62+(R()-0.5)*2; p.push([X(t),Y(v)]); } poly(g,p,C.accent,1.8);
+    text(g,'przerwa: 0 °C',X(4.5),Y(8),C.danger,11,'center',700);
+    if(op[0]){ line(g,x0,Y(54.25),x1,Y(54.25),C.danger,1.5,[5,4]); text(g,'raport: 54,25',x1-2,Y(54.25)+10,C.danger,11,'right',800); text(g,'prawdziwa ≈ 62',x0+4,Y(62)-10,C.accent3,11,'left',800); } }
+  { const {g,w,h}=fit($('#cv-t6')); const x0=44,x1=w-18,y0=h-16,y1=8, X=t=>x0+(x1-x0)*t/8, Y=v=>y0-(y0-y1)*v/56000;
+    [0,28000,56000].forEach(v=>{ line(g,x0,Y(v),x1,Y(v),C.grid,1); text(g,fmt(v/1000,0)+' k',x0-4,Y(v),C.muted,10,'right',500); }); [0,2,4,6,8].forEach(t=>text(g,(6+t)+':00',X(t),y0+9,C.muted,10,'center',500));
+    poly(g,[[X(0),Y(48200)],[X(4.5),Y(52950)]],C.accent,2); line(g,X(4.5),Y(52950),X(4.5),Y(0),C.danger,1.5,[3,3]); poly(g,[[X(4.5),Y(0)],[X(8),Y(4010)]],C.accent,2);
+    text(g,'restart',X(4.5)+4,Y(28000),C.danger,11,'left',700);
+    if(op[1]){ text(g,'+4 750',X(2.2),Y(52950)-2,C.accent3,12,'center',800); text(g,'+4 010',X(6.3),Y(4010)-12,C.accent3,12,'center',800); } }
+  { const {g,w,h}=fit($('#cv-t7')); const x0=34,x1=w-8,y0=h-10,y1=8, lo=166, hi=178, n=16, X=i=>x0+(x1-x0)*i/(n-1), Y=v=>y0-(y0-y1)*(v-lo)/(hi-lo);
+    const pts=[171.2,172.8,170.9,176.0,171.9,172.3,173.4,173.8,173.1,174.0,173.5,173.2,173.9,173.6,173.3,173.8];
+    [168,172,176].forEach(v=>text(g,String(v),x0-4,Y(v),C.muted,10,'right',500));
+    if(op[2]){ [[176.5,C.danger,[5,4],'UCL 176,5'],[172,C.accent3,[],'x̄ 172'],[167.5,C.danger,[5,4],'LCL 167,5']].forEach(([v,c,d,l])=>{ line(g,x0,Y(v),x1,Y(v),c,1.3,d); text(g,l,x1-2,Y(v)-7,c,10,'right',800); }); g.fillStyle=C.accent2; g.globalAlpha=.12; g.fillRect(X(6)-6,y1,X(15)-X(6)+12,y0-y1); g.globalAlpha=1; }
+    poly(g,pts.map((v,i)=>[X(i),Y(v)]),C.accent,1.6); pts.forEach((v,i)=>dot(g,X(i),Y(v),3.5,op[2]?(i===3?C.accent3:(i>=6?C.accent2:C.accent)):C.accent));
+    text(g,'176',X(3),Y(176)-9,C.fg,10,'center',700); } };
+
+/* ===== 16. quiz ===== */
+const QT={trend:'trend (wykres liniowy w czasie)',pareto:'wykres Pareto / słupkowy',gantt:'oś czasu stanów',spc:'karta kontrolna',kpi:'kafel KPI z celem',pie:'wykres kołowy'};
+const QZ=[['Jak zmieniała się temperatura pieca przez ostatnie 8 godzin?','trend','Zmiana jednej wielkości w czasie — wykres liniowy; warto dodać zakres normalny jako tło.'],
+ ['Które przyczyny postojów zabrały najwięcej czasu w tym tygodniu?','pareto','Porównanie kategorii, malejąco — Pareto. Od razu widać, od czego zacząć.'],
+ ['Kiedy dziś maszyna stała i dlaczego?','gantt','Kiedy i jak długo — oś czasu stanów (kolorowe odcinki na osi zmiany).'],
+ ['Czy proces zgrzewania jest stabilny, czy coś się w nim zmieniło?','spc','Stabilność procesu — karta kontrolna z granicami ±3σ i regułami sygnałów.'],
+ ['Czy osiągamy dziś cel OEE 65%?','kpi','Jedna liczba w porównaniu z celem — kafel KPI (wartość, cel, kolor tylko przy odchyłce).'],
+ ['Jaki udział w zużyciu energii mają poszczególne linie (8 linii)?','pareto','Słupki posortowane malejąco, z wartością w % nad każdym — łatwo porównać linie między sobą i od razu widać największych odbiorców.','pie','Też dobrze — wykres kołowy jest przeznaczony do pokazywania udziału w całości. Przy 8 liniach trudniej jednak porównać kawałki o podobnej wielkości (kąty ocenia się gorzej niż długości), dlatego słupki z % są czytelniejsze. Kołowy sprawdza się najlepiej przy 2–5 częściach.']];
+let QI=0, QA=null;
+function qzDraw(){ const q=QZ[QI]; $('#qz-q').textContent=(QI+1)+'. '+q[0]; $('#qz-n').textContent=(QI+1)+' / '+QZ.length;
+  const alt=q[3];
+  $('#qz-opts').innerHTML=Object.entries(QT).map(([k,l])=>`<button data-qa="${k}" style="${QA?(k===q[1]?'background:var(--accent3);color:#fff;border-color:var(--accent3)':(k===alt?'background:var(--gold);color:#fff;border-color:var(--gold)':(k===QA?'background:var(--danger);color:#fff;border-color:var(--danger)':''))):''}">${l}</button>`).join('');
+  $('#qz-a').innerHTML=!QA?'':QA===q[1]?`<b style="color:var(--accent3)">Dobrze!</b> — ${q[2]}${alt?` <span class="muted">(${QT[alt]} też jest dopuszczalny.)</span>`:''}`:QA===alt?`<b style="color:var(--gold)">${q[4]}</b>`:`<b style="color:var(--danger)">Lepiej: ${QT[q[1]]}</b> — ${q[2]}`;
+  $$('#qz-opts [data-qa]').forEach(b=>b.onclick=()=>{ QA=b.dataset.qa; qzDraw(); }); }
+$('#qz-next').onclick=()=>{ QI=(QI+1)%QZ.length; QA=null; qzDraw(); }; $('#qz-prev').onclick=()=>{ QI=(QI+QZ.length-1)%QZ.length; QA=null; qzDraw(); }; qzDraw();
+frame['s-quiz']=()=>{ const {g,w,h}=fit($('#cv-quiz')); if(!QA){ text(g,'(wybierz odpowiedź — pojawi się przykład wykresu)',w/2,h/2,C.muted,14,'center',600); return; }
+  const t=QZ[QI][1], x0=40,x1=w-30,y0=h-24,y1=14, R=rng(9+QI);
+  if(t==='trend'){ g.fillStyle=C.chip; g.fillRect(x0,y0-(y0-y1)*0.75,x1-x0,(y0-y1)*0.35); const p=[]; for(let i=0;i<=100;i++) p.push([x0+(x1-x0)*i/100,y0-(y0-y1)*(0.55+0.12*Math.sin(i/9)+(R()-0.5)*0.06)]); poly(g,p,C.accent,2.5); text(g,'zakres normalny',x1-4,y0-(y0-y1)*0.42,C.muted,11,'right',600); }
+  else if(t==='pareto'){ const v=[0.9,0.7,0.55,0.3,0.2,0.12,0.08,0.05], tot=v.reduce((a,b)=>a+b,0), en=QI===5, half=en?(x1-x0)*0.62:(x1-x0), bw=half/v.length;
+    v.forEach((q,i)=>{ g.fillStyle=i<3?C.accent:C.muted; const hh=(y0-y1-14)*q; g.fillRect(x0+i*bw+4,y0-hh,bw-8,hh); if(en) text(g,fmt(q/tot*100,0)+'%',x0+i*bw+bw/2,y0-hh-8,C.fg,11,'center',700); });
+    if(en){ const cx=x0+half+(x1-x0-half)/2, cy=(y0+y1)/2, r=Math.min((x1-x0-half)/2-10,(y0-y1)/2); let a=-Math.PI/2; const cols=[C.accent,C.accent2,C.accent3,C.violet,C.gold,C.danger,C.muted,C.grid];
+      v.forEach((q,i)=>{ const da=q/tot*TAU; g.fillStyle=cols[i]; g.beginPath(); g.moveTo(cx,cy); g.arc(cx,cy,r,a,a+da); g.closePath(); g.fill(); a+=da; });
+      text(g,'słupki z %: porównanie linii',x0,y1-2,C.fg,11,'left',700); text(g,'kołowy: udział w całości',cx,y1-2,C.fg,11,'center',700); } }
+  else if(t==='gantt'){ const yb=(y0+y1)/2; g.fillStyle=C.accent3; g.fillRect(x0,yb-16,x1-x0,32); [[0.12,0.04,C.danger],[0.33,0.07,C.accent2],[0.6,0.02,C.danger],[0.78,0.05,C.violet]].forEach(([a,d,c])=>{ g.fillStyle=c; g.fillRect(x0+(x1-x0)*a,yb-16,(x1-x0)*d,32); }); text(g,'6:00',x0,yb+30,C.muted,11,'center',500); text(g,'14:00',x1,yb+30,C.muted,11,'center',500); }
+  else if(t==='spc'){ const Y=z=>(y0+y1)/2-z*(y0-y1)/7; [[3,C.danger],[0,C.accent3],[-3,C.danger]].forEach(([z,c])=>line(g,x0,Y(z),x1,Y(z),c,1.5,z?[5,4]:[])); const p=[]; for(let i=0;i<20;i++) p.push([x0+(x1-x0)*i/19,Y(Math.max(-2.5,Math.min(2.5,(R()-0.5)*3.5)))]); poly(g,p,C.accent,2); p.forEach(q=>dot(g,q[0],q[1],4,C.accent)); }
+  else if(t==='kpi'){ const bw=Math.min(260,(x1-x0)/2-10); [[x0,'OEE dziś','58%','cel 65%',C.accent2],[x0+bw+20,'OEE wczoraj','66%','cel 65%',C.muted]].forEach(([x,l,v,c,col])=>{ g.strokeStyle=col; g.lineWidth=col===C.muted?1.5:3; g.strokeRect(x,y1,bw,y0-y1); text(g,l,x+12,y1+18,C.muted,13,'left',700); text(g,v,x+12,(y0+y1)/2+6,col===C.muted?C.fg:col,34,'left',800); text(g,c,x+bw-12,y0-14,C.muted,12,'right',600); }); } };
+
+/* ===== 17. HMI ===== */
+let HM='bad';
+$$('[data-hm]').forEach(b=>b.onclick=()=>{ HM=b.dataset.hm; $$('[data-hm]').forEach(x=>x.classList.toggle('sel',x===b)); });
+const HMI=[['Pompa P1','praca',null],['Pompa P2','rezerwa (zatrzymana)',null],['Poziom zbiornika',62,[40,80,'%',0,100]],['Temp. zgrzewu',184,[165,180,'°C',150,200]],['Ciśnienie',6.1,[5.5,6.5,'bar',4,8]],['Prędkość',38,[35,42,'szt./min',0,50]]];
+frame['s-hmi']=()=>{ const {g,w,h}=fit($('#cv-hmi')); const cols=3, rows=2, pad=10, tw=(w-pad*(cols+1))/cols, th=(h-pad*(rows+1))/rows, R=rng(4);
+  if(HM==='good'){ g.fillStyle='#d9dbde'; g.fillRect(0,0,w,h); }
+  HMI.forEach(([lab,val,rg],i)=>{ const x=pad+(i%cols)*(tw+pad), y=pad+Math.floor(i/cols)*(th+pad), cx=x+tw/2;
+    if(HM==='bad'){ const bgc=['#2e7d32','#c62828','#1565c0','#6a1b9a','#00838f','#ef6c00'][i]; const grd=g.createLinearGradient(x,y,x,y+th); grd.addColorStop(0,bgc); grd.addColorStop(1,'#111'); g.fillStyle=grd; g.fillRect(x,y,tw,th);
+      text(g,lab.toUpperCase(),cx,y+18,'#fff',14,'center',800);
+      if(!rg){ const run=val==='praca'; g.fillStyle=run?'#00e676':'#ff1744'; g.beginPath(); g.arc(cx,y+th/2+6,Math.min(tw,th)*0.22,0,TAU); g.fill(); text(g,run?'PRACA':'STOP',cx,y+th/2+6,'#000',16,'center',900); }
+      else { const r=Math.min(tw*0.36,th*0.42), cy=y+th*0.78, cols3=['#00e676','#ffea00','#ff1744']; for(let k=0;k<3;k++){ g.strokeStyle=cols3[k]; g.lineWidth=12; g.beginPath(); g.arc(cx,cy,r,Math.PI+k*Math.PI/3,Math.PI+(k+1)*Math.PI/3); g.stroke(); }
+        const f=(val-rg[3])/(rg[4]-rg[3]), a=Math.PI+f*Math.PI; line(g,cx,cy,cx+r*Math.cos(a),cy+r*Math.sin(a),'#fff',3); text(g,fmt(val,1)+' '+rg[2],cx,cy-r*0.45,'#fff',18,'center',800); } }
+    else { const bad=rg&&(val<rg[0]||val>rg[1]); g.fillStyle='#eceef0'; g.fillRect(x,y,tw,th); g.strokeStyle=bad?'#e2741d':'#b8bcc2'; g.lineWidth=bad?4:1; g.strokeRect(x,y,tw,th);
+      text(g,lab,x+12,y+18,'#555',14,'left',700);
+      if(!rg){ text(g,val,x+12,y+th/2+4,'#333',18,'left',700); }
+      else { text(g,fmt(val,1),x+12,y+th*0.45,bad?'#c4570d':'#222',30,'left',800); text(g,rg[2],x+12+g.measureText(fmt(val,1)).width+6,y+th*0.45+4,'#555',14,'left',600);
+        const bx=x+12, bw=tw-24, by=y+th*0.68, F=v=>bx+bw*(v-rg[3])/(rg[4]-rg[3]); g.fillStyle='#cfd2d6'; g.fillRect(bx,by,bw,8); g.fillStyle='#aeb3b9'; g.fillRect(F(rg[0]),by,F(rg[1])-F(rg[0]),8);
+        g.fillStyle=bad?'#e2741d':'#333'; g.beginPath(); g.moveTo(F(val),by-2); g.lineTo(F(val)-6,by-12); g.lineTo(F(val)+6,by-12); g.closePath(); g.fill();
+        const sp=[]; for(let k=0;k<30;k++){ const base=bad?val-6+k*0.2:val; sp.push([x+tw-110+k*3.3,y+th*0.42-((base+(R()-0.5)*(rg[1]-rg[0])*0.08)-val)*(bad?2.2:6)]); } poly(g,sp,bad?'#e2741d':'#777',1.6);
+        if(bad){ g.fillStyle='#e2741d'; g.fillRect(x+tw-34,y+8,24,22); text(g,'2',x+tw-22,y+19,'#fff',14,'center',800); text(g,'▲ za wysoka, rośnie',x+12,y+th-14,'#c4570d',13,'left',800); } } } }); };
+
+/* ===== 18. alarmy ===== */
+const ALB=[2,1,3,2,0,1,2,4,1,2,14,22,17,3,2,1,0,2,3,1,2,1,4,2,3,19,12,2,1,0,2,3,1,1,2,0,3,2,1,2,25,16,4,2,1,3,2,1];
+const ALA=[0,0,1,0,0,0,0,1,0,0,2,3,1,0,0,0,0,0,1,0,0,0,1,0,0,2,1,0,0,0,0,1,0,0,0,0,1,0,0,0,2,1,0,0,0,0,1,0];
+let AL='before';
+function alUpd(){ const d=AL==='before'?ALB:ALA, n=d.reduce((a,b)=>a+b,0); $('#al-n').textContent=n; $('#al-h').textContent=fmt(n/8,1); $('#al-f').textContent=d.filter(v=>v>10).length; }
+$$('[data-al]').forEach(b=>b.onclick=()=>{ AL=b.dataset.al; $$('[data-al]').forEach(x=>x.classList.toggle('sel',x===b)); alUpd(); }); alUpd();
+frame['s-alarm']=()=>{ const {g,w,h}=fit($('#cv-alarm')); const d=AL==='before'?ALB:ALA, x0=40,x1=w-14,y0=h-30,y1=16, vmax=28, bw=(x1-x0)/48, Y=v=>y0-(y0-y1)*v/vmax;
+  for(let q=0;q<=vmax;q+=7){ line(g,x0,Y(q),x1,Y(q),C.grid,1); text(g,String(q),x0-6,Y(q),C.muted,11,'right',500); }
+  d.forEach((v,i)=>{ g.fillStyle=v>10?C.danger:C.accent; g.fillRect(x0+i*bw+1,Y(v),bw-2,y0-Y(v)); });
+  line(g,x0,Y(10),x1,Y(10),C.danger,1.5,[6,4]); g.fillStyle=C.panel; g.fillRect(x0+4,Y(10)-18,190,15); text(g,'zalew: > 10 alarmów / 10 min',x0+8,Y(10)-10,C.danger,12,'left',800);
+  for(let hh=0;hh<=8;hh+=2) text(g,(6+hh)+':00',x0+hh*6*bw,y0+14,C.muted,11,'center',500); text(g,'alarmy w 10 min',x0+4,y1-4,C.fg,12,'left',700); };
+
+/* ===== 19. szkic dashboardu ===== */
+frame['s-dash']=()=>{ const {g,w,h}=fit($('#cv-dash')); const p=10, R=rng(12); g.fillStyle=C.chip; g.fillRect(0,0,w,h);
+  text(g,'Dashboard mistrza — Pakowaczka 01, zmiana I',p,16,C.fg,14,'left',800);
+  const kt=(w-p*4)/3, ky=30, kh=h*0.22;
+  [['OEE zmiany','58%','cel 65%',true],['plan / wykonanie','7 420 / 8 000','szt. do 11:30',true],['energia','8,3 Wh/szt.','cel ≤ 8,5',false]].forEach(([l,v,c,bad],i)=>{ const x=p+i*(kt+p); g.fillStyle=C.panel; g.fillRect(x,ky,kt,kh); if(bad){ g.strokeStyle=C.accent2; g.lineWidth=3; g.strokeRect(x,ky,kt,kh); }
+    text(g,l,x+8,ky+14,C.muted,12,'left',700); text(g,v,x+8,ky+kh*0.55,bad?C.accent2:C.fg,Math.min(26,kt/7),'left',800); text(g,c,x+8,ky+kh-12,C.muted,11,'left',600); });
+  const gy=ky+kh+p, gh=h*0.16; g.fillStyle=C.panel; g.fillRect(p,gy,w-2*p,gh); text(g,'stany maszyny od 6:00',p+8,gy+12,C.muted,11,'left',700);
+  const gx0=p+8, gx1=w-p-8; g.fillStyle='#9aa3ad'; g.fillRect(gx0,gy+22,gx1-gx0,gh-30); [[0.1,0.05],[0.31,0.09],[0.55,0.02],[0.62,0.02],[0.71,0.06]].forEach(([a,d],i)=>{ g.fillStyle=i===1?C.accent2:C.danger; g.fillRect(gx0+(gx1-gx0)*a,gy+22,(gx1-gx0)*d,gh-30); });
+  const by=gy+gh+p, bh=h-by-p, bw2=(w-3*p)/2; g.fillStyle=C.panel; g.fillRect(p,by,bw2,bh); g.fillRect(2*p+bw2,by,bw2,bh);
+  text(g,'postoje zmiany (Pareto)',p+8,by+12,C.muted,11,'left',700); [0.9,0.6,0.35,0.2,0.1].forEach((q,i)=>{ const bx=p+12+i*(bw2-24)/5; g.fillStyle=i<2?C.accent:'#9aa3ad'; g.fillRect(bx,by+bh-10-(bh-34)*q,(bw2-24)/5-6,(bh-34)*q); });
+  const tx=2*p+bw2; text(g,'temperatura zgrzewu',tx+8,by+12,C.muted,11,'left',700); g.fillStyle=C.chip; g.fillRect(tx+8,by+bh*0.4,bw2-16,bh*0.3);
+  const sp=[]; for(let i=0;i<=40;i++) sp.push([tx+8+(bw2-16)*i/40,by+bh*0.55-Math.sin(i/6)*bh*0.08+(R()-0.5)*bh*0.06]); poly(g,sp,'#555',2); };
+
+/* ===== 20. łańcuch ===== */
+$('#sum-chain').innerHTML=['czujnik','sygnał 4–20 mA','tag','historian','wskaźniki (OEE, Wh/szt.)','wizualizacja','decyzja'].map((c,i)=>(i?'<span class="arr">→</span>':'')+`<button${i===6?' class="sel"':''} tabindex="-1">${c}</button>`).join('');
+
+/* ---------------- nawigacja ---------------- */
+const slides=$$('.slide'); let cur=0, spk=null;
+const title=i=>slides[i].querySelector('h1,h2').textContent;
+function notesHTML(i){const n=slides[i].querySelector('.notes'); return n?n.innerHTML:'<p>(brak komentarza)</p>';}
+function updSpeaker(){ if(!spk||spk.closed) return; const nx=slides[cur+1]?title(cur+1):'— koniec —';
+  spk.document.body.innerHTML=`<p style="color:#777;margin:0">${slides[cur].dataset.blok||''}</p><h3 style="margin:.1em 0 .4em">Slajd ${cur+1}/${slides.length}: ${title(cur)}</h3>${notesHTML(cur)}<hr><p style="color:#777">Następny: ${nx}</p>`; }
+function show(i){ i=Math.max(0,Math.min(slides.length-1,i)); slides[cur].classList.remove('active'); cur=i; slides[cur].classList.add('active');
+  $('#prog div').style.width=(100*(cur+1)/slides.length)+'%'; $('#cnt').textContent=(cur+1)+' / '+slides.length; $('#blk').textContent=slides[cur].dataset.blok||''; $('#notes').innerHTML=notesHTML(cur); updSpeaker(); history.replaceState(null,'','#'+(cur+1)); }
+const next=()=>show(cur+1), prev=()=>show(cur-1);
+$('#b-next').onclick=next; $('#b-prev').onclick=prev; $('#b-theme').onclick=toggleTheme;
+const fsToggle=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen(); $('#b-fs').onclick=fsToggle;
+function openSpeaker(){ spk=window.open('','komentarze_akw2','width=760,height=640'); if(!spk) return; spk.document.title='Notatki do slajdów';
+  spk.document.head.innerHTML='<meta charset="utf-8"><style>body{font:18px/1.5 system-ui,sans-serif;padding:16px 22px;background:#fffdf6;color:#222}b{color:#b5520c}.mono{font-family:monospace}</style>'; updSpeaker(); }
+$('#b-spk').onclick=openSpeaker; $('#b-notes').onclick=()=>$('#notes').classList.toggle('show');
+document.addEventListener('keydown',e=>{ const tag=e.target.tagName, k=e.key;
+  if(tag==='INPUT'&&(e.target.type==='text'||e.target.type==='number'||k.startsWith('Arrow'))) return; if(tag==='SELECT') return;
+  if(k==='ArrowRight'||k==='PageDown'||(k===' '&&tag!=='BUTTON'&&tag!=='SUMMARY')){e.preventDefault();next();}
+  else if(k==='ArrowLeft'||k==='PageUp'){e.preventDefault();prev();}
+  else if(k==='Home') show(0); else if(k==='End') show(slides.length-1);
+  else if(k==='n'||k==='N') $('#notes').classList.toggle('show'); else if(k==='s'||k==='S') openSpeaker(); else if(k==='f'||k==='F') fsToggle(); else if(k==='t'||k==='T') toggleTheme(); });
+document.addEventListener('click',e=>{ if(e.target.tagName==='BUTTON') e.target.blur(); });
+function loop(now){ DT=Math.min(0.05,(now-LAST)/1000||0); LAST=now; NOW=now/1000; const f=frame[slides[cur].id]; if(f){ readColors(); try{f(NOW);}catch(err){console.error(err);} } requestAnimationFrame(loop); }
+show((parseInt(location.hash.slice(1))||1)-1); requestAnimationFrame(loop);
+</script>
+</body>
+</html>
