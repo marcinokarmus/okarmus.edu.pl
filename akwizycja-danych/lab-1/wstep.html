@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratorium 1 — wstęp</title>
+<style>
+:root{
+  --bg:#f7f7f4; --panel:#ffffff; --fg:#1d2330; --muted:#5d6675; --grid:#d9dce2;
+  --accent:#1f6fd1; --accent2:#e2741d; --accent3:#1f9a5a; --danger:#d23b3b; --violet:#7a4cc9;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;overflow:hidden}
+.slide{position:absolute;inset:0;padding:4vh 5vw 9vh;display:none;flex-direction:column;gap:2vh;overflow:auto}
+.slide.active{display:flex}
+.kicker{font-size:clamp(13px,1.05vw,18px);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{font-size:clamp(32px,4.4vw,76px);margin:0;line-height:1.05}
+h2{font-size:clamp(24px,2.8vw,46px);margin:0;line-height:1.1}
+p,li,td{font-size:clamp(16px,1.45vw,25px);line-height:1.4}
+p{margin:.2em 0} ul{margin:.2em 0;padding-left:1.3em} li{margin:.3em 0}
+.muted{color:var(--muted)} .big{font-size:clamp(21px,2vw,34px)}
+.title-wrap{margin:auto 0;display:flex;flex-direction:column;gap:2.4vh}
+.card{background:var(--panel);border:1px solid var(--grid);border-radius:14px;padding:1.4vh 1.3vw}
+.card h3{margin:.1em 0 .4em;font-size:clamp(17px,1.5vw,27px)}
+.card p,.card li{font-size:clamp(14px,1.25vw,21px)}
+.def{border-left:6px solid var(--accent);background:var(--panel);border-radius:10px;padding:1.2vh 1.4vw}
+.def p{font-size:clamp(17px,1.6vw,28px)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:2vw;align-items:stretch}
+.plan{display:grid;grid-template-columns:repeat(4,1fr);gap:.9vw}
+.plan .card{border-top:6px solid var(--accent)}
+.plan .card:nth-child(2){border-top-color:var(--accent2)}
+.plan .card:nth-child(3){border-top-color:var(--accent3)}
+.plan .card:nth-child(4){border-top-color:var(--violet)}
+.time{color:var(--muted);font-weight:700;font-size:clamp(13px,1.1vw,18px)}
+.chain{display:flex;align-items:stretch;gap:.5vw;flex-wrap:wrap}
+.chain div{flex:1;min-width:110px;text-align:center;font-weight:700;padding:.7em .4em;border:2px solid var(--grid);border-radius:12px;background:var(--panel);font-size:clamp(14px,1.2vw,20px);line-height:1.25}
+.chain div small{display:block;font-weight:500;color:var(--muted);font-size:.8em}
+.chain div.you{border-color:var(--accent2);background:#fff4ea}
+.chain .arr{flex:0;min-width:0;border:0;background:none;align-self:center;color:var(--muted);padding:0;font-size:clamp(20px,2vw,34px)}
+.sheets{display:flex;gap:.8vw;flex-wrap:wrap}
+.sheets span{border:1px solid var(--grid);border-bottom:4px solid var(--accent);background:var(--panel);border-radius:8px 8px 0 0;padding:.3em .9em;font-weight:700;font-size:clamp(15px,1.3vw,22px)}
+.sheets span.y{border-bottom-color:#e8c040}
+.url{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:clamp(22px,2.6vw,44px);font-weight:800;color:var(--accent);background:var(--panel);border:2px solid var(--accent);border-radius:14px;padding:.35em .7em;align-self:flex-start}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+.edit{border-bottom:3px dashed var(--accent2);padding:0 .3em;min-width:8em;display:inline-block;outline:none;color:var(--accent2);font-weight:800}
+.edit:empty::before{content:"kliknij i wpisz";color:var(--muted);font-weight:500}
+#bar{position:fixed;left:0;right:0;bottom:0;height:6vh;min-height:40px;display:flex;align-items:center;gap:.8vw;padding:0 1.2vw;background:var(--panel);border-top:1px solid var(--grid)}
+#bar button{font:inherit;font-size:15px;padding:.2em .8em;border-radius:8px;border:1px solid var(--grid);background:var(--panel);cursor:pointer}
+#prog{flex:1;height:6px;background:var(--grid);border-radius:4px;overflow:hidden}
+#prog div{height:100%;background:var(--accent);width:0}
+#cnt{color:var(--muted);font-size:15px}
+@media (max-width:800px){.cols,.plan{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section class="slide active">
+  <div class="title-wrap">
+    <div class="kicker">Akwizycja i wizualizacja danych w procesach przemysłowych · laboratorium 1</div>
+    <h1>Jedna zmiana Pakowaczki 01</h1>
+    <p class="big muted">Od surowego eksportu danych do OEE, Pareto i karty kontrolnej — w Excelu</p>
+    <div class="chain">
+      <div>czujniki<br>i liczniki<small>Pakowaczka 01</small></div><div class="arr">→</div>
+      <div>sterownik<small>8 tagów</small></div><div class="arr">→</div>
+      <div>zapis co 10 s<small>zmiana II, 14:00–22:00</small></div><div class="arr">→</div>
+      <div>eksport<small>2 892 rekordy</small></div><div class="arr">→</div>
+      <div class="you">Wy: czyszczenie,<br>wskaźniki, wnioski<small>dziś</small></div>
+    </div>
+    <div class="cols">
+      <div class="def" style="border-left-color:var(--muted)"><p><b>Ćwiczenia:</b> gotowe liczby z raportu zmiany I → OEE 61,7%, Pareto, karta kontrolna na kartce.</p></div>
+      <div class="def" style="border-left-color:var(--accent2)"><p><b>Dziś:</b> surowe dane z maszyny. Jak w każdym prawdziwym eksporcie — <b>z błędami</b>. Najpierw je znaleźć, potem liczyć.</p></div>
+    </div>
+    <p class="muted">Zarządzanie i inżynieria produkcji · IV rok · specjalność: Inżynier procesu · studia niestacjonarne · mgr inż. M. Okarmus</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <div class="kicker">Plan</div>
+  <h2>4 bloki po 45 minut</h2>
+  <div class="plan">
+    <div class="card"><div class="time">blok 1</div><h3>Oględziny danych</h3><p>Ile mamy danych? Wykresy w czasie. Szukamy podejrzanych miejsc.</p></div>
+    <div class="card"><div class="time">blok 2</div><h3>Czyszczenie</h3><p>Duplikaty, wartości, którym nie można ufać, licznik po restarcie sterownika.</p></div>
+    <div class="card"><div class="time">blok 3</div><h3>Wskaźniki</h3><p>Tabela przestawna: czas w stanach. OEE, energia na sztukę, Pareto postojów.</p></div>
+    <div class="card"><div class="time">blok 4</div><h3>Karta i dashboard</h3><p>Karta kontrolna temperatury zgrzewu. Ekran dla mistrza. Wnioski dla kierownika.</p></div>
+  </div>
+  <p class="muted">przerwa po bloku 2</p>
+  <div class="def">
+    <p><b>Plik</b> <span class="mono">Lab_1_Pakowaczka01.xlsx</span> — trzy arkusze:</p>
+    <div class="sheets" style="margin-top:1vh"><span>Dane</span><span class="y">Wyniki — żółte pola do wypełnienia</span><span>Dashboard — na zadanie 12</span></div>
+  </div>
+  <p>Instrukcja krok po kroku i ściąga z formuł Excela — na stronie (następny slajd).</p>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <div class="kicker">Zasady</div>
+  <h2>Jak pracujemy</h2>
+  <div class="url">okarmus.edu.pl/akwizycja-danych/lab-1</div>
+  <div class="cols">
+    <div class="card">
+      <h3>Praca</h3>
+      <ul>
+        <li>sami lub <b>w parach</b> — jeden komputer = jeden plik</li>
+        <li>od razu zapiszcie jako <span class="mono">Lab1_Nazwisko1_Nazwisko2.xlsx</span>, potem często <b>Ctrl+S</b></li>
+        <li>liczymy <b>formułami w Excelu</b>, nie na kalkulatorze</li>
+        <li>pytajcie — na początku bloków pokażę trudniejsze kroki na projektorze</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Sprawozdanie i ocena</h3>
+      <ul>
+        <li><b>plik z wypełnionym arkuszem Wyniki = sprawozdanie</b> — nic nie robicie w domu</li>
+        <li>oddajecie na koniec zajęć: <span class="edit" contenteditable="true" spellcheck="false"></span></li>
+        <li>20 pkt (bloki: 3 + 5 + 6 + 6), zaliczenie od 11 pkt; para — jedna ocena dla obu osób</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div id="bar">
+  <button id="prev">←</button><button id="next">→</button>
+  <div id="prog"><div></div></div>
+  <span id="cnt"></span>
+  <button id="fs">pełny ekran (F)</button>
+</div>
+
+<script>
+const S=[...document.querySelectorAll('.slide')]; let cur=0;
+function show(i){ cur=Math.max(0,Math.min(S.length-1,i)); S.forEach((s,k)=>s.classList.toggle('active',k===cur));
+  document.querySelector('#prog div').style.width=((cur+1)/S.length*100)+'%'; document.getElementById('cnt').textContent=(cur+1)+' / '+S.length; }
+function fs(){ document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen(); }
+document.getElementById('prev').onclick=()=>show(cur-1); document.getElementById('next').onclick=()=>show(cur+1); document.getElementById('fs').onclick=fs;
+document.addEventListener('keydown',e=>{ if(e.target.isContentEditable) return;
+  if(['ArrowRight','PageDown',' '].includes(e.key)){ e.preventDefault(); show(cur+1); }
+  else if(['ArrowLeft','PageUp'].includes(e.key)){ e.preventDefault(); show(cur-1); }
+  else if(e.key==='f'||e.key==='F') fs(); });
+show(0);
+</script>
+</body>
+</html>
