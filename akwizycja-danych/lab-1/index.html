@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratorium 1 — Jedna zmiana Pakowaczki 01</title>
+<style>
+body{margin:0;background:#fffdf6;color:#222;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:26px;margin:.2em 0} h2{font-size:20px;margin:1.4em 0 .4em;color:#1f4fa8}
+h2.blok{border-bottom:2px solid #1f4fa8;padding-bottom:.2em}
+.sl,.task{border:1px solid #e3dccb;border-radius:10px;padding:8px 14px;margin:10px 0;background:#fff;break-inside:avoid}
+.sl h3,.task h3{margin:.1em 0 .3em;font-size:17px}
+.nr{display:inline-block;margin-right:.35em;font-weight:800;font-size:1.15em;color:#000}
+b{color:#b5520c} .muted{color:#777} .mono,code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em}
+code{background:#f3efe3;padding:0 .3em;border-radius:4px}
+table{border-collapse:collapse;width:100%} th,td{border:1px solid #ddd;padding:4px 7px;text-align:left;vertical-align:top} th{background:#f3efe3}
+td.r{text-align:right;white-space:nowrap}
+ul.check li{list-style:"☐  "}
+.dl{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.dl a{display:inline-block;padding:.5em 1em;border-radius:8px;border:1px solid #1f4fa8;color:#1f4fa8;text-decoration:none;font-weight:700}
+.dl a.main{background:#1f4fa8;color:#fff}
+button{font:inherit;padding:.4em .9em;border-radius:8px;border:1px solid #1f4fa8;background:#1f4fa8;color:#fff;cursor:pointer;font-weight:600}
+@media print{body{background:#fff;font-size:12.5px} .wrap{padding:0;max-width:none} .sl,.task{padding:5px 9px;margin:6px 0;border-color:#000} .noprint{display:none!important}
+  *{color:#000!important;background:#fff!important} th,td{border-color:#000} h2.blok{border-color:#000} .muted{font-size:.95em}}
+</style></head>
+<body><div class="wrap">
+<p class="noprint"><button onclick="window.print()">🖨 Drukuj</button></p>
+<h1>Laboratorium 1: Jedna zmiana Pakowaczki 01</h1>
+<p class="muted">Akwizycja i wizualizacja danych w procesach przemysłowych · ZIP, IV rok, spec. Inżynier procesu, niestacjonarne</p>
+<p>Na ćwiczeniach liczyliście OEE, Pareto i kartę kontrolną na kartce, z gotowych liczb. Dziś robicie to samo na <b>surowych danych z maszyny</b>: zapis wszystkich tagów Pakowaczki 01 co 10 s przez całą zmianę II (14:00–22:00). Jak w prawdziwym eksporcie z systemu — w danych są błędy, które trzeba najpierw znaleźć i usunąć.</p>
+
+<h2>Pliki</h2>
+<div class="dl"><a class="main" href="Lab_1_Pakowaczka01.xlsx" download>⬇ Lab_1_Pakowaczka01.xlsx</a><a href="Lab_1_Pakowaczka01.csv" download>surowy eksport .csv (dla chętnych)</a></div>
+<p>Pracujecie w pliku <b>.xlsx</b>: arkusz <b>Dane</b> (2 892 rekordy), arkusz <b>Wyniki</b> (żółte pola do wypełnienia), arkusz <b>Dashboard</b> (pusty — na zadanie 12).</p>
+
+<h2>Zasady</h2>
+<ul>
+  <li>Pracujecie <b>sami lub w parach</b> (jeden komputer = jeden plik). W arkuszu Wyniki wpiszcie imiona i nazwiska wszystkich osób z zespołu.</li>
+  <li>Od razu zapiszcie plik jako <code>Lab1_Nazwisko1_Nazwisko2.xlsx</code> i zapisujcie co jakiś czas (Ctrl+S).</li>
+  <li><b>Plik z wypełnionym arkuszem Wyniki jest sprawozdaniem</b> — oddajecie go na koniec zajęć w sposób podany przez prowadzącego. Nic nie robicie w domu.</li>
+  <li>Obliczenia róbcie formułami w Excelu (nie na kalkulatorze) — formuły zostają w pliku i pokazują, jak liczyliście.</li>
+</ul>
+
+<h2>Tagi w danych</h2>
+<table>
+<tr><th>kolumna</th><th>tag</th><th>co zawiera</th></tr>
+<tr><td>A</td><td>Czas</td><td>znacznik czasu rekordu (data i godzina)</td></tr>
+<tr><td>B</td><td>Pak01.Stan</td><td>praca / postój / awaria / przezbrojenie</td></tr>
+<tr><td>C</td><td>Pak01.PrzyczynaPostoju</td><td>przyczyna wybrana przez operatora na panelu (puste w czasie pracy)</td></tr>
+<tr><td>D, E</td><td>Pak01.LicznikDobre / LicznikZle</td><td>liczniki sztuk ze sterownika (rosną przez cały czas, nie zerują się na zmianę)</td></tr>
+<tr><td>F</td><td>Pak01.TempZgrzew</td><td>temperatura zgrzewu [°C], zakres normalny 165–180 °C</td></tr>
+<tr><td>G</td><td>Pak01.CisnieniePowietrza</td><td>ciśnienie sprężonego powietrza [bar], zakres normalny 5,5–6,5 bar</td></tr>
+<tr><td>H</td><td>Pak01.Energia</td><td>licznik energii [kWh] (osobny licznik, nie w sterowniku)</td></tr>
+</table>
+<p>Dane do wskaźników: czas planowany = <b>480 min</b> (w tej zmianie nie ma przerw planowanych), cykl idealny = <b>1,5 s</b> (40 szt./min), plan zmiany = <b>14 000 szt.</b></p>
+
+<h2>Ściąga z Excela</h2>
+<table>
+<tr><th>potrzebuję…</th><th>polska wersja Excela</th><th>angielska</th></tr>
+<tr><td>liczba wypełnionych komórek</td><td><code>=ILE.NIEPUSTYCH(A:A)</code></td><td><code>=COUNTA(A:A)</code></td></tr>
+<tr><td>średnia / min / max</td><td><code>=ŚREDNIA(F:F)</code> · <code>=MIN(…)</code> · <code>=MAKS(…)</code></td><td><code>AVERAGE · MIN · MAX</code></td></tr>
+<tr><td>odchylenie standardowe</td><td><code>=ODCH.STANDARDOWE.PRÓBKI(F:F)</code></td><td><code>=STDEV.S(F:F)</code></td></tr>
+<tr><td>warunek</td><td><code>=JEŻELI(warunek; tak; nie)</code>, <code>ORAZ(…; …)</code></td><td><code>IF(…), AND(…)</code></td></tr>
+<tr><td>zliczenie / suma z warunkiem</td><td><code>=LICZ.JEŻELI(B:B;"praca")</code> · <code>=SUMA.JEŻELI(…)</code></td><td><code>COUNTIF · SUMIF</code></td></tr>
+<tr><td>usunięcie duplikatów</td><td colspan="2">Dane → <i>Usuń duplikaty</i> (zaznaczone wszystkie kolumny)</td></tr>
+<tr><td>filtr</td><td colspan="2">Dane → <i>Filtruj</i> (strzałki w nagłówkach), Ctrl+Shift+L</td></tr>
+<tr><td>tabela przestawna</td><td colspan="2">kliknij w dane → Wstawianie → <i>Tabela przestawna</i> → nowy arkusz</td></tr>
+<tr><td>wykres liniowy</td><td colspan="2">zaznacz kolumnę Czas + kolumnę wartości (Ctrl) → Wstawianie → <i>Wykres liniowy</i></td></tr>
+<tr><td>wykres Pareto</td><td colspan="2">zaznacz przyczyny + minuty → Wstawianie → <i>Wykres statystyczny</i> → <i>Pareto</i></td></tr>
+</table>
+<p class="muted">Separator argumentów w polskim Excelu to średnik <code>;</code>, a przecinek jest separatorem dziesiętnym.</p>
+
+<h2 class="blok">Blok 1 — oględziny danych (45 min)</h2>
+<div class="task"><h3><span class="nr">1.</span>Ile mamy danych?</h3><p>a) Ile jest rekordów (wierszy danych, bez nagłówka)? b) Co ile sekund zapisywane są dane? Ile rekordów powinno być w zmianie 8 h przy takim zapisie?</p></div>
+<div class="task"><h3><span class="nr">2.</span>Wykresy i podejrzane miejsca</h3><p>Zróbcie trzy wykresy liniowe w czasie: <b>temperatura zgrzewu</b>, <b>ciśnienie powietrza</b>, <b>licznik dobrych</b>. Obejrzyjcie też kolumnę Czas. Znajdźcie <b>co najmniej 3 miejsca</b>, w których dane wyglądają podejrzanie — wpiszcie godzinę i co widać. Przypomnijcie sobie katalog błędów danych z ćwiczeń 2.</p><p class="muted">Podpowiedź: czy jakaś godzina występuje dwa razy? Czy wartość może być idealnie stała przez pół godziny?</p></div>
+
+<h2 class="blok">Blok 2 — czyszczenie danych (45 min)</h2>
+<div class="task"><h3><span class="nr">3.</span>Duplikaty</h3><p>Usuńcie duplikaty (Dane → Usuń duplikaty). Ile rekordów usunięto, ile zostało? Czy teraz liczba rekordów zgadza się z zadaniem 1?</p></div>
+<div class="task"><h3><span class="nr">4.</span>Średnia z błędem</h3><p>a) Policzcie średnią temperaturę zgrzewu. b) Odfiltrujcie wiersze z temperaturą 0, <b>wyczyśćcie te komórki</b> (Delete — brak danych to nie 0 °C) i policzcie średnią ponownie. Skąd te zera? O ile różnią się wyniki?</p></div>
+<div class="task"><h3><span class="nr">5.</span>Licznik z resetem</h3><p>a) Policzcie produkcję „naiwnie”: ostatnia wartość licznika dobrych − pierwsza. Co wyszło i dlaczego?<br>b) Dodajcie kolumnę <b>I „przyrost dobre”</b>: w komórce I3 <code>=JEŻELI(D3&gt;=D2; D3-D2; D3)</code>, skopiujcie w dół (dwuklik w róg komórki), zsumujcie. To samo dla złych (kolumna J z licznika E).</p><p class="muted">Formuła: jeśli licznik rośnie — bierzemy różnicę; jeśli spadł (restart) — liczymy od zera.</p></div>
+<div class="task"><h3><span class="nr">6.</span>Zamrożona wartość</h3><p>W którym okresie ciśnienie ma stałą wartość? Czy w tym czasie wiemy, jakie było ciśnienie? Co mogło być przyczyną?</p></div>
+
+<h2 class="blok">Blok 3 — wskaźniki (45 min)</h2>
+<div class="task"><h3><span class="nr">7.</span>Czas w stanach</h3><p>Tabela przestawna: <b>wiersze</b> — Pak01.Stan, <b>wartości</b> — liczba z Czas. Jeden rekord = 10 s, więc minuty = liczba rekordów / 6. Ile minut maszyna pracowała, a ile stała (postój + awaria + przezbrojenie)?</p></div>
+<div class="task"><h3><span class="nr">8.</span>OEE</h3><p>Policzcie <b>A</b> = czas pracy / 480, <b>P</b> = wyprodukowane / (czas pracy · 40), <b>Q</b> = dobre / wyprodukowane, <b>OEE</b> = A · P · Q. Sprawdźcie: OEE = dobre · 1,5 s / 28 800 s. Porównajcie ze zmianą I (61,7%).</p></div>
+<div class="task"><h3><span class="nr">9.</span>Energia na sztukę</h3><p>Energia zmiany = ostatnia − pierwsza wartość licznika kWh. Energia na dobrą sztukę = kWh · 1000 / sztuki dobre [Wh/szt.]. Porównajcie ze zmianą I (8,1 Wh/szt.).</p></div>
+<div class="task"><h3><span class="nr">10.</span>Pareto postojów</h3><p>a) Tabela przestawna: <b>wiersze</b> — PrzyczynaPostoju (bez pustych), <b>wartości</b> — liczba rekordów → przeliczcie na minuty i zróbcie wykres Pareto.<br>b) Ile było <b>zdarzeń</b> każdej przyczyny? Dodajcie kolumnę <b>K „start postoju”</b>: w K3 <code>=JEŻELI(ORAZ(C3&lt;&gt;""; C3&lt;&gt;C2); 1; 0)</code>, skopiujcie w dół i zsumujcie ją w tabeli przestawnej według przyczyny. Czy kolejność wg minut i wg liczby zdarzeń jest taka sama?</p></div>
+
+<h2 class="blok">Blok 4 — karta kontrolna i dashboard (45 min)</h2>
+<div class="task"><h3><span class="nr">11.</span>Karta kontrolna temperatury zgrzewu</h3><p>Na danych bez zer (zad. 4b): a) średnia x̄ i odchylenie σ, b) granice UCL = x̄ + 3σ, LCL = x̄ − 3σ. c) Dodajcie kolumny z x̄, UCL i LCL (ta sama wartość w każdym wierszu, z <code>$</code>: np. <code>=$N$2</code>) i zróbcie wykres liniowy temperatury z tymi trzema liniami. Kiedy temperatura pierwszy raz przekroczyła UCL? O której była awaria zgrzewu (kolumna C)? Ile minut wcześniej karta dała sygnał?</p></div>
+<div class="task"><h3><span class="nr">12.</span>Mini-dashboard</h3><p>W arkuszu <b>Dashboard</b> zbudujcie jeden ekran dla wybranego odbiorcy (operator / mistrz / kierownik — wpiszcie w Wynikach): 3–4 „kafle” z liczbami (np. OEE, wykonanie planu w %, energia na sztukę, czas postojów) oraz 2 wykresy (skopiujcie z poprzednich zadań: Ctrl+C → Ctrl+V). Zasada z ćwiczeń: kolor tylko dla odchyłek od celu.</p></div>
+<div class="task"><h3><span class="nr">13.</span>Wnioski</h3><p>Trzy zdania dla kierownika: co w tej zmianie poprawiać najpierw i dlaczego? Jakie dane z maszyny trzeba naprawić, żeby kolejne raporty były wiarygodne?</p></div>
+
+<h2>Jeśli skończycie wcześniej</h2>
+<div class="task"><h3>Zadanie dodatkowe — alarm temperatury</h3><p>Zaproponujcie alarm dla temperatury zgrzewu (próg i opóźnienie zadziałania, np. „&gt; 177 °C przez 1 min”). Ile razy zadziałałby w tej zmianie? Czy uprzedziłby awarię? Czy zadziałałby także przy przerwie w przewodzie — i czy to dobrze?</p></div>
+
+</div></body></html>
