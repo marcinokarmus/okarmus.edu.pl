@@ -106,6 +106,15 @@ tr.act td{background:#ffecec}
       <p class="muted" style="margin-top:8px">Proces: zakres normalny temperatury zgrzewu 168–176 °C · ciśnienie robocze 5,8–6,3 bar · cykl idealny 1,5 s (40 szt./min).</p>
     </div>
   </div>
+  <div class="card" id="homeCard" style="display:none;border:2px solid var(--vio)">
+    <h3>🏠 Pracujesz poza zajęciami (w domu, później)?</h3>
+    <p>Na zajęciach zegar maszyny = zegar komputera, a zdarzenia na maszynie zaczynają się o 13:35. Poza zajęciami uruchom „zmianę” od wybranej godziny — zegar maszyny ruszy od tej godziny i będzie płynął normalnie (także po zamknięciu i ponownym otwarciu strony). Godziny w sprawozdaniu podawaj wg zegara maszyny.</p>
+    <p><button class="b" data-home="11:30">od 11:30 — całe zajęcia (zdarzenia za ok. 2 h)</button>
+       <button class="b" data-home="13:00">od 13:00 — zdarzenia za 35 min</button>
+       <button class="b" data-home="13:30">od 13:30 — zdarzenia za 5 min (reguły alarmowe już gotowe)</button>
+       <button class="b2" data-home="">wróć do zegara rzeczywistego</button></p>
+    <p class="muted" id="homeInfo"></p>
+  </div>
   <div class="card">
     <h3>Podgląd wiadomości (jak węzeł „debug” w Node-RED)</h3>
     <div id="log"></div>
@@ -160,7 +169,7 @@ tr.act td{background:#ffecec}
       <option value="gauge">wskaźnik zegarowy</option>
       <option value="stany">oś stanów maszyny</option></select></label>
     <label>dane<select id="ed_tag"></select></label>
-    <label>okno czasu<select id="ed_okno"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="60">60 min</option><option value="120">2 h</option></select></label>
+    <label>okno czasu<select id="ed_okno"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="60">60 min</option><option value="120">2 h</option><option value="240">4 h</option></select></label>
     <label>próg / zakres normalny — dolny<input type="number" step="any" id="ed_lo"></label>
     <label>górny<input type="number" step="any" id="ed_hi"></label>
     <label>tytuł panelu<input id="ed_tyt" style="width:220px"></label>
@@ -269,7 +278,10 @@ function todayAt(s){const [h,m]=s.split(':').map(Number);const d=new Date();d.se
 const SPEED = Math.max(1, +(P.get('speed') || 1));
 const LOAD = Date.now();
 const START = P.get('od') ? todayAt(P.get('od')) : null;
-const simNow = () => (START === null && SPEED === 1) ? Date.now() : (START ?? LOAD) + (Date.now() - LOAD) * SPEED;
+// tryb domowy: zegar maszyny = zegar komputera + przesunięcie zapisane w przeglądarce (praca poza zajęciami)
+const HOME = (typeof localStorage !== 'undefined' && START === null && SPEED === 1) ? JSON.parse(localStorage.getItem('lab2_pak01_home') || 'null') : null;
+const OFFSET = HOME ? HOME.offset : 0;
+const simNow = () => (START === null && SPEED === 1) ? Date.now() + OFFSET : (START ?? LOAD) + (Date.now() - LOAD) * SPEED;
 let EPOCH = todayAt(P.get('epoch') || '11:00');   // początek „zmiany” — identyczny w hali (symulator.mjs) i w przeglądarce
 if (!P.get('epoch') && simNow() < EPOCH + M) EPOCH = Math.floor((simNow() - 30 * M) / M) * M;   // otwarte przed zajęciami (test) → 30 min historii
 const T0 = todayAt(P.get('t0') || '13:35');
@@ -296,7 +308,7 @@ if (!inScen(EPOCH + 92*M, EPOCH + 102*M)) addStop(EPOCH + 92*M, 600, 'przezbroje
 {
   const rs = mulberry32(77);
   let t = EPOCH + 6*M;
-  while (t < EPOCH + 10*3600e3) {
+  while (t < EPOCH + 14*3600e3) {
     const d = 60 + Math.round(rs() * 90);
     const clash = STOPS.some(s => t < s.e + 120e3 && t + d*1000 > s.s - 120e3) || inScen(t, t + d*1000);
     if (!clash) addStop(t, d, 'postój', 'zacięcie folii');
@@ -708,7 +720,7 @@ $('#s_go').onclick = () => {
     const kartaT = '<table><tr><th>#</th><th>godzina</th><th>co było widać</th><th>przyczyna</th><th>działanie</th></tr>' + [0, 1, 2, 3, 4, 5].map(i => { const r = rep.karta[i] || []; return r.some(x => x) ? `<tr><td>${i + 1}</td>${[0, 1, 2, 3].map(j => `<td>${esc(r[j])}</td>`).join('')}</tr>` : ''; }).join('') + '</table>';
     const qa = (q, a) => `<p><b>${q}</b><br>${esc(a).replace(/\n/g, '<br>') || '<i>—</i>'}</p>`;
     const html = `<!doctype html><html lang="pl"><head><meta charset="utf-8"><title>Lab 2 — sprawozdanie — ${esc(rep.os)}</title><style>body{font:14px/1.45 system-ui,Segoe UI,Arial;max-width:1000px;margin:20px auto;padding:0 14px}table{border-collapse:collapse;margin:6px 0 14px}th,td{border:1px solid #bbb;padding:3px 7px;text-align:left}th{background:#eee}figure{display:inline-block;width:48%;margin:0 1% 12px;vertical-align:top}figure img{width:100%;border:1px solid #ccc}figcaption{font-weight:700}h2{border-bottom:2px solid #1f4fa8;color:#1f4fa8}</style></head><body>
-<h1>Laboratorium 2: Pakowaczka 01 na żywo — sprawozdanie</h1><p><b>${esc(rep.os)}</b><br>wygenerowano: ${new Date().toLocaleString('pl-PL')} · czas symulacji: ${fmt(simNow())} · wariant: symulator przeglądarkowy</p>
+<h1>Laboratorium 2: Pakowaczka 01 na żywo — sprawozdanie</h1><p><b>${esc(rep.os)}</b><br>wygenerowano: ${new Date().toLocaleString('pl-PL')} · czas symulacji: ${fmt(simNow())} · ${HOME ? `<b>tryb domowy</b>: zmiana od ${HOME.start}, uruchomiona ${HOME.real}` : 'na zajęciach (zegar rzeczywisty)'}</p>
 <h2>Z1–Z3. Tor akwizycji</h2>${cfgT}${qa('Z1. Przeliczenie mA → °C', rep.z1)}${qa('Z2. Bez reguły jakości', rep.z2)}${qa('Z3. Martwa strefa', rep.z3)}
 <h2>Z4. Dashboard: ${esc(dashMeta.title)} · odbiorca: ${esc(dashMeta.odb) || '<i>nie wybrano</i>'}</h2>${imgs || '<p><i>brak paneli</i></p>'}
 <h2>Z5. Reguły alarmowe</h2>${rulesT}${qa('Działania operatora', rep.z5)}<h3>Dziennik alarmów (${EPS.length})</h3>${almT}
@@ -774,6 +786,19 @@ if (P.get('prowadzacy')) {
   const box = document.createElement('div'); box.className = 'card'; box.style.cssText = 'position:fixed;right:10px;bottom:10px;z-index:9;max-width:340px;font-size:13px;opacity:.95';
   box.innerHTML = '<b>Scenariusz (tylko prowadzący)</b><br>' + ev.map(([t, s]) => `${fmtM(t)} — ${s}`).join('<br>') + `<br><span class="muted">start: ?t0=${fmtM(T0)} · podgląd: ?speed=20&od=gg:mm</span>`;
   document.body.appendChild(box);
+}
+// tryb domowy — karta widoczna poza oknem zajęć (7.11.2026, 11:00–14:30) albo gdy tryb jest włączony
+{
+  const d = new Date(), mm = d.getHours() * 60 + d.getMinutes();
+  const inClass = d.getFullYear() === 2026 && d.getMonth() === 10 && d.getDate() === 7 && mm >= 660 && mm < 870;
+  if (!inClass || HOME || P.get('dom')) $('#homeCard').style.display = 'block';
+  if (HOME) { $('#homeInfo').textContent = `Tryb domowy włączony: zmiana uruchomiona ${HOME.real} od godziny ${HOME.start}.`; document.querySelector('header .muted').textContent = '🏠 tryb domowy · próbka co 1 s'; }
+  $$('[data-home]').forEach(b => b.onclick = () => {
+    const hh = b.dataset.home;
+    if (hh) localStorage.setItem(LS + 'home', JSON.stringify({start: hh, offset: todayAt(hh) - Date.now(), real: new Date().toLocaleString('pl-PL')}));
+    else localStorage.setItem(LS + 'home', 'null');
+    localStorage.setItem(LS + 'acks', '{}'); location.reload();
+  });
 }
 renderRules(); fillEditor(); tick(true);
 setInterval(() => tick(false), SPEED > 1 ? 250 : 1000);
