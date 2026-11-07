@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 2 — Pakowaczka 01 na żywo (symulator hali)</title>
+<style>
+:root{--bg:#f4f5f2;--panel:#fff;--fg:#1d2330;--muted:#5d6675;--grid:#d9dce2;--accent:#1f6fd1;--ok:#1f9a5a;--warn:#d98a00;--bad:#d23b3b;--vio:#7a4cc9}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{display:flex;align-items:center;gap:14px;padding:8px 16px;background:#1d2330;color:#fff;flex-wrap:wrap}
+header h1{font-size:17px;margin:0;font-weight:700}
+header .sp{flex:1}
+.pill{padding:3px 12px;border-radius:20px;font-weight:700;font-size:14px;background:#555}
+#clock{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:16px}
+#alarmBanner{background:var(--bad);color:#fff;padding:3px 12px;border-radius:6px;font-weight:700;display:none;cursor:pointer}
+#alarmBanner.blink{animation:bl 1s steps(2) infinite}
+@keyframes bl{50%{opacity:.55}}
+nav{display:flex;gap:4px;padding:8px 16px 0;background:#e6e8e3;flex-wrap:wrap}
+nav button{font:inherit;font-weight:600;border:1px solid var(--grid);border-bottom:none;background:#f7f7f4;padding:7px 14px;border-radius:8px 8px 0 0;cursor:pointer;color:var(--muted)}
+nav button.on{background:var(--panel);color:var(--fg);border-color:#bfc4cc}
+main{padding:14px 16px 40px}
+section{display:none} section.on{display:block}
+.card{background:var(--panel);border:1px solid var(--grid);border-radius:10px;padding:10px 14px;margin:0 0 12px}
+.card h3{margin:.1em 0 .5em;font-size:16px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.row>.card{flex:1;min-width:300px}
+table{border-collapse:collapse;width:100%}
+th,td{border-bottom:1px solid var(--grid);padding:4px 7px;text-align:left;vertical-align:top;font-size:14px}
+th{background:#f0f1ed;font-weight:700}
+td.r,th.r{text-align:right;white-space:nowrap}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+.muted{color:var(--muted)}
+label{display:inline-flex;flex-direction:column;font-size:13px;color:var(--muted);gap:2px;margin:0 10px 8px 0}
+input,select,textarea{font:inherit;font-size:14px;padding:4px 6px;border:1px solid #b9bec7;border-radius:6px;background:#fff;color:var(--fg)}
+input[type=number]{width:110px}
+textarea{width:100%;min-height:54px}
+button.b{font:inherit;font-weight:600;padding:5px 12px;border-radius:7px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+button.b2{font:inherit;padding:4px 10px;border-radius:7px;border:1px solid #b9bec7;background:#fff;cursor:pointer}
+button.del{border-color:var(--bad);color:var(--bad)}
+.big{font-size:22px;font-weight:800}
+.ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
+.plate{border:2px solid #444;border-radius:6px;padding:8px 12px;background:#fbfbf6;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;line-height:1.5}
+#log{height:300px;overflow:auto;background:#1d2330;color:#cfe3ff;border-radius:8px;padding:6px 10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
+#log .tp{color:#8fb3e8} #log .v{color:#ffd88a}
+.dash{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pan{background:var(--panel);border:1px solid var(--grid);border-radius:10px;padding:6px 8px 4px;position:relative;min-height:230px;display:flex;flex-direction:column}
+.pan.sel{outline:3px solid var(--accent)}
+.pan .pt{font-weight:700;font-size:14px;display:flex;gap:6px;align-items:center}
+.pan .pt span{flex:1}
+.pan canvas{width:100%;height:190px;display:block}
+.pan.empty{align-items:center;justify-content:center;color:var(--muted);border-style:dashed;cursor:pointer}
+#dashTitle{font-size:18px;font-weight:800;margin:0 0 8px}
+.hint{background:#fff7e0;border-left:5px solid var(--warn);padding:6px 10px;border-radius:6px;font-size:14px;margin:6px 0}
+.tag{display:inline-block;padding:0 7px;border-radius:5px;font-size:12px;font-weight:700;color:#fff}
+.p1{background:var(--bad)} .p2{background:var(--warn)} .p3{background:#3d7cc9}
+tr.act td{background:#ffecec}
+@media (max-width:1100px){.dash{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🏭 Hala 1 · Pakowaczka 01</h1>
+  <span class="pill" id="stanPill">—</span>
+  <span id="alarmBanner" title="Przejdź do alarmów"></span>
+  <span class="sp"></span>
+  <span class="muted" style="color:#aab">sterownik online · próbka co 1 s</span>
+  <span id="clock">--:--:--</span>
+</header>
+<nav id="tabs">
+  <button data-t="sig" class="on">1. Sygnały ze sterownika</button>
+  <button data-t="acq">2. Akwizycja</button>
+  <button data-t="dash">3. Dashboard</button>
+  <button data-t="alm">4. Alarmy</button>
+  <button data-t="exp">5. Eksport</button>
+  <button data-t="rep">6. Sprawozdanie</button>
+</nav>
+<main>
+
+<!-- 1. SYGNAŁY -->
+<section id="sig" class="on">
+  <div class="row">
+    <div class="card" style="flex:1.2">
+      <h3>Tagi publikowane przez sterownik (MQTT)</h3>
+      <table id="tagTable"><thead><tr><th>Temat (topic)</th><th class="r">Wartość</th><th>Opis</th></tr></thead><tbody></tbody></table>
+      <p class="muted">Tak wyglądają dane „na kablu” — sterownik wysyła liczby, a nie gotowe °C i bary. Zamiana na wielkości fizyczne to zadanie toru akwizycji (zakładka 2).</p>
+    </div>
+    <div class="card">
+      <h3>Tabliczki znamionowe i dokumentacja</h3>
+      <div class="plate">
+        <b>TT101 — przetwornik temperatury zgrzewu</b><br>
+        wyjście: 4–20 mA (pętla prądowa)<br>
+        zakres pomiarowy: 0 … 300 °C<br>
+        sygnalizacja uszkodzenia (NAMUR NE 43): &lt; 3,8 mA lub &gt; 20,5 mA
+      </div>
+      <div class="plate" style="margin-top:8px">
+        <b>PT102 — ciśnienie powietrza</b> · Modbus TCP, rejestr 40003<br>
+        wartość rejestru = ciśnienie [bar] × 100 (liczba całkowita)
+      </div>
+      <div class="plate" style="margin-top:8px">
+        <b>Stan</b>: 1 = praca · 2 = postój · 3 = awaria · 4 = przezbrojenie<br>
+        <b>LicznikDobre, LicznikZle</b>: liczniki narastające sterownika (zerowane przy restarcie)<br>
+        <b>Energia</b>: licznik energii czynnej [kWh], narastający
+      </div>
+      <p class="muted" style="margin-top:8px">Proces: zakres normalny temperatury zgrzewu 168–176 °C · ciśnienie robocze 5,8–6,3 bar · cykl idealny 1,5 s (40 szt./min).</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Podgląd wiadomości (jak węzeł „debug” w Node-RED)</h3>
+    <div id="log"></div>
+  </div>
+</section>
+
+<!-- 2. AKWIZYCJA -->
+<section id="acq">
+  <div class="row">
+    <div class="card">
+      <h3>Temperatura zgrzewu (TT101, 4–20 mA)</h3>
+      <label>zakres: wartość dla 4 mA [°C]<input type="number" step="any" id="c_tmin"></label>
+      <label>zakres: wartość dla 20 mA [°C]<input type="number" step="any" id="c_tmax"></label><br>
+      <label>jakość „zła”, gdy prąd mniejszy niż [mA]<input type="number" step="any" id="c_qthr" placeholder="brak reguły"></label>
+      <label>martwa strefa zapisu [°C] (0 = zapis każdej próbki)<input type="number" step="any" min="0" id="c_tdb" value="0"></label>
+      <div class="card" style="background:#f7f8f5;margin-top:6px">
+        <div class="mono" id="prevT">—</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Ciśnienie powietrza (PT102, rejestr Modbus)</h3>
+      <label>mnożnik: bar = rejestr × …<input type="number" step="any" id="c_pfac"></label>
+      <label>martwa strefa zapisu [bar]<input type="number" step="any" min="0" id="c_pdb" value="0"></label>
+      <div class="card" style="background:#f7f8f5;margin-top:6px">
+        <div class="mono" id="prevP">—</div>
+      </div>
+      <p class="muted">Liczniki, stan i energia są zapisywane bez przeliczania (przy każdej zmianie).</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Historian — ile danych zapisujemy</h3>
+    <table id="volTable"><thead><tr><th>Tag</th><th class="r">Odebrano próbek</th><th class="r">Zapisano</th><th class="r">Oszczędność</th><th class="r">Rekordów na rok (szacunek)</th></tr></thead><tbody></tbody></table>
+    <p class="muted">Historian zapisuje próbkę, gdy zmiana od ostatniego zapisu przekracza martwą strefę, zmienia się jakość albo minęło 60 s od ostatniego zapisu („bicie serca”).</p>
+  </div>
+</section>
+
+<!-- 3. DASHBOARD -->
+<section id="dash">
+  <div class="row" style="align-items:center;margin-bottom:8px">
+    <label style="margin:0">tytuł dashboardu<input id="d_title" style="width:300px" placeholder="np. Pakowaczka 01 — ekran operatora"></label>
+    <label style="margin:0">odbiorca<select id="d_odb"><option value="">— wybierz —</option><option>operator</option><option>mistrz zmiany</option><option>kierownik produkcji</option><option>utrzymanie ruchu</option></select></label>
+    <span class="sp" style="flex:1"></span>
+    <button class="b2" id="fsBtn">⛶ pełny ekran</button>
+  </div>
+  <div id="dashTitle"></div>
+  <div class="dash" id="dashGrid"></div>
+  <div class="card" style="margin-top:12px" id="editor">
+    <h3>Edycja panelu <span id="ed_nr"></span></h3>
+    <label>typ panelu<select id="ed_typ">
+      <option value="trend">trend (wykres w czasie)</option>
+      <option value="kafel">kafel liczbowy</option>
+      <option value="gauge">wskaźnik zegarowy</option>
+      <option value="stany">oś stanów maszyny</option></select></label>
+    <label>dane<select id="ed_tag"></select></label>
+    <label>okno czasu<select id="ed_okno"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="60">60 min</option><option value="120">2 h</option></select></label>
+    <label>próg / zakres normalny — dolny<input type="number" step="any" id="ed_lo"></label>
+    <label>górny<input type="number" step="any" id="ed_hi"></label>
+    <label>tytuł panelu<input id="ed_tyt" style="width:220px"></label>
+    <div><button class="b" id="ed_save">Zapisz panel</button> <button class="b2 del" id="ed_del">Usuń panel</button> <span class="muted" id="ed_info"></span></div>
+    <p class="muted">Kliknij panel (albo puste pole), aby go edytować. Trend: zakres normalny pokazuje się jako zielony pas, punkty poza nim są czerwone. Kafel/wskaźnik: wartość poza progami świeci na czerwono.</p>
+  </div>
+</section>
+
+<!-- 4. ALARMY -->
+<section id="alm">
+  <div class="row">
+    <div class="card" style="flex:1.3">
+      <h3>Reguły alarmowe</h3>
+      <table id="ruleTable"><thead><tr><th>Prio</th><th>Nazwa</th><th>Warunek</th><th class="r">Zwłoka</th><th></th></tr></thead><tbody></tbody></table>
+      <div style="margin-top:8px">
+        <label>nazwa<input id="r_name" style="width:200px" placeholder="np. Temperatura za wysoka"></label>
+        <label>sygnał<select id="r_tag">
+          <option value="temp">temperatura zgrzewu [°C]</option>
+          <option value="cisn">ciśnienie [bar]</option>
+          <option value="tq">jakość pomiaru temperatury</option>
+          <option value="stan">stan maszyny</option>
+          <option value="braki">braki — ostatnie 15 min [%]</option></select></label>
+        <label>warunek<select id="r_war">
+          <option value="gt">większe niż</option>
+          <option value="lt">mniejsze niż</option>
+          <option value="same">bez zmian przez [s]</option>
+          <option value="bad">jakość zła</option>
+          <option value="awaria">stan = awaria</option></select></label>
+        <label>wartość<input type="number" step="any" id="r_val"></label>
+        <label>zwłoka [s]<input type="number" min="0" id="r_del" value="0"></label>
+        <label>priorytet<select id="r_prio"><option value="1">1 — wysoki</option><option value="2" selected>2 — średni</option><option value="3">3 — niski</option></select></label>
+        <div><button class="b" id="r_add">Dodaj regułę</button> <span class="muted" id="r_info"></span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Statystyka alarmów</h3>
+      <div id="almStats"></div>
+      <div class="hint">ISA-18.2 (zarządzanie alarmami): operator zdąży sensownie zareagować na ok. <b>1 alarm na 10 min</b>. Każdy alarm musi wymagać działania — jeśli nie wymaga, to nie jest alarm.</div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Dziennik alarmów</h3>
+    <table id="almTable"><thead><tr><th>Prio</th><th>Alarm</th><th>Wejście</th><th>Wyjście</th><th class="r">Czas trwania</th><th>Potwierdzenie</th></tr></thead><tbody></tbody></table>
+  </div>
+</section>
+
+<!-- 5. EKSPORT -->
+<section id="exp">
+  <div class="card">
+    <h3>Eksport danych z historiana do CSV</h3>
+    <label>od (gg:mm)<input id="e_od" style="width:90px"></label>
+    <label>do (gg:mm)<input id="e_do" style="width:90px"></label>
+    <label>rozdzielczość<select id="e_res"><option value="1">każda sekunda</option><option value="10" selected>co 10 s</option><option value="60">co 1 min</option></select></label>
+    <div><button class="b" id="e_go">⬇ Pobierz CSV</button> <span class="muted" id="e_info"></span></div>
+    <p class="muted">Format jak w Lab 1: separator „;”, przecinek dziesiętny, kodowanie UTF-8 — plik otwiera się bezpośrednio w polskim Excelu. Temperatura i ciśnienie są przeliczone wg Twojej konfiguracji z zakładki 2; przy złej jakości pomiaru komórka jest pusta, a kolumna Jakość = „zła”.</p>
+  </div>
+</section>
+
+<!-- 6. SPRAWOZDANIE -->
+<section id="rep">
+  <div class="card">
+    <h3>Zespół</h3>
+    <label style="width:100%">imiona i nazwiska (sami lub w parze)<input id="s_os" style="width:100%"></label>
+  </div>
+  <div class="card">
+    <h3>Zadanie 1–3: akwizycja</h3>
+    <label style="width:100%">Z1. Odczytana wartość TT101 [mA], godzina odczytu i Twoje przeliczenie na °C „na piechotę” (wzór!)<textarea id="s_z1"></textarea></label>
+    <label style="width:100%">Z3. Jaka martwa strefa dla temperatury i dlaczego? Ile % zapisów oszczędza? Co tracimy?<textarea id="s_z3"></textarea></label>
+  </div>
+  <div class="card">
+    <h3>Zadanie 6: karta zdarzeń zmiany</h3>
+    <p class="muted">Każde zdarzenie, które zauważyłeś(-aś) na dashboardzie lub w alarmach. Godzina = kiedy <b>Ty</b> to zauważyłeś(-aś), nie kiedy się zaczęło.</p>
+    <table id="kartaT"><thead><tr><th>#</th><th>godzina wykrycia</th><th>co było widać (panel / alarm)</th><th>prawdopodobna przyczyna</th><th>co zrobiłby operator / UR</th></tr></thead><tbody></tbody></table>
+  </div>
+  <div class="card">
+    <h3>Zadanie 7: eksport i wnioski</h3>
+    <label style="width:100%">Ile sztuk dobrych od 11:30 wyszło Ci w Excelu z eksportu, a ile pokazuje kafel? Skąd ewentualna różnica?<textarea id="s_z7a"></textarea></label>
+    <label style="width:100%">Które alarmy były zasadne, a które to „szum”? Co zmienisz w regułach?<textarea id="s_z7b"></textarea></label>
+    <label style="width:100%">Które zdarzenie wykrylibyście wcześniej niż awarię? Dzięki któremu panelowi / regule?<textarea id="s_z7c"></textarea></label>
+  </div>
+  <div class="card">
+    <button class="b" id="s_go">⬇ Pobierz sprawozdanie (plik .html)</button>
+    <span class="muted">Plik zawiera konfigurację, obraz dashboardu, reguły i dziennik alarmów oraz odpowiedzi. Prześlij go prowadzącemu. Odpowiedzi zapisują się w przeglądarce na bieżąco.</span>
+  </div>
+</section>
+</main>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+/*MODEL_START — ten blok czyta też Lab_2_hala/symulator.mjs */
+const P = new URLSearchParams(location.search);
+const M = 60e3;
+function todayAt(s){const [h,m]=s.split(':').map(Number);const d=new Date();d.setHours(h,m||0,0,0);return d.getTime();}
+// ─── zegar symulacji ───────────────────────────────────────────────────────
+// ?speed=20&od=13:30 — przyspieszony podgląd (dla prowadzącego); ?t0=13:35 — start scenariusza awarii
+const SPEED = Math.max(1, +(P.get('speed') || 1));
+const LOAD = Date.now();
+const START = P.get('od') ? todayAt(P.get('od')) : null;
+const simNow = () => (START === null && SPEED === 1) ? Date.now() : (START ?? LOAD) + (Date.now() - LOAD) * SPEED;
+let EPOCH = todayAt(P.get('epoch') || '11:00');   // początek „zmiany” — identyczny w hali (symulator.mjs) i w przeglądarce
+if (!P.get('epoch') && simNow() < EPOCH + M) EPOCH = Math.floor((simNow() - 30 * M) / M) * M;   // otwarte przed zajęciami (test) → 30 min historii
+const T0 = todayAt(P.get('t0') || '13:35');
+const fmt = t => new Date(t).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+const fmtM = t => new Date(t).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'});
+const pl = (x, d=1) => (x === null || x === undefined || isNaN(x)) ? '—' : x.toLocaleString('pl-PL', {minimumFractionDigits:d, maximumFractionDigits:d});
+const EPOCH_TXT = fmtM(EPOCH);
+
+// ─── PRNG (identyczny przebieg na każdym komputerze) ───────────────────────
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+// ─── harmonogram postojów ──────────────────────────────────────────────────
+const STOPS = [];
+const addStop = (t, durS, stan, prz) => STOPS.push({s:t, e:t + durS*1000, stan, prz});
+// scenariusz „awaria na zmianie” (minuty od T0)
+addStop(T0 + 3*M, 120, 'postój', 'zacięcie folii');
+addStop(T0 + 31*M, 300, 'awaria', 'awaria zgrzewu');
+addStop(T0 + 38*M, 60, 'awaria', 'restart sterownika');
+const FROZ = [T0 + 10*M, T0 + 16*M], WIRE = [T0 + 18*M, T0 + 21*M], DRIFT = [T0 + 23*M, T0 + 31*M], RESET = T0 + 39*M;
+// tło: zwykła praca
+const inScen = (a, b) => b > T0 - 3*M && a < T0 + 42*M;
+if (!inScen(EPOCH + 38*M, EPOCH + 44*M)) addStop(EPOCH + 38*M, 360, 'postój', 'brak materiału');
+if (!inScen(EPOCH + 92*M, EPOCH + 102*M)) addStop(EPOCH + 92*M, 600, 'przezbrojenie', 'przezbrojenie');
+{
+  const rs = mulberry32(77);
+  let t = EPOCH + 6*M;
+  while (t < EPOCH + 10*3600e3) {
+    const d = 60 + Math.round(rs() * 90);
+    const clash = STOPS.some(s => t < s.e + 120e3 && t + d*1000 > s.s - 120e3) || inScen(t, t + d*1000);
+    if (!clash) addStop(t, d, 'postój', 'zacięcie folii');
+    t += Math.round((7 + rs() * 9) * M / 1000) * 1000;
+  }
+}
+STOPS.sort((a, b) => a.s - b.s);
+const stopAt = t => { for (const s of STOPS) { if (s.s > t) break; if (t < s.e) return s; } return null; };
+const STAN_KOD = {'praca':1, 'postój':2, 'awaria':3, 'przezbrojenie':4};
+const KOD_STAN = ['', 'praca', 'postój', 'awaria', 'przezbrojenie'];
+const STAN_KOL = {1:'#1f9a5a', 2:'#e0a020', 3:'#d23b3b', 4:'#7a4cc9'};
+
+// ─── model maszyny: jedna próbka na sekundę ────────────────────────────────
+const H = {t:[], ma:[], preg:[], dobre:[], zle:[], kwh:[], st:[], prz:[]};
+const rg = mulberry32(2026);
+const gauss = () => { let u = 0; while (!u) u = rg(); const v = rg(); return Math.sqrt(-2*Math.log(u)) * Math.cos(2*Math.PI*v); };
+const S = {dobre:1281460, zle:23517, kwh:48652.4, noise:0, pn:0, frozen:null};
+function step(t){
+  const s = stopAt(t), st = s ? STAN_KOD[s.stan] : 1, prz = s ? s.prz : '';
+  const prev = H.st.length ? H.st[H.st.length - 1] : 1;
+  if (prev === 1) {
+    const n = rg() < 0.62 ? 1 : 0;
+    const pb = (t >= DRIFT[0] + 4*M && t < DRIFT[1]) ? 0.09 : 0.016;
+    const b = (n && rg() < pb) ? 1 : 0;
+    S.dobre += n - b; S.zle += b;
+    S.kwh += (13.5 + (rg() - .5) * 1.2) / 3600;
+  } else S.kwh += (3.6 + (rg() - .5) * .4) / 3600;
+  if (t >= RESET && t < RESET + 1000) { S.dobre = 0; S.zle = 0; }
+  S.noise = Math.max(-2.2, Math.min(2.2, 0.985 * S.noise + gauss() * 0.17));
+  let temp = 172 + S.noise;
+  if (t >= DRIFT[0] && t < DRIFT[1]) temp += 6.5 * (t - DRIFT[0]) / (DRIFT[1] - DRIFT[0]);
+  else if (t >= DRIFT[1] && t < DRIFT[1] + 5*M) temp += 6.5 * (1 - (t - DRIFT[1]) / (5*M));
+  let ma = Math.round((4 + 16 * temp / 300) * 100) / 100;
+  if (t >= WIRE[0] && t < WIRE[1]) ma = Math.round(rg() * 3) / 100;
+  S.pn = Math.max(-.15, Math.min(.15, 0.97 * S.pn + gauss() * 0.012));
+  let preg = Math.round((6 + S.pn + (st !== 1 ? 0.12 : 0)) * 100);
+  if (t >= FROZ[0] && t < FROZ[1]) { if (S.frozen === null) S.frozen = preg; preg = S.frozen; } else S.frozen = null;
+  H.t.push(t); H.ma.push(ma); H.preg.push(preg); H.dobre.push(S.dobre); H.zle.push(S.zle);
+  H.kwh.push(Math.round(S.kwh * 100) / 100); H.st.push(st); H.prz.push(prz);
+}
+let lastT = EPOCH - 1000;
+function catchUp(){ const n = simNow(); let k = 0; while (lastT + 1000 <= n) { step(lastT += 1000); k++; } return k; }
+/*MODEL_END*/
+
+// ─── stan ucznia (localStorage) ────────────────────────────────────────────
+const LS = 'lab2_pak01_';
+const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(LS + k)); return v ?? d; } catch(e) { return d; } };
+const save = (k, v) => localStorage.setItem(LS + k, JSON.stringify(v));
+let cfg = load('cfg', {tmin:'', tmax:'', qthr:'', tdb:0, pfac:'', pdb:0});
+let panels = load('panels', [null, null, null, null, null, null]);
+let rules = load('rules', []);
+let acks = load('acks', {});
+let dashMeta = load('dash', {title:'', odb:''});
+const num = v => (v === '' || v === null || v === undefined || isNaN(+v)) ? null : +v;
+
+// ─── przetwarzanie (tor akwizycji) ─────────────────────────────────────────
+let D = {};   // wartości pochodne, przeliczane co sekundę
+function scaleT(ma){
+  const a = num(cfg.tmin), b = num(cfg.tmax);
+  if (a === null || b === null) return null;
+  return a + (ma - 4) / 16 * (b - a);
+}
+const tBad = ma => { const q = num(cfg.qthr); return q !== null && (ma < q || ma > 20.5); };
+function record(vals, bad, db){   // martwa strefa + jakość + bicie serca 60 s → indeksy zapisanych próbek
+  const idx = []; let lv = null, lq = null, lt = -1e15;
+  for (let i = 0; i < vals.length; i++) {
+    const v = vals[i], q = bad ? bad[i] : false;
+    if (v === null) continue;
+    if (lv === null || q !== lq || Math.abs(v - lv) > db || H.t[i] - lt >= 60e3) { idx.push(i); lv = v; lq = q; lt = H.t[i]; }
+  }
+  return idx;
+}
+function derive(){
+  const n = H.t.length;
+  const temp = new Array(n), tq = new Array(n), cisn = new Array(n);
+  const pf = num(cfg.pfac);
+  for (let i = 0; i < n; i++) {
+    const v = scaleT(H.ma[i]); tq[i] = tBad(H.ma[i]);
+    temp[i] = (v === null) ? null : (tq[i] ? NaN : v);
+    cisn[i] = pf === null ? null : H.preg[i] * pf;
+  }
+  const tRec = record(temp.map(v => (v === null ? null : (isNaN(v) ? -1e9 : v))), tq, Math.max(0, num(cfg.tdb) || 0));
+  const pRec = record(cisn, null, Math.max(0, num(cfg.pdb) || 0));
+  // sztuki z przyrostów (odporne na reset licznika)
+  const inc = arr => { let s = 0; for (let i = 1; i < n; i++) s += arr[i] >= arr[i-1] ? arr[i] - arr[i-1] : arr[i]; return s; };
+  const incFrom = (arr, i0) => { let s = 0; for (let i = Math.max(1, i0); i < n; i++) s += arr[i] >= arr[i-1] ? arr[i] - arr[i-1] : arr[i]; return s; };
+  const dob = inc(H.dobre), zl = inc(H.zle);
+  let pracaS = 0; for (let i = 0; i < n; i++) if (H.st[i] === 1) pracaS++;
+  const A = n ? pracaS / n : 0, Pp = pracaS ? (dob + zl) / (pracaS / 60 * 40) : 0, Q = (dob + zl) ? dob / (dob + zl) : 0;
+  const i15 = Math.max(0, n - 900), d15 = incFrom(H.dobre, i15), z15 = incFrom(H.zle, i15);
+  const i5 = Math.max(0, n - 300), szt5 = incFrom(H.dobre, i5) + incFrom(H.zle, i5);
+  const kwh = n ? H.kwh[n-1] - H.kwh[0] : 0;
+  D = {n, temp, tq, cisn, tRec, pRec,
+       kpi:{dobre:dob, braki:(d15 + z15) ? 100 * z15 / (d15 + z15) : 0, oee:100 * A * Pp * Q,
+            wh:dob ? kwh * 1000 / dob : null, tempo:szt5 / Math.max(1, (n - i5) / 60)}};
+}
+
+// ─── katalog danych dla paneli ─────────────────────────────────────────────
+const TAGS = {
+  temp:     {n:'Temperatura zgrzewu', u:'°C', k:'num', d:1, def:[168, 176]},
+  cisn:     {n:'Ciśnienie powietrza', u:'bar', k:'num', d:2, def:[5.8, 6.3]},
+  ma:       {n:'TT101 — sygnał surowy', u:'mA', k:'num', d:2, def:[4, 20]},
+  dobre_raw:{n:'Licznik dobrych — wartość ze sterownika', u:'szt.', k:'num', d:0},
+  dobre:    {n:`Sztuki dobre od ${EPOCH_TXT} (z przyrostów)`, u:'szt.', k:'kpi', d:0},
+  braki:    {n:'Braki — ostatnie 15 min', u:'%', k:'kpi', d:1, def:[0, 3]},
+  oee:      {n:`OEE od ${EPOCH_TXT}`, u:'%', k:'kpi', d:1, def:[65, 100]},
+  wh:       {n:'Energia na sztukę', u:'Wh/szt.', k:'kpi', d:1},
+  tempo:    {n:'Tempo — ostatnie 5 min', u:'szt./min', k:'kpi', d:1, def:[30, 45]},
+  stan:     {n:'Stan maszyny', u:'', k:'stan'},
+};
+function series(tag){ // → [ [t, v], ... ] ; v = NaN → brak danych (zła jakość)
+  if (tag === 'temp') return D.tRec.map(i => [H.t[i], D.temp[i]]);
+  if (tag === 'cisn') return D.pRec.map(i => [H.t[i], D.cisn[i]]);
+  if (tag === 'ma') return H.t.map((t, i) => [t, H.ma[i]]);
+  if (tag === 'dobre_raw') return H.t.map((t, i) => [t, H.dobre[i]]);
+  return [];
+}
+function current(tag){
+  const n = D.n - 1; if (n < 0) return null;
+  if (tag === 'temp') { if (D.temp[n] === null) return null; const last = D.tRec[D.tRec.length - 1]; return last === undefined ? null : D.temp[last]; }
+  if (tag === 'cisn') { const last = D.pRec[D.pRec.length - 1]; return last === undefined ? null : D.cisn[last]; }
+  if (tag === 'ma') return H.ma[n];
+  if (tag === 'dobre_raw') return H.dobre[n];
+  if (tag === 'stan') return H.st[n];
+  return D.kpi[tag];
+}
+
+// ─── rysowanie paneli ──────────────────────────────────────────────────────
+function setupCanvas(cv){
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(50, r.width), h = Math.max(50, r.height);
+  if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h);
+  c.font = '12px system-ui,Segoe UI,Arial'; return [c, w, h];
+}
+function drawTrend(cv, p){
+  const [c, w, h] = setupCanvas(cv), T = TAGS[p.tag];
+  const tEnd = H.t[H.t.length - 1] || simNow(), tStart = tEnd - p.okno * M;
+  const all = series(p.tag); if (!all.length) return msg(c, w, h, 'brak danych — skonfiguruj tor akwizycji (zakładka 2)');
+  // ostatni punkt przed oknem (dla linii schodkowej)
+  let k = all.findIndex(q => q[0] >= tStart); if (k < 0) k = all.length; const pts = all.slice(Math.max(0, k - 1));
+  const lo = num(p.lo), hi = num(p.hi);
+  let vs = pts.map(q => q[1]).filter(v => !isNaN(v));
+  if (lo !== null) vs.push(lo); if (hi !== null) vs.push(hi);
+  if (!vs.length) vs = [0, 1];
+  let y0 = Math.min(...vs), y1 = Math.max(...vs); if (y1 - y0 < 1e-9) { y0 -= 1; y1 += 1; }
+  const pad = (y1 - y0) * 0.08; y0 -= pad; y1 += pad;
+  const L = 52, R = 8, Tp = 6, B = 20, X = t => L + (t - tStart) / (tEnd - tStart) * (w - L - R), Y = v => Tp + (y1 - v) / (y1 - y0) * (h - Tp - B);
+  c.strokeStyle = '#e3e6ea'; c.fillStyle = '#5d6675'; c.lineWidth = 1;
+  for (let j = 0; j <= 4; j++) { const v = y0 + (y1 - y0) * j / 4, y = Y(v); c.beginPath(); c.moveTo(L, y); c.lineTo(w - R, y); c.stroke(); c.textAlign = 'right'; c.fillText(pl(v, T.d > 0 ? T.d : 0), L - 4, y + 4); }
+  c.textAlign = 'center';
+  const stepM = p.okno <= 30 ? 5 : (p.okno <= 60 ? 10 : 20);
+  for (let t = Math.ceil(tStart / (stepM * M)) * stepM * M; t <= tEnd; t += stepM * M) { const x = X(t); c.beginPath(); c.moveTo(x, Tp); c.lineTo(x, h - B); c.stroke(); c.fillText(fmtM(t), x, h - 5); }
+  if (lo !== null && hi !== null) { c.fillStyle = 'rgba(31,154,90,.12)'; c.fillRect(L, Y(hi), w - L - R, Y(lo) - Y(hi)); }
+  c.setLineDash([4, 3]); c.strokeStyle = '#1f9a5a';
+  [lo, hi].forEach(v => { if (v !== null) { c.beginPath(); c.moveTo(L, Y(v)); c.lineTo(w - R, Y(v)); c.stroke(); } });
+  c.setLineDash([]);
+  // linia schodkowa (historian: wartość trzymana do następnego zapisu)
+  c.strokeStyle = '#1f6fd1'; c.lineWidth = 1.6; c.beginPath(); let pen = false;
+  for (let j = 0; j < pts.length; j++) {
+    const [t, v] = pts[j], tn = j + 1 < pts.length ? pts[j+1][0] : tEnd;
+    if (isNaN(v)) { pen = false; c.fillStyle = 'rgba(120,120,120,.18)'; c.fillRect(X(Math.max(t, tStart)), Tp, X(tn) - X(Math.max(t, tStart)), h - Tp - B); continue; }
+    const xa = X(Math.max(t, tStart)), xb = X(tn), y = Y(v);
+    if (!pen) { c.moveTo(xa, y); pen = true; } else c.lineTo(xa, y);
+    c.lineTo(xb, y);
+  }
+  c.stroke();
+  if (lo !== null || hi !== null) {
+    c.fillStyle = '#d23b3b';
+    for (const [t, v] of pts) if (t >= tStart && !isNaN(v) && ((lo !== null && v < lo) || (hi !== null && v > hi))) c.fillRect(X(t) - 1.5, Y(v) - 1.5, 3, 3);
+  }
+  const cur = current(p.tag); c.textAlign = 'right'; c.font = 'bold 13px system-ui,Segoe UI,Arial'; c.fillStyle = '#1d2330';
+  c.fillText((cur === null || isNaN(cur)) ? 'brak danych' : `${pl(cur, T.d)} ${T.u}`, w - R - 2, Tp + 12);
+}
+function msg(c, w, h, t){ c.fillStyle = '#8a929e'; c.textAlign = 'center'; c.fillText(t, w / 2, h / 2); }
+function outOf(p, v){ const lo = num(p.lo), hi = num(p.hi); return v !== null && !isNaN(v) && ((lo !== null && v < lo) || (hi !== null && v > hi)); }
+function drawKafel(cv, p){
+  const [c, w, h] = setupCanvas(cv), T = TAGS[p.tag], v = current(p.tag);
+  if (p.tag === 'stan') {
+    c.fillStyle = STAN_KOL[v] || '#888'; c.fillRect(10, 20, w - 20, h - 60);
+    c.fillStyle = '#fff'; c.textAlign = 'center'; c.font = `bold ${Math.min(44, w / 7)}px system-ui,Segoe UI,Arial`;
+    c.fillText((KOD_STAN[v] || '—').toUpperCase(), w / 2, 20 + (h - 60) / 2 + 14);
+    c.fillStyle = '#5d6675'; c.font = '13px system-ui,Segoe UI,Arial'; c.fillText(H.prz[D.n - 1] || '', w / 2, h - 18); return;
+  }
+  const bad = outOf(p, v);
+  c.textAlign = 'center'; c.fillStyle = bad ? '#d23b3b' : '#1d2330';
+  if (bad) { c.fillStyle = '#ffe3e3'; c.fillRect(0, 0, w, h); c.fillStyle = '#d23b3b'; }
+  c.font = `800 ${Math.min(60, w / 5)}px system-ui,Segoe UI,Arial`;
+  c.fillText((v === null || isNaN(v)) ? '—' : pl(v, T.d), w / 2, h / 2 + 14);
+  c.font = '15px system-ui,Segoe UI,Arial'; c.fillStyle = '#5d6675'; c.fillText(T.u, w / 2, h / 2 + 40);
+}
+function drawGauge(cv, p){
+  const [c, w, h] = setupCanvas(cv), T = TAGS[p.tag], v = current(p.tag);
+  const lo = num(p.lo) ?? (T.def ? T.def[0] : 0), hi = num(p.hi) ?? (T.def ? T.def[1] : 100);
+  const span = hi - lo || 1, a = lo - span * 0.6, b = hi + span * 0.6;
+  const cx = w / 2, cy = h * 0.70, r = Math.min(w * 0.42, h * 0.68), ang = x => Math.PI + Math.PI * Math.max(0, Math.min(1, (x - a) / (b - a)));
+  c.lineWidth = 16;
+  [[a, lo, '#f2b0b0'], [lo, hi, '#a6dcbc'], [hi, b, '#f2b0b0']].forEach(([x0, x1, col]) => { c.strokeStyle = col; c.beginPath(); c.arc(cx, cy, r, ang(x0), ang(x1)); c.stroke(); });
+  if (v !== null && !isNaN(v)) {
+    c.strokeStyle = '#1d2330'; c.lineWidth = 3; c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + Math.cos(ang(v)) * (r - 4), cy + Math.sin(ang(v)) * (r - 4)); c.stroke();
+  }
+  c.fillStyle = outOf(p, v) ? '#d23b3b' : '#1d2330'; c.textAlign = 'center'; c.font = '800 22px system-ui,Segoe UI,Arial';
+  c.fillText((v === null || isNaN(v)) ? '—' : `${pl(v, T.d)} ${T.u}`, cx, Math.min(h - 6, cy + 26));
+  c.font = '12px system-ui,Segoe UI,Arial'; c.fillStyle = '#5d6675'; c.fillText(pl(lo, T.d), cx + Math.cos(ang(lo)) * (r + 16), cy + Math.sin(ang(lo)) * (r + 16)); c.fillText(pl(hi, T.d), cx + Math.cos(ang(hi)) * (r + 16), cy + Math.sin(ang(hi)) * (r + 16));
+}
+function drawStany(cv, p){
+  const [c, w, h] = setupCanvas(cv), n = H.t.length; if (!n) return;
+  const tEnd = H.t[n - 1], tStart = tEnd - p.okno * M, L = 8, R = 8, X = t => L + (t - tStart) / (tEnd - tStart) * (w - L - R);
+  let i = 0; while (i < n && H.t[i] < tStart) i++;
+  const cnt = {1:0, 2:0, 3:0, 4:0};
+  for (let j = i; j < n; ) { let k = j; while (k < n && H.st[k] === H.st[j]) k++; c.fillStyle = STAN_KOL[H.st[j]]; c.fillRect(X(H.t[j]), 20, X(H.t[k - 1] + 1000) - X(H.t[j]) + 0.5, 60); cnt[H.st[j]] += k - j; j = k; }
+  c.fillStyle = '#5d6675'; c.textAlign = 'center'; const stepM = p.okno <= 30 ? 5 : (p.okno <= 60 ? 10 : 20);
+  for (let t = Math.ceil(tStart / (stepM * M)) * stepM * M; t <= tEnd; t += stepM * M) c.fillText(fmtM(t), X(t), 96);
+  const tot = Math.max(1, n - i); c.textAlign = 'left'; let y = 120;
+  [1, 2, 3, 4].forEach(s => { c.fillStyle = STAN_KOL[s]; c.fillRect(10, y - 10, 12, 12); c.fillStyle = '#1d2330'; c.fillText(`${KOD_STAN[s]}: ${pl(cnt[s] / 60, 1)} min (${pl(100 * cnt[s] / tot, 0)}%)`, 28, y); y += 17; });
+}
+function drawPanel(cv, p){
+  if (p.typ === 'trend') { if (TAGS[p.tag].k !== 'num') { const [c, w, h] = setupCanvas(cv); return msg(c, w, h, 'trend tylko dla temperatury, ciśnienia, mA, licznika'); } return drawTrend(cv, p); }
+  if (p.typ === 'stany') return drawStany(cv, p);
+  if (p.typ === 'gauge') { if (p.tag === 'stan') { const [c, w, h] = setupCanvas(cv); return msg(c, w, h, 'wskaźnik nie dla stanu — użyj kafla lub osi stanów'); } return drawGauge(cv, p); }
+  return drawKafel(cv, p);
+}
+
+// ─── dashboard: siatka + edytor ────────────────────────────────────────────
+let selPanel = 0;
+function buildGrid(){
+  const g = $('#dashGrid'); g.innerHTML = '';
+  panels.forEach((p, i) => {
+    const d = document.createElement('div');
+    if (!p) { d.className = 'pan empty' + (i === selPanel ? ' sel' : ''); d.innerHTML = `＋ panel ${i + 1}`; }
+    else { d.className = 'pan' + (i === selPanel ? ' sel' : ''); d.innerHTML = `<div class="pt"><span></span><small class="muted">${i + 1}</small></div><canvas></canvas>`; d.querySelector('.pt span').textContent = p.tyt || TAGS[p.tag].n; }
+    d.onclick = () => { selPanel = i; buildGrid(); fillEditor(); };
+    g.appendChild(d);
+  });
+  $('#dashTitle').textContent = (dashMeta.title || '') + (dashMeta.odb ? `  ·  dla: ${dashMeta.odb}` : '');
+  drawAll();
+}
+function drawAll(){ $$('#dashGrid .pan').forEach((d, i) => { const cv = d.querySelector('canvas'); if (cv && panels[i]) drawPanel(cv, panels[i]); }); }
+function fillTagOptions(){
+  const typ = $('#ed_typ').value, sel = $('#ed_tag'), cur = sel.value; sel.innerHTML = '';
+  Object.entries(TAGS).forEach(([k, T]) => {
+    const ok = typ === 'trend' ? T.k === 'num' : typ === 'stany' ? k === 'stan' : typ === 'gauge' ? k !== 'stan' : true;
+    if (ok) { const o = document.createElement('option'); o.value = k; o.textContent = T.n + (T.u ? ` [${T.u}]` : ''); sel.appendChild(o); }
+  });
+  if ([...sel.options].some(o => o.value === cur)) sel.value = cur;
+}
+function fillEditor(){
+  const p = panels[selPanel]; $('#ed_nr').textContent = selPanel + 1;
+  $('#ed_typ').value = p ? p.typ : 'trend'; fillTagOptions();
+  if (p) { $('#ed_tag').value = p.tag; $('#ed_okno').value = p.okno; $('#ed_lo').value = p.lo ?? ''; $('#ed_hi').value = p.hi ?? ''; $('#ed_tyt').value = p.tyt || ''; }
+  else { $('#ed_lo').value = ''; $('#ed_hi').value = ''; $('#ed_tyt').value = ''; }
+  $('#ed_info').textContent = '';
+}
+$('#ed_typ').onchange = fillTagOptions;
+$('#ed_save').onclick = () => {
+  panels[selPanel] = {typ:$('#ed_typ').value, tag:$('#ed_tag').value, okno:+$('#ed_okno').value, lo:$('#ed_lo').value, hi:$('#ed_hi').value, tyt:$('#ed_tyt').value.trim()};
+  save('panels', panels); buildGrid(); $('#ed_info').textContent = 'zapisano ✓';
+};
+$('#ed_del').onclick = () => { panels[selPanel] = null; save('panels', panels); buildGrid(); fillEditor(); };
+$('#d_title').value = dashMeta.title; $('#d_odb').value = dashMeta.odb;
+$('#d_title').oninput = $('#d_odb').onchange = () => { dashMeta = {title:$('#d_title').value, odb:$('#d_odb').value}; save('dash', dashMeta); $('#dashTitle').textContent = (dashMeta.title || '') + (dashMeta.odb ? `  ·  dla: ${dashMeta.odb}` : ''); };
+$('#fsBtn').onclick = () => { const el = $('#dash'); (el.requestFullscreen ? el.requestFullscreen() : null); el.style.background = '#f4f5f2'; el.style.padding = '12px'; setTimeout(buildGrid, 300); };
+document.addEventListener('fullscreenchange', () => setTimeout(buildGrid, 200));
+window.addEventListener('resize', () => drawAll());
+
+// ─── alarmy ────────────────────────────────────────────────────────────────
+const WAR_TXT = {gt:'>', lt:'<', same:'bez zmian ≥', bad:'jakość zła', awaria:'= awaria'};
+const SIG_TXT = {temp:'temperatura', cisn:'ciśnienie', tq:'jakość temp.', stan:'stan', braki:'braki 15 min'};
+function brakiSeries(){ // braki % w oknie 15 min, liczone co 10 s (wystarczy do alarmu)
+  const n = H.t.length, out = new Array(n).fill(null); let lastI = -1;
+  const cd = [0], cz = [0];
+  for (let i = 1; i < n; i++) { cd[i] = cd[i-1] + (H.dobre[i] >= H.dobre[i-1] ? H.dobre[i] - H.dobre[i-1] : H.dobre[i]); cz[i] = cz[i-1] + (H.zle[i] >= H.zle[i-1] ? H.zle[i] - H.zle[i-1] : H.zle[i]); }
+  for (let i = 0; i < n; i++) { const j = Math.max(0, i - 900); const d = cd[i] - cd[j], z = cz[i] - cz[j]; out[i] = (i - j >= 300 && d + z) ? 100 * z / (d + z) : null; }
+  return out;
+}
+function evalRules(){
+  const n = D.n, eps = []; let brk = null;
+  rules.forEach(r => {
+    const val = num(r.val), del = Math.max(0, num(r.del) || 0);
+    let sig;
+    if (r.tag === 'temp') sig = D.temp; else if (r.tag === 'cisn') sig = D.cisn; else if (r.tag === 'braki') sig = brk ?? (brk = brakiSeries()); else sig = null;
+    let run = 0, act = false, start = 0, same = 0;
+    for (let i = 0; i < n; i++) {
+      let c = false;
+      if (r.war === 'bad') c = D.tq[i];
+      else if (r.war === 'awaria') c = H.st[i] === 3;
+      else if (r.war === 'same') { const s = sig ? sig[i] : null; same = (i && s !== null && !isNaN(s) && s === sig[i-1]) ? same + 1 : 0; c = val !== null && same >= val; }
+      else if (sig) { const s = sig[i]; c = s !== null && !isNaN(s) && val !== null && (r.war === 'gt' ? s > val : s < val); }
+      run = c ? run + 1 : 0;
+      if (!act && c && run > del) { act = true; start = H.t[i]; }
+      else if (act && !c) { eps.push({r, s:start, e:H.t[i]}); act = false; }
+    }
+    if (act) eps.push({r, s:start, e:null});
+  });
+  return eps.sort((a, b) => b.s - a.s);
+}
+function renderRules(){
+  const tb = $('#ruleTable tbody'); tb.innerHTML = '';
+  if (!rules.length) tb.innerHTML = '<tr><td colspan="5" class="muted">brak reguł — dodaj pierwszą poniżej</td></tr>';
+  rules.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    const war = r.war === 'same' ? `${SIG_TXT[r.tag]} bez zmian ≥ ${r.val} s` : r.war === 'bad' ? 'jakość pomiaru temperatury zła' : r.war === 'awaria' ? 'stan = awaria' : `${SIG_TXT[r.tag]} ${WAR_TXT[r.war]} ${r.val}`;
+    tr.innerHTML = `<td><span class="tag p${r.prio}">${r.prio}</span></td><td></td><td>${war}</td><td class="r">${r.del || 0} s</td><td><button class="b2 del">usuń</button></td>`;
+    tr.children[1].textContent = r.name;
+    tr.querySelector('button').onclick = () => { rules.splice(i, 1); save('rules', rules); renderRules(); renderAlarms(true); };
+    tb.appendChild(tr);
+  });
+}
+$('#r_war').onchange = () => { const w = $('#r_war').value; if (w === 'bad') $('#r_tag').value = 'tq'; if (w === 'awaria') $('#r_tag').value = 'stan'; };
+$('#r_add').onclick = () => {
+  const r = {id:Date.now().toString(36), name:$('#r_name').value.trim(), tag:$('#r_tag').value, war:$('#r_war').value, val:$('#r_val').value, del:$('#r_del').value, prio:$('#r_prio').value};
+  if (r.war === 'bad') r.tag = 'tq'; if (r.war === 'awaria') r.tag = 'stan';
+  if (!r.name) return $('#r_info').textContent = 'podaj nazwę alarmu';
+  if (['gt', 'lt', 'same'].includes(r.war) && num(r.val) === null) return $('#r_info').textContent = 'podaj wartość progu';
+  if (['gt', 'lt', 'same'].includes(r.war) && !['temp', 'cisn', 'braki'].includes(r.tag)) return $('#r_info').textContent = 'ten warunek wymaga sygnału liczbowego (temperatura, ciśnienie, braki)';
+  rules.push(r); save('rules', rules); renderRules(); renderAlarms(true); $('#r_info').textContent = 'dodano ✓'; $('#r_name').value = '';
+};
+let EPS = [];
+function dur(ms){ const s = Math.round(ms / 1000); return s < 60 ? `${s} s` : `${Math.floor(s / 60)} min ${s % 60} s`; }
+function renderAlarms(force){
+  EPS = evalRules();
+  const active = EPS.filter(e => e.e === null), unack = active.filter(e => !acks[e.r.id + '@' + e.s]);
+  const ban = $('#alarmBanner');
+  if (active.length) { ban.style.display = 'inline-block'; ban.textContent = `⚠ ${active.length} aktywn${active.length === 1 ? 'y alarm' : 'e alarmy'}: ${active[0].r.name}`; ban.classList.toggle('blink', unack.length > 0); }
+  else ban.style.display = 'none';
+  if (!force && !$('#alm').classList.contains('on')) return;
+  const now = H.t[H.t.length - 1], tb = $('#almTable tbody'); tb.innerHTML = '';
+  if (!EPS.length) tb.innerHTML = '<tr><td colspan="6" class="muted">brak alarmów</td></tr>';
+  EPS.slice(0, 200).forEach(e => {
+    const key = e.r.id + '@' + e.s, tr = document.createElement('tr'); if (e.e === null) tr.className = 'act';
+    tr.innerHTML = `<td><span class="tag p${e.r.prio}">${e.r.prio}</span></td><td></td><td>${fmt(e.s)}</td><td>${e.e === null ? '<b class="bad">AKTYWNY</b>' : fmt(e.e)}</td><td class="r">${dur((e.e ?? now) - e.s)}</td><td></td>`;
+    tr.children[1].textContent = e.r.name;
+    if (acks[key]) tr.children[5].textContent = '✓ ' + acks[key];
+    else { const b = document.createElement('button'); b.className = 'b2'; b.textContent = 'potwierdź'; b.onclick = () => { acks[key] = fmt(simNow()); save('acks', acks); renderAlarms(true); }; tr.children[5].appendChild(b); }
+    tb.appendChild(tr);
+  });
+  const h1 = EPS.filter(e => e.s > now - 3600e3).length, m10 = EPS.filter(e => e.s > now - 600e3).length;
+  $('#almStats').innerHTML = `<p>wszystkich alarmów od ${EPOCH_TXT}: <span class="big">${EPS.length}</span></p><p>w ostatniej godzinie: <b>${h1}</b> · w ostatnich 10 min: <b class="${m10 > 1 ? 'bad' : ''}">${m10}</b></p><p>aktywne teraz: <b>${active.length}</b>, niepotwierdzone: <b>${unack.length}</b></p>`;
+}
+$('#alarmBanner').onclick = () => showTab('alm');
+
+// ─── zakładka 1: sygnały + log ─────────────────────────────────────────────
+const TOPIC = 'zaklad/hala1/pak01/';
+const TT = [['TT101_mA', 'ma', 'prąd z przetwornika temperatury [mA]', 2], ['PT102_reg', 'preg', 'rejestr Modbus 40003 (ciśnienie)', 0], ['LicznikDobre', 'dobre', 'licznik sztuk dobrych', 0], ['LicznikZle', 'zle', 'licznik braków', 0], ['Stan', 'st', 'kod stanu maszyny', 0], ['PrzyczynaPostoju', 'prz', 'tekst z panelu operatora', -1], ['Energia_kWh', 'kwh', 'licznik energii [kWh]', 2]];
+function renderSig(newN){
+  const n = H.t.length - 1; if (n < 0) return;
+  const tb = $('#tagTable tbody');
+  tb.innerHTML = TT.map(([nm, k, opis, d]) => { const v = H[k][n]; return `<tr><td class="mono">${TOPIC}${nm}</td><td class="r mono"><b>${d < 0 ? (v || '""') : (d ? v.toFixed(d) : v)}</b></td><td>${opis}</td></tr>`; }).join('');
+  const log = $('#log'), atBottom = log.scrollTop + log.clientHeight >= log.scrollHeight - 30;
+  for (let i = Math.max(0, n - Math.min(newN, 5) + 1); i <= n; i++) {
+    const lines = TT.filter(([nm, k]) => i === 0 || H[k][i] !== H[k][i-1] || nm === 'TT101_mA').map(([nm, k, , d]) => { const v = H[k][i]; return `<div>${fmt(H.t[i])}  <span class="tp">${TOPIC}${nm}</span>  <span class="v">${d < 0 ? JSON.stringify(v) : (d ? v.toFixed(d) : v)}</span></div>`; });
+    log.insertAdjacentHTML('beforeend', lines.join(''));
+  }
+  while (log.childElementCount > 400) log.firstElementChild.remove();
+  if (atBottom) log.scrollTop = log.scrollHeight;
+}
+
+// ─── zakładka 2: konfiguracja + podgląd ────────────────────────────────────
+['tmin', 'tmax', 'qthr', 'tdb', 'pfac', 'pdb'].forEach(k => { const el = $('#c_' + k); el.value = cfg[k] ?? ''; el.oninput = () => { cfg[k] = el.value; save('cfg', cfg); tick(true); }; });
+function renderAcq(){
+  const n = D.n - 1; if (n < 0) return;
+  const ma = H.ma[n], v = scaleT(ma), q = tBad(ma);
+  $('#prevT').innerHTML = `TT101 = <b>${ma.toFixed(2)} mA</b> → ` + (v === null ? '<span class="warn">uzupełnij zakres przetwornika</span>' : `<b>${pl(v, 1)} °C</b>`) + ` · jakość: ` + (num(cfg.qthr) === null ? '<span class="warn">brak reguły — każda wartość uznana za dobrą</span>' : (q ? '<b class="bad">ZŁA</b>' : '<b class="ok">dobra</b>'));
+  const pr = H.preg[n], pf = num(cfg.pfac);
+  $('#prevP').innerHTML = `PT102 = <b>${pr}</b> → ` + (pf === null ? '<span class="warn">uzupełnij mnożnik</span>' : `<b>${pl(pr * pf, 2)} bar</b>`);
+  const el = Math.max(1, (H.t[n] - H.t[0]) / 1000), yr = x => Math.round(x / el * 365 * 24 * 3600);
+  const rowsV = [['Temperatura zgrzewu', D.tRec.length, scaleT(4) === null], ['Ciśnienie powietrza', D.pRec.length, pf === null]];
+  $('#volTable tbody').innerHTML = rowsV.map(([nm, z, off]) => off ? `<tr><td>${nm}</td><td class="r">${(n + 1).toLocaleString('pl-PL')}</td><td class="r muted" colspan="3">nie skonfigurowano</td></tr>` :
+    `<tr><td>${nm}</td><td class="r">${(n + 1).toLocaleString('pl-PL')}</td><td class="r">${z.toLocaleString('pl-PL')}</td><td class="r"><b>${pl(100 * (1 - z / (n + 1)), 0)}%</b></td><td class="r">${yr(z).toLocaleString('pl-PL')}</td></tr>`).join('');
+}
+
+// ─── eksport CSV ───────────────────────────────────────────────────────────
+function hhmmToIdx(s, def){ if (!/^\d{1,2}:\d{2}$/.test(s || '')) return def; const t = todayAt(s); let i = H.t.findIndex(x => x >= t); return i < 0 ? H.t.length - 1 : i; }
+$('#e_go').onclick = () => {
+  const n = H.t.length; const i0 = hhmmToIdx($('#e_od').value, 0), i1 = hhmmToIdx($('#e_do').value, n - 1), res = +$('#e_res').value;
+  const c = x => String(x).replace('.', ',');
+  const out = ['Czas;Pak01.Stan;Pak01.PrzyczynaPostoju;Pak01.LicznikDobre;Pak01.LicznikZle;Pak01.TempZgrzew;Pak01.JakoscTemp;Pak01.CisnieniePowietrza;Pak01.Energia'];
+  const d2 = t => { const d = new Date(t), z = x => String(x).padStart(2, '0'); return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`; };
+  let k = 0;
+  for (let i = i0; i <= i1; i += res) {
+    const tv = D.temp[i], cv = D.cisn[i];
+    out.push([d2(H.t[i]), KOD_STAN[H.st[i]], H.prz[i], H.dobre[i], H.zle[i], (tv === null || isNaN(tv)) ? '' : c(tv.toFixed(1)), D.tq[i] ? 'zła' : 'dobra', cv === null ? '' : c(cv.toFixed(2)), c(H.kwh[i].toFixed(2))].join(';')); k++;
+  }
+  const blob = new Blob(['﻿' + out.join('\r\n')], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Lab2_Pakowaczka01_${fmtM(H.t[i0]).replace(':', '')}-${fmtM(H.t[i1]).replace(':', '')}.csv`; a.click();
+  $('#e_info').textContent = `zapisano ${k.toLocaleString('pl-PL')} rekordów`;
+};
+
+// ─── sprawozdanie ──────────────────────────────────────────────────────────
+let rep = load('rep', {os:'', z1:'', z3:'', z7a:'', z7b:'', z7c:'', karta:[]});
+['os', 'z1', 'z3', 'z7a', 'z7b', 'z7c'].forEach(k => { const el = $('#s_' + k); el.value = rep[k] || ''; el.oninput = () => { rep[k] = el.value; save('rep', rep); }; });
+{
+  const tb = $('#kartaT tbody');
+  for (let i = 0; i < 6; i++) {
+    const tr = document.createElement('tr'); tr.innerHTML = `<td>${i + 1}</td>` + [0, 1, 2, 3].map(j => `<td><input data-i="${i}" data-j="${j}" style="width:100%"${j === 0 ? ' placeholder="gg:mm"' : ''}></td>`).join('');
+    tb.appendChild(tr);
+  }
+  $$('#kartaT input').forEach(el => { const i = +el.dataset.i, j = +el.dataset.j; el.value = (rep.karta[i] || [])[j] || ''; el.oninput = () => { rep.karta[i] = rep.karta[i] || ['', '', '', '']; rep.karta[i][j] = el.value; save('rep', rep); }; });
+}
+const esc = s => String(s ?? '').replace(/[&<>"]/g, ch => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[ch]));
+$('#s_go').onclick = () => {
+  showTab('dash');
+  setTimeout(() => {
+    const imgs = $$('#dashGrid .pan').map((d, i) => { const cv = d.querySelector('canvas'); return cv && panels[i] ? `<figure><figcaption>${esc(panels[i].tyt || TAGS[panels[i].tag].n)} <small>(${panels[i].typ}, ${esc(TAGS[panels[i].tag].n)}, progi: ${esc(panels[i].lo)}–${esc(panels[i].hi)})</small></figcaption><img src="${cv.toDataURL('image/png')}"></figure>` : ''; }).join('');
+    renderAlarms(true);
+    const cfgT = `<table><tr><th>parametr</th><th>wartość</th></tr><tr><td>TT101: 4 mA →</td><td>${esc(cfg.tmin)} °C</td></tr><tr><td>TT101: 20 mA →</td><td>${esc(cfg.tmax)} °C</td></tr><tr><td>jakość zła poniżej</td><td>${esc(cfg.qthr) || '<i>brak reguły</i>'} mA</td></tr><tr><td>martwa strefa temp.</td><td>${esc(cfg.tdb)} °C (zapisano ${D.tRec.length} z ${D.n} próbek)</td></tr><tr><td>PT102: mnożnik</td><td>${esc(cfg.pfac)}</td></tr><tr><td>martwa strefa ciśn.</td><td>${esc(cfg.pdb)} bar (zapisano ${D.pRec.length} z ${D.n})</td></tr></table>`;
+    const rulesT = '<table><tr><th>prio</th><th>nazwa</th><th>warunek</th><th>zwłoka</th></tr>' + rules.map(r => `<tr><td>${r.prio}</td><td>${esc(r.name)}</td><td>${esc(SIG_TXT[r.tag])} ${esc(WAR_TXT[r.war])} ${esc(r.war === 'bad' || r.war === 'awaria' ? '' : r.val)}</td><td>${esc(r.del || 0)} s</td></tr>`).join('') + '</table>';
+    const almT = '<table><tr><th>prio</th><th>alarm</th><th>wejście</th><th>wyjście</th><th>potwierdzono</th></tr>' + EPS.slice(0, 120).map(e => `<tr><td>${e.r.prio}</td><td>${esc(e.r.name)}</td><td>${fmt(e.s)}</td><td>${e.e ? fmt(e.e) : 'aktywny'}</td><td>${esc(acks[e.r.id + '@' + e.s] || '')}</td></tr>`).join('') + '</table>';
+    const kartaT = '<table><tr><th>#</th><th>godzina</th><th>co było widać</th><th>przyczyna</th><th>działanie</th></tr>' + [0, 1, 2, 3, 4, 5].map(i => { const r = rep.karta[i] || []; return r.some(x => x) ? `<tr><td>${i + 1}</td>${[0, 1, 2, 3].map(j => `<td>${esc(r[j])}</td>`).join('')}</tr>` : ''; }).join('') + '</table>';
+    const qa = (q, a) => `<p><b>${q}</b><br>${esc(a).replace(/\n/g, '<br>') || '<i>—</i>'}</p>`;
+    const html = `<!doctype html><html lang="pl"><head><meta charset="utf-8"><title>Lab 2 — sprawozdanie — ${esc(rep.os)}</title><style>body{font:14px/1.45 system-ui,Segoe UI,Arial;max-width:1000px;margin:20px auto;padding:0 14px}table{border-collapse:collapse;margin:6px 0 14px}th,td{border:1px solid #bbb;padding:3px 7px;text-align:left}th{background:#eee}figure{display:inline-block;width:48%;margin:0 1% 12px;vertical-align:top}figure img{width:100%;border:1px solid #ccc}figcaption{font-weight:700}h2{border-bottom:2px solid #1f4fa8;color:#1f4fa8}</style></head><body>
+<h1>Laboratorium 2: Pakowaczka 01 na żywo — sprawozdanie</h1><p><b>${esc(rep.os)}</b><br>wygenerowano: ${new Date().toLocaleString('pl-PL')} · czas symulacji: ${fmt(simNow())} · wariant: symulator przeglądarkowy</p>
+<h2>Z1–Z3. Tor akwizycji</h2>${cfgT}${qa('Z1. Przeliczenie mA → °C', rep.z1)}${qa('Z3. Martwa strefa', rep.z3)}
+<h2>Z4. Dashboard: ${esc(dashMeta.title)} · odbiorca: ${esc(dashMeta.odb) || '<i>nie wybrano</i>'}</h2>${imgs || '<p><i>brak paneli</i></p>'}
+<h2>Z5. Reguły alarmowe</h2>${rulesT}<h3>Dziennik alarmów (${EPS.length})</h3>${almT}
+<h2>Z6. Karta zdarzeń zmiany</h2>${kartaT}
+<h2>Z7. Eksport i wnioski</h2>${qa('Sztuki dobre: Excel vs kafel', rep.z7a)}${qa('Alarmy zasadne / szum', rep.z7b)}${qa('Wczesne wykrycie', rep.z7c)}
+</body></html>`;
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([html], {type:'text/html;charset=utf-8'}));
+    a.download = 'Lab2_' + (rep.os || 'sprawozdanie').split(/[,;]| i /)[0].trim().split(/\s+/).pop().replace(/[^\wąćęłńóśźżĄĆĘŁŃÓŚŹŻ-]/g, '') + '.html'; a.click();
+    showTab('rep');
+  }, 400);
+};
+
+// ─── zakładki i pętla główna ───────────────────────────────────────────────
+function showTab(id){
+  $$('nav button').forEach(b => b.classList.toggle('on', b.dataset.t === id));
+  $$('main section').forEach(s => s.classList.toggle('on', s.id === id));
+  if (id === 'dash') setTimeout(buildGrid, 30);
+  if (id === 'alm') renderAlarms(true);
+  if (id === 'exp' && !$('#e_od').value) { const n = H.t.length; $('#e_od').value = fmtM(Math.max(H.t[0], H.t[n - 1] - 30 * M)); $('#e_do').value = fmtM(H.t[n - 1]); }
+}
+$$('nav button').forEach(b => b.onclick = () => showTab(b.dataset.t));
+
+function tick(force){
+  const k = catchUp(); if (!k && !force) return;
+  derive();
+  const n = H.t.length - 1, st = H.st[n];
+  $('#clock').textContent = fmt(H.t[n]);
+  const pill = $('#stanPill'); pill.textContent = KOD_STAN[st].toUpperCase() + (H.prz[n] ? ' · ' + H.prz[n] : ''); pill.style.background = STAN_KOL[st];
+  if ($('#sig').classList.contains('on')) renderSig(k);
+  if ($('#acq').classList.contains('on')) renderAcq();
+  if ($('#dash').classList.contains('on')) drawAll();
+  renderAlarms(false);
+}
+// tryb prowadzącego: ?prowadzacy=1 — oś scenariusza
+if (P.get('prowadzacy')) {
+  const ev = [[T0 + 3*M, 'zacięcie folii (postój 2 min)'], [FROZ[0], 'zamrożone ciśnienie (6 min)'], [WIRE[0], 'przerwa w przewodzie TT101 → 0 mA (3 min)'], [DRIFT[0], 'dryf temperatury +6,5 °C (8 min)'], [DRIFT[0] + 4*M, 'rosną braki (9%)'], [DRIFT[1], 'AWARIA ZGRZEWU (5 min)'], [T0 + 38*M, 'restart sterownika (1 min)'], [RESET, 'reset liczników → 0']];
+  const box = document.createElement('div'); box.className = 'card'; box.style.cssText = 'position:fixed;right:10px;bottom:10px;z-index:9;max-width:340px;font-size:13px;opacity:.95';
+  box.innerHTML = '<b>Scenariusz (tylko prowadzący)</b><br>' + ev.map(([t, s]) => `${fmtM(t)} — ${s}`).join('<br>') + `<br><span class="muted">start: ?t0=${fmtM(T0)} · podgląd: ?speed=20&od=gg:mm</span>`;
+  document.body.appendChild(box);
+}
+renderRules(); fillEditor(); tick(true);
+setInterval(() => tick(false), SPEED > 1 ? 250 : 1000);
+</script>
+</body>
+</html>

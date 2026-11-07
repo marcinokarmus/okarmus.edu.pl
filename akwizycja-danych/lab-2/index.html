@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratorium 2 — Pakowaczka 01 na żywo</title>
+<style>
+body{margin:0;background:#fffdf6;color:#222;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:26px;margin:.2em 0} h2{font-size:20px;margin:1.4em 0 .4em;color:#1f4fa8}
+h2.blok{border-bottom:2px solid #1f4fa8;padding-bottom:.2em}
+.sl,.task{border:1px solid #e3dccb;border-radius:10px;padding:8px 14px;margin:10px 0;background:#fff;break-inside:avoid}
+.sl h3,.task h3{margin:.1em 0 .3em;font-size:17px}
+.nr{display:inline-block;margin-right:.35em;font-weight:800;font-size:1.15em;color:#000}
+b{color:#b5520c} .muted{color:#777} .mono,code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em}
+code{background:#f3efe3;padding:0 .3em;border-radius:4px}
+table{border-collapse:collapse;width:100%} th,td{border:1px solid #ddd;padding:4px 7px;text-align:left;vertical-align:top} th{background:#f3efe3}
+td.r{text-align:right;white-space:nowrap}
+ul.check li{list-style:"☐  "}
+.dl{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.dl a{display:inline-block;padding:.5em 1em;border-radius:8px;border:1px solid #1f4fa8;color:#1f4fa8;text-decoration:none;font-weight:700}
+.dl a.main{background:#1f4fa8;color:#fff}
+button{font:inherit;padding:.4em .9em;border-radius:8px;border:1px solid #1f4fa8;background:#1f4fa8;color:#fff;cursor:pointer;font-weight:600}
+@media print{body{background:#fff;font-size:12.5px} .wrap{padding:0;max-width:none} .sl,.task{padding:5px 9px;margin:6px 0;border-color:#000} .noprint{display:none!important}
+  *{color:#000!important;background:#fff!important} th,td{border-color:#000} h2.blok{border-color:#000} .muted{font-size:.95em}}
+.var{display:inline-block;font-size:12px;font-weight:800;padding:0 .5em;border-radius:5px;color:#fff;margin-right:.3em;vertical-align:1px}
+.vA{background:#1f6fd1} .vC{background:#7a4cc9}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px} .two>div{border:1px dashed #d8d0bc;border-radius:8px;padding:4px 10px;background:#fffef9}
+pre{background:#f3efe3;border-radius:6px;padding:6px 9px;white-space:pre-wrap;font-size:13px;margin:4px 0}
+.pts{float:right;font-weight:800;color:#1f4fa8}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+@media print{.two>div{border-color:#000}}
+</style></head>
+</head>
+<body><div class="wrap">
+<p class="noprint"><button onclick="window.print()">🖨 Drukuj</button></p>
+<h1>Laboratorium 2: Pakowaczka 01 na żywo</h1>
+<p class="muted">Akwizycja i wizualizacja danych w procesach przemysłowych · ZIP, IV rok, spec. Inżynier procesu, niestacjonarne</p>
+<p>Na Lab 1 dostaliście gotowy eksport z historiana. Dziś budujecie tor, który taki eksport tworzy: <b>sterownik → Node-RED → historian (InfluxDB) → Grafana</b>. Maszyna jest ta sama, ale pracuje teraz, na żywo. Między 13:35 a 14:15 będzie się na niej działo kilka rzeczy. Waszym zadaniem jest je zauważyć i opisać.</p>
+
+<h2>Dwa warianty — te same zadania</h2>
+<div class="two">
+<div><p><span class="var vA">A</span><b>Hala prowadzącego</b> (podstawowy)</p>
+<ul><li>Node-RED: <code>http://&lt;IP z tablicy&gt;:19NN</code>, gdzie NN to numer stanowiska (s07 → 1907)</li>
+<li>Grafana: <code>http://&lt;IP&gt;:3000</code> → <b>Sign in</b>: login <code>sNN</code>, hasło <code>hala1</code></li>
+<li>Wasza praca zostaje na serwerze — nic nie wysyłacie.</li></ul></div>
+<div><p><span class="var vC">C</span><b>Symulator w przeglądarce</b> (zapasowy)</p>
+<ul><li><a href="symulator.html"><b>otwórz symulator</b></a> — te same dane co w hali, co do sekundy</li>
+<li>zakładki 1–6 odpowiadają zadaniom; postęp zapisuje się w przeglądarce (nie czyśćcie historii!)</li>
+<li>na koniec: zakładka <b>6. Sprawozdanie</b> → pobierz plik → oddaj prowadzącemu.</li></ul></div>
+</div>
+<p>Pracujecie <b>sami lub w parach</b> (jedno stanowisko). Zadania oznaczone <span class="var vA">A</span> / <span class="var vC">C</span> mają osobne wskazówki dla wariantów.</p>
+
+<h2>Dokumentacja maszyny</h2>
+<table>
+<tr><th>Tag (temat MQTT <code>zaklad/hala1/pak01/…</code>)</th><th>Co przychodzi</th><th>Jak przeliczyć</th></tr>
+<tr><td><code>TT101_mA</code></td><td>prąd z przetwornika temperatury zgrzewu [mA]</td><td>4–20 mA ↔ 0–300 °C; <b>&lt; 3,8 mA = uszkodzenie</b> (NAMUR NE 43)</td></tr>
+<tr><td><code>PT102_reg</code></td><td>rejestr Modbus 40003, liczba całkowita</td><td>ciśnienie [bar] = rejestr × 0,01</td></tr>
+<tr><td><code>LicznikDobre</code>, <code>LicznikZle</code></td><td>liczniki narastające sterownika</td><td>sztuki = <b>przyrosty</b> (licznik zeruje się przy restarcie sterownika)</td></tr>
+<tr><td><code>Stan</code></td><td>kod stanu</td><td>1 praca · 2 postój · 3 awaria · 4 przezbrojenie</td></tr>
+<tr><td><code>PrzyczynaPostoju</code>, <code>Energia_kWh</code></td><td>tekst z panelu operatora; licznik energii</td><td>—</td></tr>
+</table>
+<p class="muted">Zakresy normalne: temperatura zgrzewu 168–176 °C · ciśnienie 5,8–6,3 bar · cykl idealny 1,5 s (40 szt./min).<br>
+<span class="var vA">A</span> W historianie (baza <code>hala</code>) są dwie tabele: <code>pak01_ref</code> — kompletny zapis wszystkich tagów co 1 s (gotowy, z niej robicie większość paneli) oraz <code>pak01_sNN</code> — <b>Wasza</b> tabela, którą zapełnia Wasz przepływ Node-RED.</p>
+
+<h2 class="blok">Blok 1 · Akwizycja (11:45–12:30)</h2>
+
+<div class="task"><h3><span class="nr">1</span>Surowy sygnał <span class="pts">2 pkt</span></h3>
+<p><span class="var vA">A</span> W Node-RED przeciągnij węzeł <b>mqtt in</b> (kategoria <i>network</i>). Server: <code>Hala 1 (broker)</code>, Topic: <code>zaklad/hala1/pak01/TT101_mA</code>, Output: <i>auto-detect</i>. Połącz go z węzłem <b>debug</b> i kliknij <b>Deploy</b>. Wartości pojawią się w zakładce 🐞 po prawej.<br>
+<span class="var vC">C</span> Zakładka <b>1. Sygnały ze sterownika</b>.</p>
+<p><b>Zapisz:</b> godzinę, odczytaną wartość w mA i <b>własne przeliczenie na °C</b> (wzór!). Ile °C odpowiada zmianie o 0,01 mA? Jaka jest więc rozdzielczość tego pomiaru?</p></div>
+
+<div class="task"><h3><span class="nr">2</span>Tor akwizycji: skalowanie i jakość <span class="pts">3 pkt</span></h3>
+<p><span class="var vA">A</span> Za <b>mqtt in</b> wstaw:</p>
+<ol>
+<li><b>switch</b> (<i>function</i>), nazwa „jakość”: reguła <code>&lt; 3.8</code> (typ <i>number</i>) → wyjście 1 = pomiar zły; reguła <code>otherwise</code> → wyjście 2 = pomiar dobry.</li>
+<li>Do wyjścia 2 podłącz <b>range</b> (<i>function</i>): <i>Scale the message property</i>, from 4 – 20 to 0 – 300.</li>
+<li>Za range wstaw <b>template</b> (<i>function</i>), Format: <i>Plain text</i>, Output as: <i>Plain text</i>, treść (zamień NN na swój numer!):
+<pre>pak01_sNN temp_c={{payload}},jakosc_temp=1i</pre>i połącz z gotowym węzłem <b>→ HISTORIAN</b>.</li>
+<li>Do wyjścia 1 switcha podłącz drugi <b>template</b>: <code>pak01_sNN jakosc_temp=0i</code> → HISTORIAN.</li>
+<li>Ciśnienie: drugi <b>mqtt in</b> (<code>…/PT102_reg</code>) → <b>range</b> 0–1000 → 0–10 → <b>template</b> <code>pak01_sNN cisn_bar={{payload}}</code> → HISTORIAN.</li>
+</ol>
+<p>Deploy. Pod węzłem „odpowiedź historiana” ma się pokazywać <b>204</b> (zapisano). Kod <b>400</b> oznacza błąd w linii — sprawdź spacje i przecinki.</p>
+<p class="muted">Format linii (line protocol): <code>tabela pole=wartość,pole2=wartość</code> — jedna spacja po nazwie tabeli, bez spacji między polami; <code>1i</code> = liczba całkowita.</p>
+<p><span class="var vC">C</span> Zakładka <b>2. Akwizycja</b>: wpisz zakres przetwornika, regułę jakości i mnożnik ciśnienia z dokumentacji. Sprawdź podgląd „mA → °C”.</p>
+<p><b>Pytanie do sprawozdania:</b> co zapisałby historian podczas przerwy w przewodzie, gdyby <b>nie było</b> reguły jakości? (policz: 0 mA → ? °C)</p></div>
+
+<div class="task"><h3><span class="nr">3</span>Martwa strefa <span class="pts">2 pkt</span></h3>
+<p><span class="var vA">A</span> Między <b>range</b> a <b>template</b> temperatury wstaw węzeł <b>filter</b> (dawniej „rbe”, kategoria <i>function</i>): Mode <i>block unless value change is greater or equal to</i> <code>0.5</code>, <i>compared to last valid output value</i>. Deploy. Po 10 minutach porównaj w Grafanie (<b>Explore</b>, źródło Hala 1) liczbę zapisów:</p>
+<pre>SELECT count("temp_c") FROM "pak01_sNN" WHERE time &gt; now() - 10m
+SELECT count("temp_c") FROM "pak01_ref" WHERE time &gt; now() - 10m</pre>
+<p><span class="var vC">C</span> Zakładka 2: martwa strefa 0,5 °C; tabela „Historian — ile danych zapisujemy”.</p>
+<p><b>Zapisz:</b> ile % zapisów oszczędza martwa strefa? Ile rekordów na rok dla tego jednego tagu bez niej, a ile z nią? Co tracimy?</p></div>
+
+<h2 class="blok">Blok 2 · Dashboard (12:40–13:30)</h2>
+<div class="task"><h3><span class="nr">4</span>Ekran dla wybranego odbiorcy <span class="pts">5 pkt</span></h3>
+<p>Najpierw wybierzcie <b>odbiorcę</b> (operator, mistrz zmiany, kierownik produkcji, utrzymanie ruchu) i wpiszcie go w tytule. Dashboard musi mieć co najmniej:</p>
+<ul class="check">
+<li>trend temperatury zgrzewu z <b>zakresem normalnym 168–176 °C</b> <span class="var vA">A</span> z <b>Waszej</b> tabeli <code>pak01_sNN</code></li>
+<li>stan maszyny (oś stanów albo kafel z kolorem)</li>
+<li>sztuki dobre — <b>z przyrostów</b>, nie surowy licznik (pamiętacie reset z Lab 1?)</li>
+<li>jeden wskaźnik jakości lub mediów z progami (braki %, ciśnienie)</li>
+<li>układ i dobór paneli pasujący do odbiorcy (ćwiczenia: HMI ISA-101 — szarość = norma, kolor = odchylenie)</li>
+</ul>
+<p><span class="var vA">A</span> Grafana: <b>Dashboards → New → New dashboard → Add visualization</b>, źródło <b>Hala 1 (InfluxDB)</b>. W kreatorze zapytania: <i>FROM</i> → tabela, <i>SELECT</i> → field(<code>temp_c</code>) mean(), <i>GROUP BY</i> time($__interval). Typ wykresu wybieracie po prawej (<i>Time series, Stat, Gauge, State timeline</i>). Zakres normalny: <b>Thresholds</b> (czerwony, 168 → zielony, 176 → czerwony) + <b>Show thresholds: As lines + filled regions</b>. Zapisujcie (<b>Save dashboard</b>) do folderu <b>Stanowisko sNN</b>.</p>
+<p>Trudniejsze zapytania — przełączcie edytor na tryb tekstowy (ikona ołówka) i wklejcie:</p>
+<pre>-- stan maszyny (State timeline; Value mappings: 1 praca, 2 postój, 3 awaria, 4 przezbrojenie)
+SELECT last("stan") FROM "pak01_ref" WHERE $timeFilter GROUP BY time(10s) fill(previous)
+
+-- sztuki dobre w wybranym zakresie czasu, odporne na reset licznika (Stat)
+SELECT sum("d") FROM (SELECT non_negative_difference(last("dobre")) AS d FROM "pak01_ref" WHERE $timeFilter GROUP BY time(10s))
+
+-- braki [%] w ostatnich 15 min (Gauge)
+SELECT 100 * sum("z") / (sum("d") + sum("z")) FROM (SELECT non_negative_difference(last("zle")) AS z, non_negative_difference(last("dobre")) AS d FROM "pak01_ref" WHERE time &gt; now() - 15m GROUP BY time(10s))</pre>
+<p>Ustawcie zakres czasu (prawy górny róg) np. <i>Last 1 hour</i> i odświeżanie <b>5s</b>.</p>
+<p><span class="var vC">C</span> Zakładka <b>3. Dashboard</b>: kliknij pole, wybierz typ, dane, okno i progi, „Zapisz panel”.</p></div>
+
+<h2 class="blok">Blok 3 · Alarmy i zmiana (13:35–14:15)</h2>
+<div class="task"><h3><span class="nr">5</span>Reguły alarmowe <span class="pts">3 pkt</span></h3>
+<p>Co najmniej <b>4 reguły</b>, każda z sensowną nazwą i zwłoką: (a) temperatura za wysoka, (b) uszkodzony czujnik temperatury, (c) ciśnienie „zamrożone” — wartość nie zmienia się od ≥ 30 s, (d) awaria maszyny. Do każdej zapiszcie: <b>co ma zrobić operator</b>, gdy alarm się pojawi.</p>
+<p><span class="var vA">A</span> <b>Alerting → Alert rules → New alert rule</b>. Zapytanie jak w panelu, poniżej warunek (<i>IS ABOVE / IS BELOW</i>). Okres zapytania (<i>Time range</i>) np. 1 min. Folder: <b>Stanowisko sNN</b>, Evaluation group: nowa, nazwa <code>sNN</code>, co <b>10s</b>; Pending period: zwłoka. Podpowiedzi zapytań:</p>
+<pre>(b) SELECT last("jakosc_temp") FROM "pak01_sNN" WHERE $timeFilter          → IS BELOW 1
+(c) SELECT spread("cisn_bar") FROM "pak01_ref" WHERE $timeFilter            → IS BELOW 0.001   (Time range: 30 s)
+(d) SELECT last("stan") FROM "pak01_ref" WHERE $timeFilter                  → IS WITHIN RANGE 2.5 … 3.5</pre>
+<p>Na dashboard dodajcie panel <b>Alert list</b>.</p>
+<p><span class="var vC">C</span> Zakładka <b>4. Alarmy</b>.</p></div>
+
+<div class="task"><h3><span class="nr">6</span>Karta zdarzeń zmiany <span class="pts">3 pkt</span></h3>
+<p>Od 13:35 obserwujcie maszynę. Każde zdarzenie wpiszcie do tabeli: <b>godzina, kiedy Wy je zauważyliście</b> · co było widać (który panel, który alarm) · prawdopodobna przyczyna · co powinien zrobić operator lub utrzymanie ruchu. Nie wszystko, co widać na ekranie, jest awarią maszyny — czasem to awaria <b>pomiaru</b>.</p></div>
+
+<h2 class="blok">Blok 4 · Eksport i oddanie (14:15–14:30)</h2>
+<div class="task"><h3><span class="nr">7</span>Eksport i wnioski <span class="pts">2 pkt</span></h3>
+<p><span class="var vA">A</span> Na panelu z temperaturą lub stanem: menu panelu (⋮) → <b>Inspect → Data → Download CSV</b> (włącz <i>Formatted data</i> i <i>Download for Excel</i>).
+<span class="var vC">C</span> Zakładka <b>5. Eksport</b>, od 11:00 do teraz, co 10 s.</p>
+<p>W Excelu policzcie sztuki dobre od 11:00 (przyrosty — jak w Lab 1) i porównajcie z kaflem. Odpowiedzcie: które alarmy były zasadne, a które to „szum”? Które zdarzenie dało się zauważyć <b>przed</b> awarią i dzięki czemu?</p></div>
+
+<h2>Oddanie</h2>
+<p><span class="var vA">A</span> Na swoim dashboardzie dodajcie panel <b>Text</b> (tryb Markdown) o tytule <b>Sprawozdanie</b>: imiona i nazwiska, odpowiedzi do zad. 1, 2, 3 i 7 oraz kartę zdarzeń (zad. 6). Zapiszcie dashboard. Przepływ Node-RED musi być wdrożony (<b>Deploy</b>). Prowadzący ocenia wszystko na serwerze.<br>
+<span class="var vC">C</span> Zakładka <b>6. Sprawozdanie</b> → „Pobierz sprawozdanie” → plik <code>Lab2_Nazwisko.html</code> oddajecie w sposób podany przez prowadzącego.</p>
+
+<h2>Ocena</h2>
+<table><tr><th>Zadanie</th><th class="r">pkt</th></tr>
+<tr><td>1. surowy sygnał i przeliczenie</td><td class="r">2</td></tr>
+<tr><td>2. tor akwizycji: skalowanie, jakość, zapis do historiana (204)</td><td class="r">3</td></tr>
+<tr><td>3. martwa strefa i ilość danych</td><td class="r">2</td></tr>
+<tr><td>4. dashboard dla odbiorcy (5 elementów × 1 pkt)</td><td class="r">5</td></tr>
+<tr><td>5. reguły alarmowe z działaniem operatora</td><td class="r">3</td></tr>
+<tr><td>6. karta zdarzeń zmiany</td><td class="r">3</td></tr>
+<tr><td>7. eksport i wnioski</td><td class="r">2</td></tr>
+<tr><th>razem (zaliczenie od 11)</th><th class="r">20</th></tr></table>
+</div></body></html>
