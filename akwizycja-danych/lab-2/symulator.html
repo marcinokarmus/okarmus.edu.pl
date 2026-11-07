@@ -64,6 +64,7 @@ tr.act td{background:#ffecec}
   <span class="pill" id="stanPill">—</span>
   <span id="alarmBanner" title="Przejdź do alarmów"></span>
   <span class="sp"></span>
+  <a href="index.html" target="_blank" style="color:#cfe3ff;font-weight:700">📘 instrukcja</a>
   <span class="muted" style="color:#aab">sterownik online · próbka co 1 s</span>
   <span id="clock">--:--:--</span>
 </header>
@@ -221,13 +222,22 @@ tr.act td{background:#ffecec}
 <!-- 6. SPRAWOZDANIE -->
 <section id="rep">
   <div class="card">
+    <h3>Lista kontrolna — co już masz</h3>
+    <div id="checklist"></div>
+  </div>
+  <div class="card">
     <h3>Zespół</h3>
     <label style="width:100%">imiona i nazwiska (sami lub w parze)<input id="s_os" style="width:100%"></label>
   </div>
   <div class="card">
     <h3>Zadanie 1–3: akwizycja</h3>
     <label style="width:100%">Z1. Odczytana wartość TT101 [mA], godzina odczytu i Twoje przeliczenie na °C „na piechotę” (wzór!)<textarea id="s_z1"></textarea></label>
+    <label style="width:100%">Z2. Co pokazałby historian podczas przerwy w przewodzie (0 mA), gdyby NIE było reguły jakości? Policz.<textarea id="s_z2"></textarea></label>
     <label style="width:100%">Z3. Jaka martwa strefa dla temperatury i dlaczego? Ile % zapisów oszczędza? Co tracimy?<textarea id="s_z3"></textarea></label>
+  </div>
+  <div class="card">
+    <h3>Zadanie 5: reguły alarmowe</h3>
+    <label style="width:100%">Dla każdej reguły: co ma zrobić operator (lub utrzymanie ruchu), gdy ten alarm się pojawi?<textarea id="s_z5"></textarea></label>
   </div>
   <div class="card">
     <h3>Zadanie 6: karta zdarzeń zmiany</h3>
@@ -672,19 +682,19 @@ $('#e_go').onclick = () => {
   }
   const blob = new Blob(['﻿' + out.join('\r\n')], {type:'text/csv;charset=utf-8'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Lab2_Pakowaczka01_${fmtM(H.t[i0]).replace(':', '')}-${fmtM(H.t[i1]).replace(':', '')}.csv`; a.click();
-  $('#e_info').textContent = `zapisano ${k.toLocaleString('pl-PL')} rekordów`;
+  $('#e_info').textContent = `zapisano ${k.toLocaleString('pl-PL')} rekordów`; save('exported', fmt(simNow()));
 };
 
 // ─── sprawozdanie ──────────────────────────────────────────────────────────
-let rep = load('rep', {os:'', z1:'', z3:'', z7a:'', z7b:'', z7c:'', karta:[]});
-['os', 'z1', 'z3', 'z7a', 'z7b', 'z7c'].forEach(k => { const el = $('#s_' + k); el.value = rep[k] || ''; el.oninput = () => { rep[k] = el.value; save('rep', rep); }; });
+let rep = load('rep', {os:'', z1:'', z2:'', z3:'', z5:'', z7a:'', z7b:'', z7c:'', karta:[]});
+['os', 'z1', 'z2', 'z3', 'z5', 'z7a', 'z7b', 'z7c'].forEach(k => { const el = $('#s_' + k); el.value = rep[k] || ''; el.oninput = () => { rep[k] = el.value; save('rep', rep); renderChecklist(); }; });
 {
   const tb = $('#kartaT tbody');
   for (let i = 0; i < 6; i++) {
     const tr = document.createElement('tr'); tr.innerHTML = `<td>${i + 1}</td>` + [0, 1, 2, 3].map(j => `<td><input data-i="${i}" data-j="${j}" style="width:100%"${j === 0 ? ' placeholder="gg:mm"' : ''}></td>`).join('');
     tb.appendChild(tr);
   }
-  $$('#kartaT input').forEach(el => { const i = +el.dataset.i, j = +el.dataset.j; el.value = (rep.karta[i] || [])[j] || ''; el.oninput = () => { rep.karta[i] = rep.karta[i] || ['', '', '', '']; rep.karta[i][j] = el.value; save('rep', rep); }; });
+  $$('#kartaT input').forEach(el => { const i = +el.dataset.i, j = +el.dataset.j; el.value = (rep.karta[i] || [])[j] || ''; el.oninput = () => { rep.karta[i] = rep.karta[i] || ['', '', '', '']; rep.karta[i][j] = el.value; save('rep', rep); renderChecklist(); }; });
 }
 const esc = s => String(s ?? '').replace(/[&<>"]/g, ch => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[ch]));
 $('#s_go').onclick = () => {
@@ -699,9 +709,9 @@ $('#s_go').onclick = () => {
     const qa = (q, a) => `<p><b>${q}</b><br>${esc(a).replace(/\n/g, '<br>') || '<i>—</i>'}</p>`;
     const html = `<!doctype html><html lang="pl"><head><meta charset="utf-8"><title>Lab 2 — sprawozdanie — ${esc(rep.os)}</title><style>body{font:14px/1.45 system-ui,Segoe UI,Arial;max-width:1000px;margin:20px auto;padding:0 14px}table{border-collapse:collapse;margin:6px 0 14px}th,td{border:1px solid #bbb;padding:3px 7px;text-align:left}th{background:#eee}figure{display:inline-block;width:48%;margin:0 1% 12px;vertical-align:top}figure img{width:100%;border:1px solid #ccc}figcaption{font-weight:700}h2{border-bottom:2px solid #1f4fa8;color:#1f4fa8}</style></head><body>
 <h1>Laboratorium 2: Pakowaczka 01 na żywo — sprawozdanie</h1><p><b>${esc(rep.os)}</b><br>wygenerowano: ${new Date().toLocaleString('pl-PL')} · czas symulacji: ${fmt(simNow())} · wariant: symulator przeglądarkowy</p>
-<h2>Z1–Z3. Tor akwizycji</h2>${cfgT}${qa('Z1. Przeliczenie mA → °C', rep.z1)}${qa('Z3. Martwa strefa', rep.z3)}
+<h2>Z1–Z3. Tor akwizycji</h2>${cfgT}${qa('Z1. Przeliczenie mA → °C', rep.z1)}${qa('Z2. Bez reguły jakości', rep.z2)}${qa('Z3. Martwa strefa', rep.z3)}
 <h2>Z4. Dashboard: ${esc(dashMeta.title)} · odbiorca: ${esc(dashMeta.odb) || '<i>nie wybrano</i>'}</h2>${imgs || '<p><i>brak paneli</i></p>'}
-<h2>Z5. Reguły alarmowe</h2>${rulesT}<h3>Dziennik alarmów (${EPS.length})</h3>${almT}
+<h2>Z5. Reguły alarmowe</h2>${rulesT}${qa('Działania operatora', rep.z5)}<h3>Dziennik alarmów (${EPS.length})</h3>${almT}
 <h2>Z6. Karta zdarzeń zmiany</h2>${kartaT}
 <h2>Z7. Eksport i wnioski</h2>${qa('Sztuki dobre: Excel vs kafel', rep.z7a)}${qa('Alarmy zasadne / szum', rep.z7b)}${qa('Wczesne wykrycie', rep.z7c)}
 </body></html>`;
@@ -711,12 +721,38 @@ $('#s_go').onclick = () => {
   }, 400);
 };
 
+// ─── lista kontrolna (zakładka 6) ──────────────────────────────────────────
+function renderChecklist(){
+  const ok = (c, t) => `<div>${c ? '<b class="ok">✓</b>' : '<b class="bad">✗</b>'} ${t}</div>`;
+  const s4 = scaleT(4), s20 = scaleT(20), filled = k => (rep[k] || '').trim().length > 10;
+  const pan = panels.filter(Boolean), kartaN = (rep.karta || []).filter(r => r && r[0] && r[1]).length;
+  $('#checklist').innerHTML = [
+    ok(filled('z1'), 'Z1 — odpowiedź wpisana'),
+    ok(s4 === 0 && s20 === 300, 'Z2 — przeliczenie TT101 na °C zgodne z tabliczką'),
+    ok(num(cfg.qthr) !== null && num(cfg.qthr) > 3 && num(cfg.qthr) < 4, 'Z2 — reguła jakości pomiaru ustawiona'),
+    ok(num(cfg.pfac) === 0.01, 'Z2 — ciśnienie przeliczone na bary'),
+    ok(filled('z2'), 'Z2 — odpowiedź wpisana'),
+    ok((num(cfg.tdb) || 0) > 0, 'Z3 — martwa strefa temperatury ustawiona'),
+    ok(filled('z3'), 'Z3 — odpowiedź wpisana'),
+    ok(dashMeta.title && dashMeta.odb, 'Z4 — tytuł i odbiorca dashboardu'),
+    ok(pan.length >= 5, `Z4 — co najmniej 5 paneli (masz ${pan.length})`),
+    ok(pan.some(p => p.typ === 'trend' && p.tag === 'temp' && num(p.lo) !== null && num(p.hi) !== null), 'Z4 — trend temperatury z zakresem normalnym'),
+    ok(rules.length >= 4, `Z5 — co najmniej 4 reguły alarmowe (masz ${rules.length})`),
+    ok(filled('z5'), 'Z5 — działania operatora wpisane'),
+    ok(kartaN >= 4, `Z6 — co najmniej 4 zdarzenia w karcie (masz ${kartaN})`),
+    ok(!!load('exported', ''), 'Z7 — plik CSV pobrany'),
+    ok(filled('z7a') && filled('z7b') && filled('z7c'), 'Z7 — trzy odpowiedzi wpisane'),
+    ok((rep.os || '').trim().length > 3, 'imiona i nazwiska wpisane'),
+  ].join('') + '<p class="muted">Lista sprawdza tylko, czy coś jest zrobione — nie ocenia treści odpowiedzi.</p>';
+}
+
 // ─── zakładki i pętla główna ───────────────────────────────────────────────
 function showTab(id){
   $$('nav button').forEach(b => b.classList.toggle('on', b.dataset.t === id));
   $$('main section').forEach(s => s.classList.toggle('on', s.id === id));
   if (id === 'dash') setTimeout(buildGrid, 30);
   if (id === 'alm') renderAlarms(true);
+  if (id === 'rep') renderChecklist();
   if (id === 'exp' && !$('#e_od').value) { const n = H.t.length; $('#e_od').value = fmtM(Math.max(H.t[0], H.t[n - 1] - 30 * M)); $('#e_do').value = fmtM(H.t[n - 1]); }
 }
 $$('nav button').forEach(b => b.onclick = () => showTab(b.dataset.t));

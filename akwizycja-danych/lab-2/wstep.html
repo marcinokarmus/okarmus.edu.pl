@@ -64,13 +64,13 @@ p{margin:.2em 0} ul{margin:.2em 0;padding-left:1.3em} li{margin:.3em 0}
   <div class="title-wrap">
     <div class="kicker">Akwizycja i wizualizacja danych w procesach przemysłowych · laboratorium 2</div>
     <h1>Pakowaczka 01 na żywo</h1>
-    <p class="big muted">Na Lab 1 dostaliście gotowy plik CSV. Dziś budujecie tor, który taki plik tworzy.</p>
+    <p class="big muted">Na Lab 1 dostaliście gotowy plik CSV. Dziś przechodzicie całą drogę danych, która taki plik tworzy.</p>
     <div class="chain">
       <div>TT101, PT102<br>liczniki<small>czujniki</small></div><div class="arr">→</div>
       <div>sterownik<small>publikuje tagi (MQTT)</small></div><div class="arr">→</div>
-      <div class="you">Node-RED<small>skalowanie, jakość, martwa strefa</small></div><div class="arr">→</div>
-      <div class="hist">historian<small>InfluxDB</small></div><div class="arr">→</div>
-      <div class="you">Grafana<small>dashboard + alarmy</small></div><div class="arr">→</div>
+      <div class="you">akwizycja<small>skalowanie, jakość, martwa strefa</small></div><div class="arr">→</div>
+      <div class="hist">historian<small>baza szeregów czasowych</small></div><div class="arr">→</div>
+      <div class="you">dashboard<small>+ alarmy</small></div><div class="arr">→</div>
       <div>CSV → Excel<small>= Lab 1</small></div>
     </div>
     <div class="cols">
@@ -84,11 +84,11 @@ p{margin:.2em 0} ul{margin:.2em 0;padding-left:1.3em} li{margin:.3em 0}
 <!-- 2 -->
 <section class="slide">
   <div class="kicker">Plan</div>
-  <h2>Trzy bloki i jedna zmiana z niespodziankami</h2>
+  <h2>Pracujecie samodzielnie — wg instrukcji krok po kroku</h2>
   <div class="plan">
     <div class="card"><div class="time">11:45–12:30</div><h3>1. Akwizycja</h3><p>Surowe sygnały ze sterownika. Przeliczenie mA → °C, jakość pomiaru, martwa strefa. Zapis do historiana.</p><p class="muted">zad. 1–3</p></div>
-    <div class="card"><div class="time">12:40–13:30</div><h3>2. Dashboard</h3><p>Ekran dla wybranego odbiorcy: trend z zakresem normalnym, stany maszyny, sztuki, braki.</p><p class="muted">zad. 4</p></div>
-    <div class="card"><div class="time">13:35–14:15</div><h3>3. Alarmy i zmiana</h3><p>Reguły alarmowe. Potem obserwujecie maszynę i zapisujecie każde zdarzenie: <b>co, kiedy, dlaczego</b>.</p><p class="muted">zad. 5–6</p></div>
+    <div class="card"><div class="time">12:40–13:30</div><h3>2. Dashboard i alarmy</h3><p>Ekran dla wybranego odbiorcy. Reguły alarmowe — <b>gotowe przed 13:35</b>.</p><p class="muted">zad. 4–5</p></div>
+    <div class="card"><div class="time">13:35–14:15</div><h3>3. Zmiana z niespodziankami</h3><p>Obserwujecie maszynę i zapisujecie każde zdarzenie: <b>co, kiedy, dlaczego, co zrobić</b>.</p><p class="muted">zad. 6</p></div>
     <div class="card"><div class="time">14:15–14:30</div><h3>4. Eksport i oddanie</h3><p>CSV z historiana → Excel. Czy liczby się zgadzają? Wnioski.</p><p class="muted">zad. 7</p></div>
   </div>
   <p class="muted">przerwy: 12:30–12:40 i 13:30–13:35 · maszyna pracuje także w przerwach</p>
@@ -97,25 +97,25 @@ p{margin:.2em 0} ul{margin:.2em 0;padding-left:1.3em} li{margin:.3em 0}
 
 <!-- 3 -->
 <section class="slide">
-  <div class="kicker">Zasady</div>
-  <h2>Jak pracujemy</h2>
+  <div class="kicker">Start</div>
+  <h2>Otwórzcie symulator hali</h2>
   <div class="url">okarmus.edu.pl/akwizycja-danych/lab-2</div>
   <div class="cols">
     <div class="card">
-      <h3>Stanowisko</h3>
+      <h3>Praca</h3>
       <ul>
-        <li>sami lub <b>w parach</b>, jedno stanowisko <span class="mono">sNN</span> = jeden numer z listy adresów</li>
-        <li><b>Node-RED</b>: <span class="mono">http://<span class="edit" contenteditable="true" spellcheck="false"></span>:19NN</span></li>
-        <li><b>Grafana</b>: <span class="mono">http://…:3000</span>, login <span class="mono">sNN</span>, hasło <span class="mono">hala1</span></li>
-        <li>gdy sieć hali nie działa: <b>symulator w przeglądarce</b> (link w instrukcji) — te same dane, te same zadania</li>
+        <li>instrukcja → link <b>symulator.html</b>; Chrome lub Edge, <b>nie</b> tryb prywatny</li>
+        <li>sami lub <b>w parach</b>; nie zmieniajcie komputera — postęp zapisuje się w przeglądarce</li>
+        <li>instrukcja prowadzi krok po kroku; zegar maszyny jest taki sam na wszystkich komputerach</li>
+        <li>zakładka <b>6. Sprawozdanie</b> ma listę kontrolną — sprawdzajcie, co już macie</li>
       </ul>
     </div>
     <div class="card">
       <h3>Sprawozdanie i ocena</h3>
       <ul>
-        <li>Wasza praca <b>zostaje na serwerze hali</b>: przepływ Node-RED + dashboard w folderze <span class="mono">Stanowisko sNN</span> z panelem tekstowym „Sprawozdanie”</li>
-        <li>wariant przeglądarkowy: plik z zakładki „6. Sprawozdanie” oddajecie: <span class="edit" contenteditable="true" spellcheck="false"></span></li>
-        <li>20 pkt (2 + 3 + 2 + 5 + 3 + 3 + 2), zaliczenie od 11 pkt; para — jedna ocena</li>
+        <li>odpowiedzi wpisujecie w symulatorze; na koniec <b>Pobierz sprawozdanie</b> → plik <span class="mono">Lab2_Nazwisko.html</span></li>
+        <li>oddajecie: <span class="edit" contenteditable="true" spellcheck="false"></span></li>
+        <li>20 pkt (2 + 3 + 2 + 5 + 3 + 3 + 2), zaliczenie od 11 pkt; para — jeden plik, jedna ocena</li>
       </ul>
     </div>
   </div>
