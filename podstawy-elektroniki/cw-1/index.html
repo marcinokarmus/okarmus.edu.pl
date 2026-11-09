@@ -1,0 +1,915 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Podstawy elektroniki i elektrotechniki — ćwiczenia 1</title>
+<style>
+:root{
+  --bg:#f7f7f4; --panel:#ffffff; --fg:#1d2330; --muted:#5d6675; --grid:#d9dce2;
+  --accent:#1f6fd1; --accent2:#e2741d; --accent3:#1f9a5a; --danger:#d23b3b; --violet:#7a4cc9; --gold:#c49a00;
+  --chip:#eef2f8;
+}
+:root[data-theme="dark"]{
+  --bg:#12151b; --panel:#1b2029; --fg:#e9edf3; --muted:#9aa4b4; --grid:#323a47;
+  --accent:#5aa2ff; --accent2:#ff9a4a; --accent3:#43c785; --danger:#ff6464; --violet:#ae8cff; --gold:#e8c040;
+  --chip:#232a36;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;overflow:hidden}
+.slide{position:absolute;inset:0;padding:3.2vh 5vw 9vh;display:none;flex-direction:column;gap:1.4vh;overflow:auto}
+.slide.active{display:flex}
+.kicker{font-size:clamp(13px,1.05vw,18px);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{font-size:clamp(32px,4.4vw,76px);margin:0;line-height:1.05}
+h2{font-size:clamp(24px,2.8vw,46px);margin:0;line-height:1.1}
+p,li,td,th,label,.txt{font-size:clamp(16px,1.45vw,25px);line-height:1.4}
+p{margin:.2em 0}
+ul,ol{margin:.2em 0;padding-left:1.3em} li{margin:.2em 0}
+.muted{color:var(--muted)}
+.big{font-size:clamp(21px,2vw,34px)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:2vw;align-items:start}
+.cols.c3{grid-template-columns:1fr 1fr 1fr}
+.cols.c64{grid-template-columns:1.5fr 1fr}
+.cols.c46{grid-template-columns:1fr 1.5fr}
+.card{background:var(--panel);border:1px solid var(--grid);border-radius:14px;padding:1.2vh 1.2vw}
+.card h3{margin:.1em 0 .3em;font-size:clamp(17px,1.5vw,27px)}
+.card p,.card li,.card td,.card th{font-size:clamp(14px,1.25vw,21px)}
+.def{border-left:6px solid var(--accent);background:var(--panel);border-radius:10px;padding:.9vh 1.3vw}
+.def p{font-size:clamp(17px,1.6vw,28px)}
+.formula{font-family:"Cambria Math","Times New Roman",serif;font-size:clamp(20px,2.1vw,36px);background:var(--panel);border:2px solid var(--grid);border-radius:12px;padding:.25em .7em;display:inline-block}
+canvas.viz{width:100%;height:44vh;display:block;background:var(--panel);border:1px solid var(--grid);border-radius:14px}
+canvas.short{height:30vh}
+canvas.tall{height:54vh}
+canvas.mini{height:19vh;margin:.4vh 0}
+.ctrl{display:flex;gap:.9vw;align-items:center;flex-wrap:wrap}
+.ctrl label{display:flex;align-items:center;gap:.5em;font-size:clamp(14px,1.2vw,20px)}
+input[type=range]{width:clamp(140px,14vw,280px);accent-color:var(--accent);height:28px}
+input[type=checkbox]{width:1.2em;height:1.2em;accent-color:var(--accent3)}
+button,select,input[type=text],input[type=number]{font:inherit;font-size:clamp(14px,1.2vw,20px);padding:.3em .7em;border-radius:10px;border:1px solid var(--grid);background:var(--panel);color:var(--fg)}
+input[type=number]{width:6.5em}
+button,select{cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+button.sel{background:var(--accent);color:#fff;border-color:var(--accent)}
+.val{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent)}
+.res{font-variant-numeric:tabular-nums;font-weight:800;color:var(--accent3);font-size:clamp(20px,2vw,34px)}
+.bad{color:var(--danger);font-weight:800}
+.info{font-size:clamp(14px,1.2vw,20px);color:var(--muted)}
+.info b{color:var(--fg)}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+table{border-collapse:collapse;width:100%}
+th,td{border-bottom:1px solid var(--grid);padding:.3em .55em;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+.ex{background:var(--panel);border:1px solid var(--grid);border-left:6px solid var(--accent2);border-radius:12px;padding:.9vh 1.2vw}
+.ex h3{margin:0 0 .3em;font-size:clamp(16px,1.45vw,25px);color:var(--accent2)}
+.ex ol li{display:none}
+.ex ol li.on{display:list-item}
+.ex .step{margin-top:.4em}
+.you{background:var(--panel);border:1px dashed var(--accent3);border-radius:12px;padding:.8vh 1.2vw}
+.you h3{margin:0 0 .3em;font-size:clamp(16px,1.45vw,25px);color:var(--accent3)}
+details summary{cursor:pointer;font-weight:600;font-size:clamp(15px,1.3vw,22px)}
+details p{color:var(--accent3);font-weight:700}
+.plan{display:grid;grid-template-columns:repeat(4,1fr);gap:.8vw}
+.plan .card{border-top:6px solid var(--accent)}
+.plan .card:nth-child(2){border-top-color:var(--accent2)}
+.plan .card:nth-child(3){border-top-color:var(--accent3)}
+.plan .card:nth-child(4){border-top-color:var(--violet)}
+.plan .time{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;font-size:clamp(13px,1.1vw,18px)}
+.pyr{display:flex;flex-direction:column;align-items:center;gap:6px}
+.pyr button{display:block;text-align:center;font-weight:700;border-width:2px;padding:.55em .5em;font-size:clamp(14px,1.25vw,21px)}
+.pyr button.sel{box-shadow:0 0 0 4px var(--accent2)}
+.chain{display:flex;align-items:stretch;gap:.4vw;flex-wrap:wrap}
+.chain button{flex:1;min-width:110px;text-align:center;font-weight:700;padding:.6em .4em;font-size:clamp(13px,1.1vw,19px);line-height:1.25}
+.chain .arr{align-self:center;color:var(--muted);font-size:clamp(18px,1.8vw,30px)}
+.chain button small{display:block;font-weight:500;color:var(--muted);font-size:.8em}
+.chain button.sel small{color:#fff}
+.title-wrap{margin:auto 0;display:flex;flex-direction:column;gap:2vh}
+.hint{position:fixed;right:1.2vw;top:1vh;font-size:13px;color:var(--muted);opacity:.7}
+#bar{position:fixed;left:0;right:0;bottom:0;height:6vh;min-height:44px;display:flex;align-items:center;gap:.8vw;padding:0 1.2vw;background:var(--panel);border-top:1px solid var(--grid);z-index:10}
+#bar button{padding:.2em .7em}
+#prog{flex:1;height:6px;background:var(--grid);border-radius:4px;overflow:hidden}
+#prog div{height:100%;background:var(--accent);width:0}
+#cnt{font-variant-numeric:tabular-nums;color:var(--muted);font-size:15px;min-width:5ch;text-align:right}
+#blk{color:var(--muted);font-size:15px;white-space:nowrap}
+.notes{display:none}
+#notes{position:fixed;left:0;right:0;bottom:6vh;max-height:42vh;overflow:auto;background:var(--panel);border-top:3px solid var(--accent2);padding:1.2vh 2vw;display:none;z-index:9;box-shadow:0 -8px 24px rgba(0,0,0,.15)}
+#notes.show{display:block}
+#notes, #notes *{font-size:clamp(14px,1.12vw,19px)}
+@media (max-width:800px){.cols,.cols.c3,.cols.c64,.cols.c46,.plan{grid-template-columns:1fr}}
+
+.card p,.card li,.card td,.card th{font-size:clamp(14px,1.3vw,22px)}
+table.cmp td,table.cmp th{font-size:clamp(13px,1.2vw,20px)}
+table.cmp td:first-child{font-weight:600}
+table.mini td{font-size:clamp(12px,1vw,17px);padding:.12em .4em}
+svg.dia{width:100%;height:auto;display:block;max-height:50vh}
+svg.dia text{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+.formula{font-size:clamp(17px,1.65vw,28px)!important}
+.dev{display:flex;align-items:center;gap:.6vw;margin:.5vh 0;font-size:clamp(14px,1.25vw,21px)}
+.dev input{width:1.3em;height:1.3em}
+#rc-ctl select{min-width:7.5em}
+</style>
+</head>
+<body>
+
+<div class="hint">← → przewijanie · N notatki · S notatki w osobnym oknie · F pełny ekran · T motyw</div>
+
+<!-- 1 -->
+<section class="slide" id="s-title" data-blok="Część A · obwód elektryczny">
+  <div class="title-wrap">
+    <div class="kicker">Podstawy elektroniki i elektrotechniki I · ćwiczenia 1</div>
+    <h1>Prąd, napięcie, moc — obwód elektryczny w zakładzie</h1>
+    <p class="big muted">sześć wielkości · prawo Ohma · moc i koszt energii · połączenia · prawa Kirchhoffa · źródło rzeczywiste · elementy elektroniczne</p>
+    <p class="muted">Zarządzanie i inżynieria produkcji · I rok · studia stacjonarne · mgr inż. M. Okarmus</p>
+  </div>
+  <aside class="notes">
+    <p><b>O czym są te zajęcia.</b> Inżynier produkcji nie projektuje układów elektronicznych, ale codziennie podejmuje decyzje, w których elektryczność gra rolę: dobór i koszt pracy maszyn, rachunek za energię, zabezpieczenia, awarie czujników, rozmowa z działem utrzymania ruchu. Dziś budujemy fundament: <b>sześć wielkości</b> i <b>trzy prawa</b>, z których wynika prawie cała reszta.</p>
+<p><b>Sterowanie prezentacją:</b> ← → slajdy, N — notatki pod slajdem, S — notatki w osobnym oknie, F — pełny ekran, T — motyw jasny/ciemny. Notatki są materiałem do nauki — rozwijają to, co widać na slajdzie.</p>
+  </aside>
+</section>
+<!-- 2 -->
+<section class="slide" id="s-plan" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Plan</div>
+  <h2>Dziś: 90 minut, dwie części</h2>
+  <div class="cols">
+    <div class="card" style="border-top:6px solid var(--accent)"><h3>A. Obwód elektryczny</h3><ul>
+      <li>prąd, napięcie, rezystancja, moc, energia, ładunek</li><li>prawo Ohma</li><li>moc i koszt energii w zakładzie</li>
+      <li>połączenie szeregowe, równoległe, dzielnik napięcia</li><li>prawa Kirchhoffa: obwód gniazd 16 A, spadek napięcia na kablu</li><li>źródło rzeczywiste i zwarcie</li></ul></div>
+    <div class="card" style="border-top:6px solid var(--accent2)"><h3>B. Elementy elektroniczne</h3><ul>
+      <li>rezystor i kod paskowy</li><li>kondensator: ładowanie, stała czasowa</li><li>cewka: przekaźnik, stycznik, przepięcia</li>
+      <li>dioda, LED, zasilacz 24 V</li><li>tranzystor jako łącznik — wyjście sterownika PLC</li><li>czujniki: Pt100, 4–20 mA</li></ul></div>
+  </div>
+  <div class="def" style="border-left-color:var(--violet)"><p><b>Zajęcia zdalne:</b> pytania i odpowiedzi — <b>na czacie</b>. Na slajdach są suwaki i przyciski — proponujcie wartości, sprawdzimy razem.</p></div>
+  <aside class="notes">
+    <p><b>Część A</b> to obwód elektryczny prądu stałego: definicje wielkości, prawo Ohma, moc i energia, łączenie odbiorników, prawa Kirchhoffa, źródło rzeczywiste. To podstawa wszystkich kolejnych tematów (prąd przemienny, maszyny, pomiary).</p>
+<p><b>Część B</b> to przegląd elementów, które spotkacie w każdej szafie sterowniczej: rezystor, kondensator, cewka (przekaźnik, stycznik), dioda, tranzystor, czujniki. Celem jest rozpoznanie elementu i zrozumienie, <b>do czego służy</b>, a nie projektowanie układów.</p>
+  </aside>
+</section>
+<!-- 3 -->
+<section class="slide" id="s-why" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Po co inżynierowi produkcji elektrotechnika?</div>
+  <h2>Ścieżka energii i informacji w maszynie</h2>
+  <div id="why-chain" class="chain"></div>
+  <div class="cols c64">
+    <div class="card"><h3 id="why-t"></h3><p id="why-d"></p></div>
+    <div class="card"><h3>Decyzja inżyniera produkcji</h3><p id="why-z"></p></div>
+  </div>
+  <p class="info">Kliknij element łańcucha.</p>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> W każdej maszynie płyną dwa strumienie: <b>energia</b> (sieć → rozdzielnica → zabezpieczenia → napęd) i <b>informacja</b> (czujnik → sterownik PLC → wyjście → przekaźnik/stycznik). Elektrotechnika zajmuje się głównie pierwszym, elektronika — drugim.</p>
+<ul><li><b>sieć i przyłącze</b> — moc umowna, taryfa, koszt energii; <b>rozdzielnica</b> — wyłączniki nadprądowe i różnicowoprądowe,</li>
+<li><b>napęd</b> — silnik i falownik (przemiennik częstotliwości): zmiana prędkości, oszczędność energii,</li>
+<li><b>sterownik PLC</b> — mózg maszyny; <b>czujniki</b> — oczy; <b>przekaźniki i styczniki</b> — „ręce”, które przełączają duże prądy małym sygnałem.</li></ul>
+<p><b>Warto wiedzieć.</b> Energia elektryczna to w wielu zakładach jedna z największych pozycji kosztów zmiennych; a awaria czujnika za kilkadziesiąt złotych potrafi zatrzymać linię wartą miliony. Obie sprawy to codzienność inżyniera produkcji.</p>
+  </aside>
+</section>
+<!-- 4 -->
+<section class="slide" id="s-units" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Rozgrzewka · przedrostki</div>
+  <h2>Zamień jednostki — odpowiedzi na czat</h2>
+  <div class="cols">
+    <div class="card"><table class="cmp">
+      <tr><th>przedrostek</th><th>symbol</th><th>mnożnik</th></tr>
+      <tr><td>mega</td><td>M</td><td>10⁶ = 1 000 000</td></tr><tr><td>kilo</td><td>k</td><td>10³ = 1 000</td></tr>
+      <tr><td>—</td><td></td><td>1</td></tr><tr><td>mili</td><td>m</td><td>10⁻³ = 0,001</td></tr>
+      <tr><td>mikro</td><td>µ</td><td>10⁻⁶ = 0,000 001</td></tr><tr><td>nano</td><td>n</td><td>10⁻⁹</td></tr></table></div>
+    <div>
+      <div class="you"><h3>1. 20 mA = ? A</h3><details><summary>odpowiedź</summary><p>0,02 A</p></details></div>
+      <div class="you"><h3>2. 4,7 kΩ = ? Ω</h3><details><summary>odpowiedź</summary><p>4 700 Ω</p></details></div>
+      <div class="you"><h3>3. 0,4 kW = ? W</h3><details><summary>odpowiedź</summary><p>400 W</p></details></div>
+      <div class="you"><h3>4. 100 µF = ? F</h3><details><summary>odpowiedź</summary><p>0,0001 F</p></details></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> W elektrotechnice wartości różnią się o wiele rzędów: prąd czujnika to miliampery, prąd silnika — dziesiątki amperów, rezystancja izolacji — megaomy. Przedrostki trzeba zamieniać bez zastanowienia.</p>
+<ul><li>z „większej” jednostki na „mniejszą” (kA → A, A → mA) — <b>mnożymy</b> przez 1000,</li><li>z „mniejszej” na „większą” (mA → A) — <b>dzielimy</b> przez 1000.</li></ul>
+<p><b>Częsty błąd.</b> Wstawienie do wzoru miliamperów i kiloomów bez zamiany: U = R·I = 4,7 kΩ · 20 mA. Bezpiecznie: zamień wszystko na jednostki podstawowe (Ω, A, V, W): 4700 Ω · 0,02 A = 94 V. (Para kΩ · mA też daje wolty, bo 10³ · 10⁻³ = 1 — ale łatwo się pomylić przy innych parach.)</p>
+<p><b>Uwaga na zapis:</b> m (mili, 10⁻³) i M (mega, 10⁶) różnią się tylko wielkością litery — różnica to miliard razy.</p>
+  </aside>
+</section>
+<!-- 5 -->
+<section class="slide" id="s-quant" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Słownik</div>
+  <h2>Sześć wielkości, które trzeba znać</h2>
+  <table class="cmp">
+    <tr><th>wielkość</th><th>symbol</th><th>jednostka</th><th>co to jest</th><th>przykład w zakładzie</th></tr>
+    <tr><td>ładunek</td><td>Q</td><td>C (kulomb), A·h</td><td>„ilość elektryczności”</td><td>pojemność akumulatora wózka: 500 Ah</td></tr>
+    <tr><td>natężenie prądu</td><td>I</td><td>A (amper)</td><td>ładunek przepływający w czasie: I = Q / t</td><td>silnik 7,5 kW: ok. 15 A; czujnik: 4–20 mA</td></tr>
+    <tr><td>napięcie</td><td>U</td><td>V (wolt)</td><td>„siła”, która pcha ładunki; różnica potencjałów</td><td>sieć 230/400 V; sterowanie 24 V DC</td></tr>
+    <tr><td>rezystancja</td><td>R</td><td>Ω (om)</td><td>opór dla przepływu prądu</td><td>grzałka 26 Ω; Pt100: 100 Ω w 0 °C</td></tr>
+    <tr><td>moc</td><td>P</td><td>W (wat)</td><td>szybkość przetwarzania energii: P = U · I</td><td>sprężarka 11 kW</td></tr>
+    <tr><td>energia</td><td>E (W)</td><td>J (dżul), kWh</td><td>praca prądu: E = P · t</td><td>rachunek: zł za kWh</td></tr>
+  </table>
+  <div class="def"><p><b>1 kWh</b> = 1000 W przez 1 h = 3 600 000 J. To jednostka, za którą zakład płaci.</p></div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b></p>
+<ul><li><b>Prąd I</b> [A] — ile ładunku przepływa przez przekrój przewodu w sekundzie: 1 A = 1 C/s. Prąd mierzymy amperomierzem włączonym <b>szeregowo</b> (prąd musi przez niego płynąć).</li>
+<li><b>Napięcie U</b> [V] — różnica potencjałów między dwoma punktami; to ona „wymusza” przepływ prądu. Mierzymy woltomierzem włączonym <b>równolegle</b> (między dwoma punktami).</li>
+<li><b>Rezystancja R</b> [Ω] — opór elementu; zależy od materiału (rezystywność ρ), długości l i przekroju S przewodu: R = ρ · l / S. Miedź: ρ ≈ 0,0175 Ω·mm²/m.</li>
+<li><b>Moc P</b> [W] — ile energii na sekundę element pobiera lub oddaje: P = U · I.</li>
+<li><b>Energia E</b> [J lub kWh] — moc razy czas: E = P · t.</li>
+<li><b>Ładunek Q</b> [C lub Ah] — prąd razy czas: Q = I · t; w akumulatorach podaje się go w amperogodzinach (1 Ah = 3600 C).</li></ul>
+<p><b>Częsty błąd.</b> „Silnik zużywa 11 kW na godzinę” — niepoprawne. Moc (kW) mówi, jak szybko zużywa energię; zużycie to energia (kWh): 11 kW przez 1 h = 11 kWh.</p>
+  </aside>
+</section>
+<!-- 6 -->
+<section class="slide" id="s-model" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Model</div>
+  <h2>Obwód elektryczny: źródło, przewody, odbiornik</h2>
+  <div class="cols c64">
+    <canvas id="cv-mod" class="viz"></canvas>
+    <div>
+      <div class="ctrl"><label>napięcie U <input type="range" id="md-u" min="0" max="24" step="1" value="12"> <span class="val" id="md-uv"></span></label></div>
+      <div class="ctrl"><label>rezystancja R <input type="range" id="md-r" min="2" max="48" step="1" value="12"> <span class="val" id="md-rv"></span></label></div>
+      <div class="ctrl"><label><input type="checkbox" id="md-sw" checked> łącznik zamknięty</label></div>
+      <div class="card" style="margin-top:1vh"><p>prąd I = U / R = <span class="res" id="md-i"></span></p><p>moc P = U · I = <span class="val" id="md-p"></span></p></div>
+      <p class="info">Kropki = ładunki. Szybkość ruchu ~ natężenie prądu.</p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Prąd płynie tylko w <b>obwodzie zamkniętym</b>: źródło (bateria, zasilacz, sieć) → przewód → odbiornik (grzałka, silnik, lampa) → przewód powrotny → źródło. Otwarcie łącznika w dowolnym miejscu przerywa prąd w całym obwodzie.</p>
+<ul><li>Źródło <b>nie „wytwarza” ładunków</b> — tylko je pompuje w obiegu. Ładunki są w przewodach cały czas.</li>
+<li><b>Umowny kierunek prądu</b>: od „+” do „−” na zewnątrz źródła (elektrony w metalu płyną odwrotnie — to historyczna umowa, w obliczeniach jej się trzymamy).</li>
+<li>Większe napięcie → większy prąd; większa rezystancja → mniejszy prąd. Dokładnie mówi o tym prawo Ohma (następny slajd).</li></ul>
+<p><b>Na slajdzie.</b> Zmień napięcie i rezystancję: kropki poruszają się szybciej przy większym prądzie. Otwórz łącznik — prąd znika w całym obwodzie, nie tylko „za łącznikiem”.</p>
+<p><b>Analogia (tylko orientacyjnie):</b> napięcie ~ ciśnienie wody, prąd ~ przepływ, rezystancja ~ zwężenie rury, źródło ~ pompa.</p>
+  </aside>
+</section>
+<!-- 7 -->
+<section class="slide" id="s-ohm" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Prawo Ohma</div>
+  <h2>U = R · I &nbsp;→&nbsp; I = U / R &nbsp;→&nbsp; R = U / I</h2>
+  <div class="cols c64">
+    <canvas id="cv-ohm" class="viz"></canvas>
+    <div>
+      <div class="ctrl"><label>R <input type="range" id="oh-r" min="5" max="100" step="5" value="20"> <span class="val" id="oh-rv"></span></label></div>
+      <div class="ctrl"><label>U <input type="range" id="oh-u" min="0" max="24" step="0.5" value="12"> <span class="val" id="oh-uv"></span></label></div>
+      <div class="card" style="margin-top:1vh"><p>I = <span class="res" id="oh-i"></span></p></div>
+      <div class="def"><p>Charakterystyka I(U) rezystora to <b>prosta</b> przez zero. Nachylenie = 1/R.</p></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Dla przewodników metalowych i rezystorów w stałej temperaturze prąd jest <b>proporcjonalny</b> do napięcia: I = U / R. Dwukrotnie większe napięcie → dwukrotnie większy prąd.</p>
+<p>Trzy postacie tego samego prawa (zapamiętaj trójkąt: U na górze, R i I na dole):</p>
+<ul><li>U = R · I — ile napięcia „odkłada się” na elemencie, przez który płynie prąd,</li><li>I = U / R — jaki prąd popłynie przy danym napięciu,</li><li>R = U / I — rezystancja z pomiaru napięcia i prądu.</li></ul>
+<p><b>Przykład.</b> Czujnik zasilany 24 V pobiera 20 mA. Jaka jest jego „zastępcza” rezystancja? R = 24 V / 0,02 A = 1200 Ω.</p>
+<p><b>Warto wiedzieć.</b> Nie wszystkie elementy są liniowe. Żarówka ma inną rezystancję zimna i gorąca (włókno nagrzane ma ok. 10 razy większą rezystancję — dlatego żarówki przepalają się przy włączaniu), a dioda przewodzi dopiero powyżej pewnego napięcia (część B).</p>
+<p><b>Częsty błąd.</b> Mylenie jednostek (mA, kΩ) — patrz rozgrzewka.</p>
+  </aside>
+</section>
+<!-- 8 -->
+<section class="slide" id="s-power" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Moc i energia</div>
+  <h2>P = U · I = I² · R = U² / R · E = P · t</h2>
+  <div class="cols c46">
+    <div class="ex" data-steps>
+      <h3>Grzałka 230 V, 2 kW. Policz I, R, koszt 3 min pracy (0,90 zł/kWh).</h3>
+      <ol>
+        <li>I = P / U = 2000 W / 230 V = <b>8,7 A</b></li>
+        <li>R = U² / P = 230² / 2000 = 52 900 / 2000 = <b>26,5 Ω</b></li>
+        <li>sprawdzenie: R = U / I = 230 / 8,7 = 26,4 Ω ✔</li>
+        <li>E = P · t = 2 kW · 0,05 h = <b>0,1 kWh</b></li>
+        <li>koszt = 0,1 kWh · 0,90 zł/kWh = <b>0,09 zł</b></li>
+      </ol>
+      <div class="step ctrl"><button class="primary" data-next>Następny krok ▶</button><button data-reset>Od początku</button></div>
+    </div>
+    <div class="card">
+      <h3>Kalkulator: ile kosztuje praca urządzenia?</h3>
+      <div class="ctrl"><label>moc <input type="range" id="en-p" min="0.1" max="55" step="0.1" value="11"> <span class="val" id="en-pv"></span></label></div>
+      <div class="ctrl"><label>godzin na dobę <input type="range" id="en-h" min="1" max="24" step="1" value="16"> <span class="val" id="en-hv"></span></label></div>
+      <div class="ctrl"><label>dni w roku <input type="range" id="en-d" min="50" max="365" step="5" value="250"> <span class="val" id="en-dv"></span></label></div>
+      <div class="ctrl"><label>cena <input type="range" id="en-c" min="0.4" max="1.5" step="0.05" value="0.9"> <span class="val" id="en-cv"></span></label></div>
+      <p>energia: <span class="val" id="en-e"></span> · koszt roczny: <span class="res" id="en-k"></span></p>
+      <p class="info" id="en-msg"></p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Moc elektryczna P = U · I. Łącząc ją z prawem Ohma, dostajemy dwie inne postacie: P = I² · R (przydatna, gdy znamy prąd — np. straty w przewodach) i P = U² / R (gdy znamy napięcie — np. grzałka w sieci 230 V). Energia E = P · t.</p>
+<p><b>Przykład krok po kroku</b> (taki typ zadania może być na kolokwium): grzałka 2 kW w sieci 230 V pobiera I = 8,7 A; jej rezystancja w stanie gorącym to ok. 26,5 Ω; przez 3 minuty (0,05 h) zużywa 0,1 kWh, co przy cenie 0,90 zł/kWh kosztuje 9 groszy.</p>
+<p><b>Na slajdzie — kalkulator.</b> Sprężarka 11 kW pracująca 16 h na dobę przez 250 dni w roku zużywa 11 · 16 · 250 = 44 000 kWh, czyli ok. 39 600 zł rocznie (przy 0,90 zł/kWh — przyjęta cena orientacyjna; w zakładzie dochodzą opłaty dystrybucyjne i za moc). Każdy kilowat pracujący na dwie zmiany kosztuje rocznie ok. 3600 zł.</p>
+<p><b>Warto wiedzieć.</b> Moc z tabliczki znamionowej silnika to moc <b>mechaniczna na wale</b>; z sieci pobiera on więcej (sprawność 85–95%). Urządzenie rzadko pracuje stale z pełną mocą — rzeczywiste zużycie mierzy się licznikiem energii (podlicznikiem na maszynie).</p>
+<p><b>Częsty błąd.</b> Mnożenie W przez godziny i podawanie wyniku w kWh bez dzielenia przez 1000.</p>
+  </aside>
+</section>
+<!-- 9 -->
+<section class="slide" id="s-led" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Decyzja z liczb</div>
+  <h2>Wymiana oświetlenia hali — opłaca się?</h2>
+  <div class="cols c46">
+    <div class="card"><table class="cmp">
+      <tr><td>liczba opraw</td><td><b>40</b></td></tr>
+      <tr><td>stara oprawa (metalohalogenkowa)</td><td><b>400 W</b></td></tr>
+      <tr><td>nowa oprawa LED (podobny strumień światła)</td><td><b>150 W</b>, koszt 900 zł/szt. z montażem</td></tr>
+      <tr><td>praca</td><td><b>16 h × 250 dni</b></td></tr>
+      <tr><td>cena energii</td><td><b>0,90 zł/kWh</b></td></tr></table></div>
+    <div class="ex" data-steps>
+      <h3>Policz roczną oszczędność i prosty czas zwrotu.</h3>
+      <ol>
+        <li>różnica mocy: 40 · (400 − 150) W = 10 000 W = <b>10 kW</b></li>
+        <li>czas pracy w roku: 16 · 250 = <b>4000 h</b></li>
+        <li>oszczędność energii: 10 kW · 4000 h = <b>40 000 kWh</b></li>
+        <li>oszczędność: 40 000 · 0,90 = <b>36 000 zł/rok</b></li>
+        <li>nakład: 40 · 900 = 36 000 zł → prosty czas zwrotu ≈ <b>1 rok</b></li>
+      </ol>
+      <div class="step ctrl"><button class="primary" data-next>Następny krok ▶</button><button data-reset>Od początku</button></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Przykład decyzji opartej na mocy i energii.</b> 40 opraw po 400 W zastępujemy oprawami LED po 150 W. Różnica mocy 40 · 250 W = 10 kW. Przy 4000 h pracy rocznie oszczędzamy 40 000 kWh, czyli ok. 36 000 zł rocznie. Nakład 36 000 zł zwraca się po ok. roku.</p>
+<p><b>Prosty czas zwrotu</b> (SPBT) = nakład / roczna oszczędność. Nie uwzględnia wartości pieniądza w czasie ani kosztów utrzymania — ale do pierwszej oceny wystarcza.</p>
+<p><b>Warto wiedzieć.</b> W rzeczywistości dochodzą dodatkowe korzyści (dłuższa żywotność LED, mniej wymian na wysokości, natychmiastowe włączanie, możliwość ściemniania i czujników ruchu) i dodatkowe koszty (utylizacja, przestój na montaż). Takie inwestycje często kwalifikują się do <b>białych certyfikatów</b> (świadectw efektywności energetycznej).</p>
+  </aside>
+</section>
+<!-- 10 -->
+<section class="slide" id="s-series" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Łączenie odbiorników</div>
+  <h2>Połączenie szeregowe i równoległe</h2>
+  <div class="ctrl"><button data-sp="s" class="sel">szeregowo</button><button data-sp="p">równolegle</button>
+    <label>U <input type="range" id="sp-u" min="6" max="24" step="1" value="12"> <span class="val" id="sp-uv"></span></label>
+    <label>R₁ <input type="range" id="sp-1" min="10" max="300" step="10" value="100"> <span class="val" id="sp-1v"></span></label>
+    <label>R₂ <input type="range" id="sp-2" min="10" max="300" step="10" value="200"> <span class="val" id="sp-2v"></span></label></div>
+  <div class="cols c64">
+    <canvas id="cv-sp" class="viz"></canvas>
+    <div class="card"><h3 id="sp-t"></h3><p id="sp-f" class="formula"></p><table class="mini" id="sp-tab"></table><p class="info" id="sp-msg"></p></div>
+  </div>
+  <aside class="notes">
+    <p><b>Połączenie szeregowe</b> — elementy jeden za drugim, jedna droga dla prądu:</p>
+<ul><li>przez wszystkie płynie <b>ten sam prąd</b>,</li><li>napięcia się <b>sumują</b>: U = U₁ + U₂ (większe napięcie na większej rezystancji),</li><li>rezystancja zastępcza: <b>R = R₁ + R₂</b> (zawsze większa od największej),</li><li>przerwa w jednym elemencie wyłącza wszystkie (stare lampki choinkowe).</li></ul>
+<p><b>Połączenie równoległe</b> — elementy obok siebie, między tymi samymi dwoma punktami:</p>
+<ul><li>na wszystkich jest <b>to samo napięcie</b>,</li><li>prądy się <b>sumują</b>: I = I₁ + I₂ (większy prąd przez mniejszą rezystancję),</li><li>rezystancja zastępcza: <b>1/R = 1/R₁ + 1/R₂</b>, dla dwóch: R = R₁·R₂ / (R₁ + R₂) (zawsze mniejsza od najmniejszej),</li><li>każdy odbiornik działa niezależnie — tak są podłączone gniazdka, lampy i maszyny w instalacji.</li></ul>
+<p><b>Przykład.</b> U = 12 V, R₁ = 100 Ω, R₂ = 200 Ω. Szeregowo: R = 300 Ω, I = 40 mA, U₁ = 4 V, U₂ = 8 V. Równolegle: R = 66,7 Ω, I₁ = 120 mA, I₂ = 60 mA, I = 180 mA.</p>
+<p><b>Częsty błąd.</b> Dodawanie rezystancji równoległych wprost (100 + 200) — wynik musi być mniejszy od 100 Ω.</p>
+  </aside>
+</section>
+<!-- 11 -->
+<section class="slide" id="s-div" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Zastosowanie połączenia szeregowego</div>
+  <h2>Dzielnik napięcia — tak sterownik „czyta” położenie</h2>
+  <div class="cols c64">
+    <canvas id="cv-div" class="viz"></canvas>
+    <div>
+      <div class="ctrl"><label>położenie suwaka potencjometru <input type="range" id="dv-x" min="0" max="100" step="1" value="35"> <span class="val" id="dv-xv"></span></label></div>
+      <div class="card"><p class="formula">U<sub>wy</sub> = U · R₂ / (R₁ + R₂)</p>
+        <p>R₁ = <span class="val" id="dv-r1"></span>, R₂ = <span class="val" id="dv-r2"></span></p>
+        <p>U<sub>wy</sub> = <span class="res" id="dv-u"></span> → wejście analogowe PLC 0–10 V</p>
+        <p>odczyt w sterowniku: <span class="val" id="dv-pv"></span> (przetwornik 0–27 648)</p></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Dwa rezystory połączone szeregowo dzielą napięcie zasilania w stosunku swoich rezystancji. Napięcie na dolnym rezystorze: <b>U<sub>wy</sub> = U · R₂ / (R₁ + R₂)</b>.</p>
+<p><b>Potencjometr</b> to rezystor z ruchomym suwakiem — dzieli się na dwie części R₁ i R₂, których suma jest stała. Napięcie na suwaku jest proporcjonalne do jego położenia. Tak działają proste <b>czujniki położenia</b> (przepustnica, dźwignia, poziom w zbiorniku z pływakiem) i pokrętła zadawania prędkości.</p>
+<p><b>Przykład.</b> Potencjometr 10 kΩ zasilany 10 V, suwak w 35%: R₂ = 3,5 kΩ, R₁ = 6,5 kΩ, U<sub>wy</sub> = 10 · 3,5 / 10 = 3,5 V. Sterownik (np. Siemens S7, zakres 0–27 648 dla 0–10 V) odczyta liczbę ok. 9677.</p>
+<p><b>Warto wiedzieć.</b> Wzór działa, gdy z dzielnika nie pobieramy prądu (wejście pomiarowe ma bardzo dużą rezystancję). Dzielnika <b>nie używa się do zasilania</b> odbiorników — do tego służą zasilacze i stabilizatory.</p>
+  </aside>
+</section>
+<!-- 12 -->
+<section class="slide" id="s-k1" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">I prawo Kirchhoffa — węzeł</div>
+  <h2>Suma prądów wpływających = suma prądów wypływających</h2>
+  <div class="cols c46">
+    <div class="card"><h3>Obwód gniazd 230 V, wyłącznik 16 A — włącz odbiorniki:</h3><div id="k1-list"></div></div>
+    <div><canvas id="cv-k1" class="viz short"></canvas>
+      <div class="card"><p>prąd w przewodzie zasilającym: <span class="res" id="k1-i"></span></p><p id="k1-msg"></p></div></div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> W węźle (punkcie połączenia przewodów) ładunek nie znika ani się nie gromadzi, więc <b>suma prądów wpływających = suma prądów wypływających</b>: I = I₁ + I₂ + I₃ + … To wprost połączenie równoległe.</p>
+<p><b>Przykład.</b> Obwód gniazd zabezpieczony wyłącznikiem 16 A. Prąd odbiornika: I = P / U. Czajnik 2000 W → 8,7 A; grzejnik 1500 W → 6,5 A; ekspres 1200 W → 5,2 A. Razem 20,4 A &gt; 16 A — wyłącznik zadziała.</p>
+<p><b>Warto wiedzieć.</b> Wyłącznik nadprądowy (typowo charakterystyka B lub C) przy niewielkim przeciążeniu wyłącza <b>po czasie</b> (od kilkunastu sekund do godzin — człon termiczny), a przy zwarciu natychmiast (człon elektromagnetyczny). Chroni <b>przewody</b> przed przegrzaniem, a nie ludzi przed porażeniem — do tego służy wyłącznik różnicowoprądowy (RCD, 30 mA).</p>
+<p><b>Częsty błąd.</b> „Dołożę mocniejszy wyłącznik, to nie będzie wybijać” — wyłącznik dobiera się do przekroju przewodu (np. 2,5 mm² Cu → 16 A); większy wyłącznik = ryzyko przegrzania i pożaru.</p>
+  </aside>
+</section>
+<!-- 13 -->
+<section class="slide" id="s-k2" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">II prawo Kirchhoffa — oczko</div>
+  <h2>Ile napięcia dociera do zaworu na końcu długiego kabla?</h2>
+  <div class="cols c64">
+    <canvas id="cv-k2" class="viz"></canvas>
+    <div>
+      <div class="ctrl"><label>długość kabla <input type="range" id="k2-l" min="5" max="200" step="5" value="80"> <span class="val" id="k2-lv"></span></label></div>
+      <div class="ctrl"><label>przekrój żyły <select id="k2-s"><option value="0.5">0,5 mm²</option><option value="0.75" selected>0,75 mm²</option><option value="1.5">1,5 mm²</option><option value="2.5">2,5 mm²</option></select></label></div>
+      <div class="ctrl"><label>prąd odbiornika <input type="range" id="k2-i" min="0.1" max="3" step="0.1" value="1"> <span class="val" id="k2-iv"></span></label></div>
+      <div class="card"><p>R przewodów (tam i z powrotem): <span class="val" id="k2-r"></span></p>
+        <p>U<sub>zas</sub> = U<sub>kabel</sub> + U<sub>odb</sub>: 24 V = <span class="val" id="k2-du"></span> + <span class="res" id="k2-u"></span></p><p id="k2-msg"></p></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> W zamkniętej pętli (oczku) <b>suma napięć źródeł = suma spadków napięć na elementach</b>: E = U₁ + U₂ + … Napięcie źródła „rozkłada się” na wszystkie elementy połączone szeregowo — także na przewody.</p>
+<p><b>Przykład.</b> Zawór elektromagnetyczny 24 V DC pobiera 1 A, kabel ma 80 m, żyły 0,75 mm² Cu. Prąd płynie tam i z powrotem, więc długość przewodu to 160 m: R = 0,0175 · 160 / 0,75 = 3,73 Ω. Spadek: 3,73 Ω · 1 A = 3,7 V. Do zaworu dociera 24 − 3,7 = 20,3 V — na granicy działania (typowo −15%, czyli 20,4 V).</p>
+<p><b>Rozwiązania:</b> większy przekrój żył, krótsza trasa (szafka lokalna, wyspa zaworowa), wyższe napięcie zasilania lub zasilacz z regulacją napięcia (np. 26–28 V).</p>
+<p><b>Warto wiedzieć.</b> Spadek napięcia na przewodach to też <b>strata mocy</b>: P = I² · R — kabel się grzeje. Dlatego energię przesyła się wysokim napięciem (mniejszy prąd przy tej samej mocy).</p>
+  </aside>
+</section>
+<!-- 14 -->
+<section class="slide" id="s-src" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Źródło rzeczywiste</div>
+  <h2>Dlaczego napięcie akumulatora spada pod obciążeniem?</h2>
+  <div class="cols c64">
+    <canvas id="cv-src" class="viz"></canvas>
+    <div>
+      <div class="card"><p class="formula">U = E − I · R<sub>w</sub></p><p>E — siła elektromotoryczna (napięcie bez obciążenia), R<sub>w</sub> — rezystancja wewnętrzna</p></div>
+      <div class="ctrl"><label>R obciążenia <input type="range" id="sr-r" min="0" max="100" step="1" value="40"> <span class="val" id="sr-rv"></span></label></div>
+      <div class="card"><p>I = <span class="val" id="sr-i"></span> · U = <span class="res" id="sr-u"></span></p><p>prąd zwarcia I<sub>z</sub> = E / R<sub>w</sub> = <span class="val" id="sr-z"></span></p></div>
+      <p class="info">Bateria 9 V: E = 9 V, R<sub>w</sub> = 2 Ω. Suwak w lewo do końca = zwarcie.</p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Każde rzeczywiste źródło ma <b>rezystancję wewnętrzną R<sub>w</sub></b>. Gdy płynie prąd, część napięcia „zostaje” wewnątrz źródła: <b>U = E − I · R<sub>w</sub></b>. Im większy prąd, tym niższe napięcie na zaciskach.</p>
+<ul><li><b>stan jałowy</b> (bez obciążenia, I = 0): U = E — to pokazuje woltomierz na nieobciążonej baterii,</li><li><b>obciążenie</b>: U &lt; E,</li><li><b>zwarcie</b> (R = 0): U = 0, prąd I<sub>z</sub> = E / R<sub>w</sub> — największy możliwy.</li></ul>
+<p><b>Przykład.</b> Bateria 9 V, R<sub>w</sub> = 2 Ω, obciążenie 16 Ω: I = 9 / (16 + 2) = 0,5 A, U = 9 − 0,5 · 2 = 8 V.</p>
+<p><b>Warto wiedzieć.</b> Akumulator samochodowy 12 V ma R<sub>w</sub> rzędu 0,01 Ω — prąd zwarcia to ok. 1000 A. Metalowy klucz lub obrączka zwierające zaciski rozgrzewają się do czerwoności. Dlatego przy pracy z akumulatorami (wózki widłowe, UPS) zdejmuje się biżuterię i używa izolowanych narzędzi. Rosnąca R<sub>w</sub> to też objaw <b>zużycia akumulatora</b> — „pokazuje 12 V, ale nie kręci rozrusznikiem”.</p>
+<p><b>Jak wyznaczyć E i R<sub>w</sub>:</b> zmierz U bez obciążenia (= E), potem U i I przy obciążeniu: R<sub>w</sub> = (E − U) / I.</p>
+  </aside>
+</section>
+<!-- 15 -->
+<section class="slide" id="s-quizA" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Sprawdź się · odpowiedzi na czat</div>
+  <h2>Pytania kontrolne — część A</h2>
+  <div class="cols">
+    <div class="you"><h3>1. Silnik 4 kW pracuje 8 h. Ile energii zużył?</h3><details><summary>odpowiedź</summary><p>32 kWh (moc razy czas; przy 0,90 zł/kWh — ok. 29 zł).</p></details></div>
+    <div class="you"><h3>2. Dwa rezystory 100 Ω równolegle — ile wynosi R zastępcza?</h3><details><summary>odpowiedź</summary><p>50 Ω (dla dwóch jednakowych: połowa).</p></details></div>
+    <div class="you"><h3>3. Przez rezystor 1 kΩ płynie 12 mA. Jakie jest na nim napięcie i moc?</h3><details><summary>odpowiedź</summary><p>U = 1000 · 0,012 = 12 V; P = 12 · 0,012 = 0,144 W.</p></details></div>
+    <div class="you"><h3>4. Dlaczego nie wolno zastąpić wyłącznika 16 A wyłącznikiem 25 A, „bo wybija”?</h3><details><summary>odpowiedź</summary><p>Wyłącznik chroni przewód; przewód dobrany do 16 A przy 25 A się przegrzeje — ryzyko pożaru. Trzeba rozdzielić odbiorniki na inne obwody.</p></details></div>
+  </div>
+  <aside class="notes">
+    <p><b>Odpowiedzi z uzasadnieniem:</b></p>
+<ol><li>E = P · t = 4 kW · 8 h = <b>32 kWh</b>.</li>
+<li>R = R₁·R₂/(R₁+R₂) = 100·100/200 = <b>50 Ω</b>. Dla n jednakowych rezystorów równolegle: R/n.</li>
+<li>U = R · I = 1000 Ω · 0,012 A = <b>12 V</b>; P = U · I = 12 · 0,012 = <b>0,144 W</b> (albo I² · R = 0,000144 · 1000). Typowy mały rezystor ma moc znamionową 0,25 W — wystarczy.</li>
+<li>Wyłącznik nadprądowy dobiera się do <b>obciążalności przewodu</b>; chroni instalację przed przegrzaniem. Większy wyłącznik nie zadziała, gdy przewód będzie już przegrzany.</li></ol>
+  </aside>
+</section>
+<!-- 16 -->
+<section class="slide" id="s-sum" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Podsumowanie części A</div>
+  <h2>Ściąga wzorów</h2>
+  <div class="cols c3">
+    <div class="card"><h3>Prawo Ohma i moc</h3><p>U = R · I</p><p>P = U · I = I² · R = U² / R</p><p>E = P · t &nbsp;[kWh]</p><p>Q = I · t &nbsp;[Ah]</p><p>R = ρ · l / S (Cu: ρ = 0,0175 Ω·mm²/m)</p></div>
+    <div class="card"><h3>Połączenia</h3><p>szeregowo: I wspólny, R = R₁ + R₂, U = U₁ + U₂</p><p>równolegle: U wspólne, 1/R = 1/R₁ + 1/R₂, I = I₁ + I₂</p><p>dzielnik: U<sub>wy</sub> = U · R₂ / (R₁ + R₂)</p></div>
+    <div class="card"><h3>Kirchhoff i źródło</h3><p>węzeł: Σ I<sub>wpł</sub> = Σ I<sub>wypł</sub></p><p>oczko: Σ E = Σ R · I</p><p>źródło: U = E − I · R<sub>w</sub></p><p>zwarcie: I<sub>z</sub> = E / R<sub>w</sub></p></div>
+  </div>
+  <div class="def"><p><b>Trzy rzeczy do zapamiętania:</b> płacimy za <b>energię</b> (kWh), nie za moc; wyłącznik chroni <b>przewód</b>; na długim kablu <b>ginie napięcie</b>.</p></div>
+  <aside class="notes">
+    <p><b>Zestaw wzorów z części A</b> — wszystkie wynikają z trzech praw (Ohma i dwóch praw Kirchhoffa) oraz definicji mocy.</p>
+<ul><li>Prawo Ohma: U = R · I. Moc: P = U · I, a po podstawieniu prawa Ohma: P = I² · R = U² / R. Energia: E = P · t. Ładunek: Q = I · t.</li>
+<li>Rezystancja przewodu: R = ρ · l / S; pamiętaj, że prąd płynie tam i z powrotem (długość × 2).</li>
+<li>Szeregowo: wspólny prąd, napięcia i rezystancje się sumują. Równolegle: wspólne napięcie, prądy i przewodności (1/R) się sumują.</li>
+<li>I prawo Kirchhoffa (węzeł) — bilans prądów; II prawo Kirchhoffa (oczko) — bilans napięć.</li>
+<li>Źródło rzeczywiste: U = E − I · R<sub>w</sub>; prąd zwarcia E / R<sub>w</sub>.</li></ul>
+  </aside>
+</section>
+<!-- 17 -->
+<section class="slide" id="s-b" data-blok="Część B · elementy elektroniczne (opcjonalnie)">
+  <div class="kicker">Część B</div>
+  <h2>Co jest w szafie sterowniczej?</h2>
+  <div class="cols">
+    <div class="card" style="border-top:6px solid var(--accent)"><h3>Elementy bierne (pasywne)</h3><p>nie wzmacniają sygnału, nie potrzebują osobnego zasilania</p><ul><li><b>rezystor</b> — ogranicza prąd, dzieli napięcie</li><li><b>kondensator</b> — magazynuje energię w polu elektrycznym</li><li><b>cewka</b> — magazynuje energię w polu magnetycznym; przekaźnik, stycznik, transformator</li></ul></div>
+    <div class="card" style="border-top:6px solid var(--accent2)"><h3>Elementy półprzewodnikowe</h3><p>przewodzą „w jedną stronę” albo „na rozkaz”</p><ul><li><b>dioda, LED</b> — zawór jednokierunkowy dla prądu</li><li><b>tranzystor</b> — łącznik sterowany małym prądem lub napięciem</li><li><b>układy scalone</b> — tysiące tranzystorów: sterownik PLC, falownik</li></ul></div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Elementy elektroniczne dzielimy na <b>bierne</b> (rezystor, kondensator, cewka — tylko pobierają, magazynują lub oddają energię) i <b>czynne / półprzewodnikowe</b> (dioda, tranzystor, układy scalone — sterują przepływem prądu).</p>
+<p><b>Półprzewodnik</b> (krzem) to materiał, którego przewodnictwo można sterować domieszkami i napięciem. Z dwóch rodzajów domieszkowanego krzemu (typ n i typ p) powstaje złącze p-n — podstawa diody i tranzystora.</p>
+<p>W szafie sterowniczej maszyny znajdziecie: zasilacz 24 V DC, sterownik PLC z modułami wejść i wyjść, przekaźniki i styczniki, wyłączniki nadprądowe i silnikowe, falowniki, zaciski — a na zewnątrz czujniki i elementy wykonawcze (zawory, silniki).</p>
+  </aside>
+</section>
+<!-- 18 -->
+<section class="slide" id="s-res" data-blok="Część B · elementy elektroniczne (opcjonalnie)">
+  <div class="kicker">Rezystor</div>
+  <h2>Kod paskowy: jak odczytać wartość?</h2>
+  <div class="cols c64">
+    <div><svg id="rc-svg" class="dia" viewBox="0 0 600 160"></svg>
+      <div class="ctrl" id="rc-ctl"></div></div>
+    <div class="card"><p>wartość: <span class="res" id="rc-v"></span></p><p>tolerancja: <span class="val" id="rc-t"></span> → <span id="rc-rng"></span></p>
+      <p class="info">1. i 2. pasek — cyfry, 3. — mnożnik (liczba zer), 4. — tolerancja.</p>
+      <table class="mini"><tr><td>0 czarny</td><td>1 brązowy</td><td>2 czerwony</td><td>3 pomarańczowy</td><td>4 żółty</td></tr><tr><td>5 zielony</td><td>6 niebieski</td><td>7 fioletowy</td><td>8 szary</td><td>9 biały</td></tr></table></div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Rezystor ma trzy parametry: <b>rezystancję</b> [Ω], <b>tolerancję</b> [%] i <b>moc znamionową</b> [W] (ile ciepła może bezpiecznie oddać; typowo 0,25 W dla małych elementów przewlekanych).</p>
+<p><b>Kod paskowy (4 paski):</b> dwie cyfry, mnożnik (10 do potęgi = liczba zer), tolerancja. Kolejność cyfr: czarny 0, brązowy 1, czerwony 2, pomarańczowy 3, żółty 4, zielony 5, niebieski 6, fioletowy 7, szary 8, biały 9. Mnożnik złoty = ×0,1, srebrny = ×0,01. Tolerancja: brązowy ±1%, czerwony ±2%, złoty ±5%, srebrny ±10%.</p>
+<p><b>Przykład.</b> żółty–fioletowy–czerwony–złoty: 4, 7, dwa zera → 4700 Ω = 4,7 kΩ ±5% (od 4465 do 4935 Ω). Brązowy–czarny–pomarańczowy: 10 i trzy zera = 10 kΩ.</p>
+<p><b>Warto wiedzieć.</b> Wartości produkuje się w szeregach (E12: 1,0 1,2 1,5 1,8 2,2 2,7 3,3 3,9 4,7 5,6 6,8 8,2 × potęgi 10) — dlatego nie kupicie rezystora 5 kΩ w szeregu E12. Elementy SMD (montaż powierzchniowy) oznacza się cyframi, np. „472” = 47 · 10² = 4,7 kΩ.</p>
+  </aside>
+</section>
+<!-- 19 -->
+<section class="slide" id="s-cap" data-blok="Część B · elementy elektroniczne (opcjonalnie)">
+  <div class="kicker">Kondensator</div>
+  <h2>Ładowanie kondensatora: stała czasowa τ = R · C</h2>
+  <div class="cols c64">
+    <canvas id="cv-rc" class="viz"></canvas>
+    <div>
+      <div class="ctrl"><label>R <input type="range" id="rc-r" min="1" max="100" step="1" value="10"> <span class="val" id="rc-rv"></span></label></div>
+      <div class="ctrl"><label>C <input type="range" id="rc-c" min="10" max="1000" step="10" value="470"> <span class="val" id="rc-cv"></span></label></div>
+      <div class="card"><p>τ = R · C = <span class="res" id="rc-tau"></span></p><p>po 5τ = <span class="val" id="rc-5"></span> kondensator naładowany w ok. 99%</p></div>
+      <div class="def"><p>u(t) = U · (1 − e<sup>−t/τ</sup>) · po τ: 63%</p></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Kondensator to dwie przewodzące okładki rozdzielone izolatorem. Gromadzi ładunek: <b>Q = C · U</b>; pojemność C w faradach [F] (praktycznie µF, nF). Napięcie na kondensatorze <b>nie może zmienić się skokowo</b> — ładuje się i rozładowuje w czasie.</p>
+<p><b>Stała czasowa τ = R · C</b> [s]: po czasie τ kondensator ładuje się do 63% napięcia źródła, po 5τ — praktycznie do pełna (99%). Przykład: R = 10 kΩ, C = 470 µF → τ = 4,7 s, pełne naładowanie ok. 23,5 s.</p>
+<p><b>Zastosowania:</b></p>
+<ul><li><b>wygładzanie napięcia</b> w zasilaczach (kondensator „dolewa” ładunku między szczytami wyprostowanego napięcia),</li><li><b>opóźnienia czasowe</b>, filtry zakłóceń na wejściach czujników,</li><li><b>kompensacja mocy biernej</b> — baterie kondensatorów w rozdzielniach zakładów zmniejszają opłaty za energię bierną (temat prądu przemiennego),</li><li>superkondensatory — krótkotrwałe podtrzymanie zasilania.</li></ul>
+<p><b>Uwaga BHP.</b> Duże kondensatory (np. w falownikach) <b>trzymają napięcie po wyłączeniu zasilania</b> — na obudowie podaje się czas oczekiwania (np. 5 min) przed otwarciem.</p>
+  </aside>
+</section>
+<!-- 20 -->
+<section class="slide" id="s-ind" data-blok="Część B · elementy elektroniczne (opcjonalnie)">
+  <div class="kicker">Cewka</div>
+  <h2>Cewka: przekaźnik, stycznik, silnik — i przepięcie przy wyłączeniu</h2>
+  <div class="cols">
+    <div class="card"><h3>Co robi cewka?</h3><ul>
+      <li>prąd w uzwojeniu wytwarza <b>pole magnetyczne</b> → elektromagnes przyciąga zworę</li>
+      <li><b>przekaźnik</b>: mała cewka (24 V, ~20 mA) przełącza styki obwodu do kilku amperów</li>
+      <li><b>stycznik</b>: to samo dla dużych prądów (silniki, grzałki), styki trójfazowe</li>
+      <li><b>transformator, silnik, zawór</b> — też cewki</li></ul></div>
+    <div class="card"><h3>Prąd w cewce nie lubi zmian</h3>
+      <p>Cewka gromadzi energię w polu magnetycznym. Przy nagłym przerwaniu prądu oddaje ją jako <b>przepięcie</b> — setki woltów na stykach i tranzystorach.</p>
+      <p><b>Rozwiązanie:</b> dioda gasząca (DC), układ RC lub warystor (AC) równolegle do cewki — tzw. <b>tłumik przepięć</b>.</p>
+      <p class="info">Objaw braku tłumika: iskrzenie styków, uszkodzone wyjścia PLC, zakłócenia.</p></div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Cewka (induktor) to zwinięty przewód, często na rdzeniu ferromagnetycznym. Prąd płynący przez cewkę wytwarza pole magnetyczne; indukcyjność L mierzymy w henrach [H]. Cewka <b>przeciwstawia się zmianom prądu</b> — prąd w niej nie może zmienić się skokowo (analogicznie jak napięcie na kondensatorze).</p>
+<p><b>Przekaźnik i stycznik</b> to elektromagnesy przełączające styki. Dzięki nim wyjście sterownika (24 V, kilkaset mA) może włączyć silnik pobierający dziesiątki amperów przy 400 V — z <b>separacją galwaniczną</b> (obwód sterowania i obwód mocy nie są połączone elektrycznie).</p>
+<p><b>Przepięcie przy wyłączeniu.</b> Gdy przerywamy prąd w cewce, zgromadzona energia powoduje skok napięcia (u = L · di/dt), znacznie większy od napięcia zasilania. Dlatego cewki przekaźników i zaworów DC mają <b>diodę gaszącą</b> włączoną zaporowo równolegle, a cewki AC — układy RC lub warystory. Wielu producentów oferuje gotowe moduły tłumików nakładane na stycznik.</p>
+  </aside>
+</section>
+<!-- 21 -->
+<section class="slide" id="s-diode" data-blok="Część B · elementy elektroniczne (opcjonalnie)">
+  <div class="kicker">Dioda i LED</div>
+  <h2>Dioda przewodzi w jedną stronę — i od pewnego napięcia</h2>
+  <div class="cols c64">
+    <canvas id="cv-di" class="viz"></canvas>
+    <div>
+      <div class="ctrl"><button data-di="si" class="sel">dioda krzemowa</button><button data-di="led">LED czerwona</button><button data-di="ledb">LED niebieska</button></div>
+      <div class="card"><h3>Rezystor do LED na 24 V</h3><p class="formula">R = (U − U<sub>LED</sub>) / I</p>
+        <div class="ctrl"><label>prąd LED <input type="range" id="di-i" min="2" max="20" step="1" value="10"> <span class="val" id="di-iv"></span></label></div>
+        <p>R = <span class="res" id="di-r"></span> · moc na R: <span class="val" id="di-p"></span></p></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Dioda to „zawór zwrotny” dla prądu: przewodzi w <b>kierunku przewodzenia</b> (od anody do katody), a w kierunku zaporowym praktycznie nie przewodzi. Ponadto przewodzi dopiero po przekroczeniu <b>napięcia progowego</b>: ok. 0,6–0,7 V dla diody krzemowej, ok. 1,8–2,2 V dla LED czerwonej, ok. 3 V dla LED niebieskiej i białej.</p>
+<p>Powyżej progu prąd rośnie <b>gwałtownie</b> — dioda nie ogranicza sama prądu. Dlatego LED podłącza się zawsze <b>przez rezystor</b>: R = (U − U<sub>LED</sub>) / I.</p>
+<p><b>Przykład.</b> Kontrolka LED czerwona na 24 V, prąd 10 mA: R = (24 − 2) / 0,01 = 2200 Ω = 2,2 kΩ (wartość z szeregu E12). Moc na rezystorze: P = 22 V · 0,01 A = 0,22 W — rezystor 0,25 W pracowałby na granicy, bezpieczniej 0,5 W. Gotowe lampki sygnalizacyjne 24 V mają ten rezystor w środku.</p>
+<p><b>Zastosowania diod:</b> prostowniki w zasilaczach (następny slajd), diody gaszące przy cewkach, zabezpieczenie przed odwrotnym podłączeniem zasilania, LED — sygnalizacja i oświetlenie.</p>
+  </aside>
+</section>
+<!-- 22 -->
+<section class="slide" id="s-psu" data-blok="Część B · elementy elektroniczne (opcjonalnie)">
+  <div class="kicker">Zastosowanie</div>
+  <h2>Zasilacz 24 V DC w szafie: od 230 V AC do napięcia sterowania</h2>
+  <div id="psu-chain" class="chain"></div>
+  <div class="cols c64">
+    <div class="card"><h3 id="psu-t"></h3><p id="psu-d"></p></div>
+    <canvas id="cv-psu" class="viz short"></canvas>
+  </div>
+  <p class="info">Kliknij kolejne bloki — wykres pokazuje napięcie po danym bloku.</p>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Sterowniki, czujniki i przekaźniki w maszynach zasila się napięciem <b>24 V DC</b> (bezpieczne dla człowieka, standard w automatyce). Zasilacz zamienia napięcie sieci 230 V AC na 24 V DC w kilku krokach:</p>
+<ol><li><b>transformator</b> — obniża napięcie przemienne (i oddziela galwanicznie od sieci),</li><li><b>prostownik</b> (mostek z 4 diod, mostek Graetza) — „odwraca” ujemne połówki sinusoidy; napięcie jest już jednokierunkowe, ale tętniące,</li><li><b>kondensator filtrujący</b> — wygładza tętnienia,</li><li><b>stabilizator</b> — utrzymuje stałe 24 V niezależnie od obciążenia i wahań sieci.</li></ol>
+<p><b>Warto wiedzieć.</b> Współczesne zasilacze na szynę DIN są <b>impulsowe</b>: najpierw prostują 230 V, potem przełączają je z dużą częstotliwością (dziesiątki kHz) przez mały transformator. Są lżejsze i sprawniejsze (ok. 90%+), ale zasada „AC → prostowanie → filtracja → regulacja” zostaje.</p>
+  </aside>
+</section>
+<!-- 23 -->
+<section class="slide" id="s-tr" data-blok="Część B · elementy elektroniczne (opcjonalnie)">
+  <div class="kicker">Tranzystor</div>
+  <h2>Tranzystor jako łącznik: mały prąd steruje dużym</h2>
+  <div class="cols c64">
+    <svg id="tr-svg" class="dia" viewBox="0 0 640 300"></svg>
+    <div>
+      <div class="ctrl"><button id="tr-b" class="primary">program PLC: wyjście Q0.0 = 0</button></div>
+      <div class="card" id="tr-st"></div>
+      <div class="def"><p>Wzmocnienie „łańcuchowe”: <b>mA</b> w programie → <b>0,5 A</b> na wyjściu → <b>dziesiątki A</b> przez stycznik.</p></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Tranzystor ma trzy wyprowadzenia. Mały prąd (tranzystor bipolarny: baza) lub napięcie (tranzystor MOSFET: bramka) <b>steruje</b> dużym prądem między pozostałymi dwoma wyprowadzeniami. W automatyce tranzystor pracuje najczęściej jako <b>łącznik</b>: całkowicie zatkany (wyłączony) albo całkowicie otwarty (włączony).</p>
+<p><b>Wyjście tranzystorowe sterownika PLC</b> (typowo 24 V DC, 0,5 A): gdy program ustawi wyjście na 1, tranzystor przewodzi i zasila cewkę przekaźnika, zaworu lub lampkę. Wyjścia tranzystorowe są szybkie i nie zużywają się mechanicznie; wyjścia <b>przekaźnikowe</b> są wolniejsze i mają ograniczoną liczbę łączeń, ale przełączą też AC i większe prądy.</p>
+<p><b>Łańcuch wzmocnienia:</b> procesor sterownika (miliampery) → tranzystor wyjściowy (0,5 A) → przekaźnik/stycznik (dziesiątki amperów, 400 V) → silnik. Na tej samej zasadzie falownik przełącza tranzystorami mocy (IGBT) prądy setek amperów kilka tysięcy razy na sekundę.</p>
+<p><b>Warto wiedzieć.</b> Wyjścia i wejścia PLC bywają <b>PNP</b> (wyjście podaje +24 V, „source”) lub <b>NPN</b> (zwiera do 0 V, „sink”). W Europie dominuje PNP. Czujnik NPN podłączony do wejścia PNP nie zadziała — to częsta przyczyna problemów przy wymianie czujnika na „zamiennik”.</p>
+  </aside>
+</section>
+<!-- 24 -->
+<section class="slide" id="s-sens" data-blok="Część B · elementy elektroniczne (opcjonalnie)">
+  <div class="kicker">Czujniki</div>
+  <h2>Temperatura → rezystancja → prąd 4–20 mA → liczba w sterowniku</h2>
+  <div class="cols c64">
+    <canvas id="cv-sen" class="viz"></canvas>
+    <div>
+      <div class="ctrl"><label>temperatura <input type="range" id="se-t" min="-50" max="200" step="1" value="60"> <span class="val" id="se-tv"></span></label></div>
+      <div class="card"><p>Pt100: R = 100 · (1 + 0,00385 · T) = <span class="res" id="se-r"></span></p>
+        <p>przetwornik 0…150 °C → <span class="val" id="se-i"></span></p><p id="se-msg" class="info"></p></div>
+      <div class="def"><p>I = 4 + 16 · T / 150 &nbsp;[mA] · <b>„żywe zero”</b>: 0 mA = przerwany przewód</p></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Wiele czujników to elementy, których <b>rezystancja zależy od wielkości fizycznej</b>: temperatury (termorezystor Pt100, termistor NTC), światła (fotorezystor), odkształcenia (tensometr — w wagach). Sterownik nie mierzy rezystancji bezpośrednio — robi to <b>przetwornik</b>, który zamienia ją na sygnał standardowy.</p>
+<p><b>Pt100</b> — platynowy termorezystor: 100 Ω w 0 °C, przyrost ok. 0,385 Ω na każdy °C (wzór uproszczony R = 100 · (1 + 0,00385 · T)). W 60 °C: 123,1 Ω.</p>
+<p><b>Sygnał prądowy 4–20 mA</b> — standard w przemyśle: 4 mA = początek zakresu, 20 mA = koniec. Dla przetwornika 0…150 °C: I = 4 + 16 · T / 150. W 60 °C: 4 + 6,4 = 10,4 mA. Zalety: prąd w pętli jest taki sam na całej długości kabla (I prawo Kirchhoffa — spadki napięcia na kablu nie fałszują pomiaru) oraz <b>„żywe zero”</b> — 0 mA oznacza awarię (przerwany przewód), a nie 0 °C. Wg zalecenia NAMUR NE 43 prąd poniżej 3,6 mA lub powyżej 21 mA sygnalizuje błąd.</p>
+<p><b>Czujniki dwustanowe</b> (indukcyjne zbliżeniowe, krańcowe, fotoelektryczne) dają tylko 0/1 — mają w środku tranzystor wyjściowy PNP lub NPN (poprzedni slajd).</p>
+  </aside>
+</section>
+<!-- 25 -->
+<section class="slide" id="s-quizB" data-blok="Część B · elementy elektroniczne (opcjonalnie)">
+  <div class="kicker">Sprawdź się · odpowiedzi na czat</div>
+  <h2>Pytania kontrolne — część B</h2>
+  <div class="cols">
+    <div class="you"><h3>1. Odczytaj: brązowy–czarny–czerwony–złoty.</h3><details><summary>odpowiedź</summary><p>1, 0, dwa zera = 1000 Ω = 1 kΩ ±5%.</p></details></div>
+    <div class="you"><h3>2. R = 100 kΩ, C = 100 µF. Po ilu sekundach kondensator jest praktycznie naładowany?</h3><details><summary>odpowiedź</summary><p>τ = 100 000 · 0,0001 = 10 s; 5τ = 50 s.</p></details></div>
+    <div class="you"><h3>3. Po co dioda równolegle do cewki zaworu 24 V DC?</h3><details><summary>odpowiedź</summary><p>Tłumi przepięcie przy wyłączeniu cewki — chroni wyjście tranzystorowe PLC i styki.</p></details></div>
+    <div class="you"><h3>4. Przetwornik 0…150 °C pokazuje 0 mA. Ile stopni jest w piecu?</h3><details><summary>odpowiedź</summary><p>Nie wiadomo — 0 mA to awaria (przerwany obwód), a nie 0 °C ani −37,5 °C.</p></details></div>
+  </div>
+  <aside class="notes">
+    <p><b>Odpowiedzi z uzasadnieniem:</b></p>
+<ol><li>Brązowy 1, czarny 0, czerwony = mnożnik 10² → 10 · 100 = <b>1000 Ω = 1 kΩ</b>, złoty ±5%.</li>
+<li>τ = R · C = 100 000 Ω · 0,0001 F = <b>10 s</b>. Po 5τ = <b>50 s</b> kondensator jest naładowany w ok. 99%.</li>
+<li>Dioda gasząca przejmuje prąd cewki po wyłączeniu i rozprasza zgromadzoną energię — bez niej powstaje przepięcie, które niszczy wyjścia tranzystorowe i powoduje iskrzenie styków.</li>
+<li>Sygnał 4–20 mA ma „żywe zero”: 4 mA = 0 °C (początek zakresu). <b>0 mA = przerwa w obwodzie lub brak zasilania</b> przetwornika. Wartość z takiego czujnika trzeba oznaczyć jako błędną, a nie przeliczać ze wzoru (wyszłoby −37,5 °C).</li></ol>
+  </aside>
+</section>
+<!-- 26 -->
+<section class="slide" id="s-end" data-blok="Część B · elementy elektroniczne (opcjonalnie)">
+  <div class="kicker">Zakończenie</div>
+  <h2>Co zostaje po dzisiejszych zajęciach</h2>
+  <div class="cols">
+    <div class="card"><h3>Część A — obwód</h3><ul><li>U = R · I, P = U · I, E = P · t</li><li>szeregowo: wspólny prąd; równolegle: wspólne napięcie</li><li>węzeł: prądy się sumują → wyłącznik 16 A</li><li>oczko: napięcia się sumują → spadek na kablu</li><li>źródło: U = E − I · R<sub>w</sub>, zwarcie</li></ul></div>
+    <div class="card"><h3>Część B — elementy</h3><ul><li>rezystor: wartość, tolerancja, moc</li><li>kondensator: τ = R · C, napięcie po wyłączeniu</li><li>cewka: przekaźnik, stycznik, dioda gasząca</li><li>dioda i LED: próg, rezystor szeregowy; zasilacz 24 V</li><li>tranzystor jako łącznik; czujniki, 4–20 mA</li></ul></div>
+  </div>
+  <div class="def" style="border-left-color:var(--violet)"><p><b>Notatki do nauki</b> — plik z notatkami do każdego slajdu. Pytania — na czacie teraz albo na kolejnych zajęciach.</p></div>
+  <aside class="notes">
+    <p><b>Podsumowanie.</b> Z trzech praw (Ohma, dwóch praw Kirchhoffa) i definicji mocy wynika większość obliczeń w obwodach prądu stałego. Dla inżyniera produkcji najważniejsze praktyczne wnioski:</p>
+<ul><li>za energię płaci się w <b>kWh</b>; każdy kilowat pracujący na dwie zmiany to kilka tysięcy złotych rocznie,</li><li>wyłącznik nadprądowy chroni <b>przewód</b>, a różnicowoprądowy — <b>człowieka</b>,</li><li>długie kable i małe przekroje to <b>spadek napięcia</b> i straty,</li><li>przekaźnik, stycznik i tranzystor pozwalają <b>małym sygnałem sterować dużą mocą</b>,</li><li>sygnał 4–20 mA ma „żywe zero” — 0 mA to awaria, a nie pomiar.</li></ul>
+<p>Na kolejnych zajęciach: obliczenia obwodów prądu stałego, potem prąd przemienny (wartość skuteczna, moc czynna i bierna, układ trójfazowy).</p>
+  </aside>
+</section>
+
+<div id="notes"></div>
+<div id="bar">
+  <button id="b-prev" title="poprzedni (←)">◀</button>
+  <button id="b-next" title="następny (→)">▶</button>
+  <span id="blk"></span>
+  <div id="prog"><div></div></div>
+  <span id="cnt"></span>
+  <button id="b-notes" title="notatki pod slajdem (N)">notatki</button>
+  <button id="b-spk" title="notatki w osobnym oknie (S)">okno notatek</button>
+  <button id="b-theme" title="motyw (T)">◐</button>
+  <button id="b-fs" title="pełny ekran (F)">⛶</button>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const TAU=Math.PI*2;
+let C={}, NOW=0, DT=0, LAST=0;
+function readColors(){ const cs=getComputedStyle(document.documentElement); for(const k of ['bg','panel','fg','muted','grid','accent','accent2','accent3','danger','violet','gold','chip']) C[k]=cs.getPropertyValue('--'+k).trim(); }
+function toggleTheme(){ const r=document.documentElement; r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'; try{localStorage.setItem('akw-theme',r.dataset.theme);}catch(e){} }
+try{ const t=localStorage.getItem('akw-theme'); if(t) document.documentElement.dataset.theme=t; }catch(e){}
+readColors();
+
+/* ---------- liczby i rysowanie ---------- */
+function fmt(x,d=2){ if(!isFinite(x)) return '—'; const neg=x<0; x=Math.abs(x); const s=(Math.round(x*10**d)/10**d).toFixed(d); let [a,b]=s.split('.');
+  a=a.replace(/\B(?=(\d{3})+(?!\d))/g,' '); b=b?b.replace(/0+$/,''):''; return (neg?'−':'')+(b?a+','+b:a); }
+const num=el=>{ const v=parseFloat(String(el.value).replace(',','.')); return isFinite(v)?v:NaN; };
+function bytes(b){ const U=[[1e12,'TB'],[1e9,'GB'],[1e6,'MB'],[1e3,'kB']]; for(const [m,u] of U) if(b>=m) return fmt(b/m,b/m<10?2:(b/m<100?1:0))+' '+u; return fmt(b,0)+' B'; }
+function fit(cv){ const r=cv.getBoundingClientRect(), d=window.devicePixelRatio||1; const W=Math.max(10,r.width), H=Math.max(10,r.height);
+  if(cv.width!==Math.round(W*d)||cv.height!==Math.round(H*d)){ cv.width=Math.round(W*d); cv.height=Math.round(H*d); }
+  const g=cv.getContext('2d'); g.setTransform(d,0,0,d,0,0); g.clearRect(0,0,W,H); return {g,w:W,h:H}; }
+function line(g,x1,y1,x2,y2,col,w=2,dash){ g.strokeStyle=col; g.lineWidth=w; g.setLineDash(dash||[]); g.beginPath(); g.moveTo(x1,y1); g.lineTo(x2,y2); g.stroke(); g.setLineDash([]); }
+function poly(g,pts,col,w=2.5){ if(!pts.length) return; g.strokeStyle=col; g.lineWidth=w; g.lineJoin='round'; g.beginPath(); pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1])); g.stroke(); }
+function text(g,s,x,y,col,size=14,align='left',weight=600){ g.fillStyle=col; g.font=`${weight} ${size}px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif`; g.textAlign=align; g.textBaseline='middle'; g.fillText(s,x,y); }
+function dot(g,x,y,r,col){ g.fillStyle=col; g.beginPath(); g.arc(x,y,r,0,TAU); g.fill(); }
+function axes(g,x0,y0,x1,y1,xmax,ymax,xl,yl,xt,yt,fx,fy,xmin=0,ymin=0){ line(g,x0,y0,x1,y0,C.muted,1.5); line(g,x0,y0,x0,y1,C.muted,1.5);
+  for(let i=0;i<=xt;i++){ const x=x0+(x1-x0)*i/xt; line(g,x,y0,x,y1,C.grid,1); text(g,fx(xmin+(xmax-xmin)*i/xt),x,y0+14,C.muted,12,'center',500); }
+  for(let i=0;i<=yt;i++){ const y=y0+(y1-y0)*i/yt; line(g,x0,y,x1,y,C.grid,1); text(g,fy(ymin+(ymax-ymin)*i/yt),x0-6,y,C.muted,12,'right',500); }
+  text(g,xl,x1,y0+30,C.fg,13,'right',700); text(g,yl,x0+6,y1-10,C.fg,13,'left',700); }
+function rng(seed){ let a=seed>>>0; return ()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}; }
+const frame={};
+
+/* kroki w przykładach */
+$$('[data-steps]').forEach(ex=>{ const li=[...ex.querySelectorAll('ol li')]; let k=0; const upd=()=>li.forEach((l,i)=>l.classList.toggle('on',i<k));
+  ex.querySelector('[data-next]').onclick=()=>{ k=Math.min(li.length,k+1); upd(); }; ex.querySelector('[data-reset]').onclick=()=>{ k=0; upd(); }; upd(); });
+
+
+function chain(id,data,on){ const el=$(id); el.innerHTML=data.map((c,i)=>(i?'<span class="arr">→</span>':'')+`<button data-i="${i}">${c[0]}<small>${c[1]}</small></button>`).join('');
+  const bs=[...el.querySelectorAll('button')]; bs.forEach(b=>b.onclick=()=>{ bs.forEach(x=>x.classList.toggle('sel',x===b)); on(data[+b.dataset.i], +b.dataset.i); }); bs[0].click(); }
+function selGroup(attr,on){ $$('['+attr+']').forEach(b=>b.onclick=()=>{ $$('['+attr+']').forEach(x=>x.classList.toggle('sel',x===b)); on(b.getAttribute(attr)); }); }
+function slide(id,fmtf,cb){ const el=$('#'+id); const u=()=>{ $('#'+id+'v').textContent=fmtf(+el.value); if(cb) cb(); }; el.addEventListener('input',u); u(); }
+const ohm=v=>v>=1e6?fmt(v/1e6,2)+' MΩ':v>=1000?fmt(v/1000,2)+' kΩ':fmt(v,1)+' Ω';
+const amp=v=>Math.abs(v)<1?fmt(v*1000,1)+' mA':fmt(v,2)+' A';
+const watt=v=>v<1?fmt(v*1000,0)+' mW':v>=1000?fmt(v/1000,2)+' kW':fmt(v,2)+' W';
+function niceMax(v){ const p=10**Math.floor(Math.log10(v)); for(const m of [1,1.2,1.5,2,2.5,3,4,5,6,8,10]) if(m*p>=v) return m*p; return 10*p; }
+function resistor(g,x,y,w,h,col,lab){ g.strokeStyle=col; g.lineWidth=2.5; g.strokeRect(x,y,w,h); if(lab) text(g,lab,x+w/2,y+h/2,C.fg,13,'center',800); }
+
+/* ===== łańcuch: po co ===== */
+chain('#why-chain',[
+ ['sieć','przyłącze','Energia z sieci 15 kV lub 400 V; zakład ma moc umowną i taryfę.','Przekroczenie mocy umownej = kary. Rozkład pracy energochłonnych maszyn w czasie obniża szczyty i koszty.'],
+ ['rozdzielnica','zabezpieczenia','Wyłączniki nadprądowe chronią przewody, różnicowoprądowe — ludzi. Liczniki energii na odpływach.','Podliczniki na maszynach pokazują, gdzie naprawdę idzie energia (kWh na wyrób).'],
+ ['napęd','silnik + falownik','Silnik zamienia energię elektryczną na mechaniczną; falownik reguluje jego prędkość.','Falownik na pompie lub wentylatorze często zmniejsza zużycie energii o kilkadziesiąt procent.'],
+ ['sterownik','PLC','Program sterownika czyta wejścia (czujniki) i ustawia wyjścia (zawory, styczniki).','Dane ze sterownika: stany maszyny, liczniki sztuk, czasy cykli — źródło wskaźników produkcji.'],
+ ['wykonawcze','przekaźnik, zawór','Mały sygnał 24 V z PLC włącza przez przekaźnik lub stycznik duże moce.','Typowe awarie: spalona cewka, zużyte styki, brak tłumika przepięć. Części zamienne na magazynie.'],
+ ['czujniki','pomiar','Zamieniają temperaturę, położenie, ciśnienie na sygnał elektryczny (np. 4–20 mA).','Czujnik za 50 zł potrafi zatrzymać linię. Standaryzacja typów (PNP, 4–20 mA) upraszcza utrzymanie ruchu.'],
+],c=>{ $('#why-t').textContent=c[0]+' — '+c[1]; $('#why-d').textContent=c[2]; $('#why-z').textContent=c[3]; });
+
+/* ===== model obwodu ===== */
+slide('md-u',v=>v+' V'); slide('md-r',v=>v+' Ω');
+let MDPH=0;
+frame['s-model']=()=>{ const {g,w,h}=fit($('#cv-mod')); const U=+$('#md-u').value, R=+$('#md-r').value, on=$('#md-sw').checked, I=on?U/R:0;
+  $('#md-i').textContent=fmt(I,2)+' A'; $('#md-p').textContent=fmt(U*I,1)+' W';
+  const x0=w*0.15,x1=w*0.85,y0=h*0.18,y1=h*0.82; const L=2*(x1-x0)+2*(y1-y0);
+  const P=s=>{ s=((s%L)+L)%L; const a=x1-x0,b=y1-y0; if(s<a) return [x0+s,y0]; s-=a; if(s<b) return [x1,y0+s]; s-=b; if(s<a) return [x1-s,y1]; s-=a; return [x0,y1-s]; };
+  g.strokeStyle=C.muted; g.lineWidth=3; g.strokeRect(x0,y0,x1-x0,y1-y0);
+  // źródło (lewa krawędź)
+  const ym=(y0+y1)/2; g.fillStyle=C.panel; g.fillRect(x0-30,ym-30,60,60); line(g,x0-26,ym-8,x0+26,ym-8,C.fg,4); line(g,x0-14,ym+8,x0+14,ym+8,C.fg,4);
+  text(g,'+',x0+36,ym-14,C.danger,18,'left',800); text(g,'źródło '+U+' V',x0-38,ym,C.fg,14,'right',700);
+  // odbiornik (prawa)
+  g.fillStyle=C.panel; g.fillRect(x1-22,ym-50,44,100); resistor(g,x1-16,ym-46,32,92,C.accent2,''); text(g,'R = '+R+' Ω',x1+30,ym,C.fg,14,'left',700);
+  // łącznik (góra)
+  const xm=(x0+x1)/2; g.fillStyle=C.panel; g.fillRect(xm-40,y0-30,80,40); dot(g,xm-30,y0,5,C.fg); dot(g,xm+30,y0,5,C.fg);
+  if(on) line(g,xm-30,y0,xm+30,y0,C.fg,4); else line(g,xm-30,y0,xm+24,y0-26,C.fg,4); text(g,on?'łącznik zamknięty':'łącznik otwarty',xm,y0-40,on?C.accent3:C.danger,13,'center',700);
+  MDPH+=DT*I*60; const n=Math.round(L/34); for(let k=0;k<n;k++){ const [x,y]=P(k*L/n+MDPH); dot(g,x,y,4.5,C.accent); }
+  if(on){ text(g,'I = '+fmt(I,2)+' A →',xm,y1+24,C.accent,15,'center',800); } };
+
+/* ===== prawo Ohma ===== */
+slide('oh-r',v=>v+' Ω'); slide('oh-u',v=>fmt(v,1)+' V');
+frame['s-ohm']=()=>{ const {g,w,h}=fit($('#cv-ohm')); const R=+$('#oh-r').value, U=+$('#oh-u').value, I=U/R; $('#oh-i').textContent=fmt(I,3)+' A = '+fmt(I*1000,0)+' mA';
+  const ym=niceMax(24/R*1.05), x0=60,x1=w-20,y0=h-40,y1=20, X=u=>x0+(x1-x0)*u/24, Y=i=>y0-(y0-y1)*i/ym;
+  axes(g,x0,y0,x1,y1,24,ym,'U [V]','I [A]',8,5,v=>fmt(v,0),v=>fmt(v,ym<1?2:1));
+  [[R*2,C.grid],[R/2,C.grid]].forEach(([r,c])=>{ if(r>=1){ const ue=Math.min(24,ym*r); line(g,X(0),Y(0),X(ue),Y(ue/r),C.muted,1.2,[5,4]); text(g,'R = '+fmt(r,0)+' Ω',X(ue)-4,Y(ue/r)-10,C.muted,11,'right',600);} });
+  line(g,X(0),Y(0),X(24),Y(24/R),C.accent,3); line(g,X(U),y0,X(U),Y(I),C.accent2,1.5,[4,4]); line(g,x0,Y(I),X(U),Y(I),C.accent2,1.5,[4,4]); dot(g,X(U),Y(I),7,C.accent2);
+  text(g,'R = '+R+' Ω',X(24)-6,Y(24/R)+16,C.accent,13,'right',800); };
+
+/* ===== kalkulator energii ===== */
+const enUpd=()=>{ const P=+$('#en-p').value, H=+$('#en-h').value, D=+$('#en-d').value, c=+$('#en-c').value, E=P*H*D;
+  $('#en-e').textContent=fmt(E,0)+' kWh/rok'; $('#en-k').textContent=fmt(E*c,0)+' zł'; $('#en-msg').innerHTML=`= ${fmt(P,1)} kW × ${H} h × ${D} dni. Każdy 1 kW w tym trybie pracy kosztuje <b>${fmt(H*D*c,0)} zł</b> rocznie.`; };
+slide('en-p',v=>fmt(v,1)+' kW',enUpd); slide('en-h',v=>v+' h',enUpd); slide('en-d',v=>v,enUpd); slide('en-c',v=>fmt(v,2)+' zł/kWh',enUpd);
+
+/* ===== szeregowo / równolegle ===== */
+let SPM='s'; selGroup('data-sp',v=>SPM=v); slide('sp-u',v=>v+' V'); slide('sp-1',v=>v+' Ω'); slide('sp-2',v=>v+' Ω');
+frame['s-series']=()=>{ const {g,w,h}=fit($('#cv-sp')); const U=+$('#sp-u').value, R1=+$('#sp-1').value, R2=+$('#sp-2').value; let Rz,I,I1,I2,U1,U2;
+  if(SPM==='s'){ Rz=R1+R2; I=U/Rz; I1=I2=I; U1=I*R1; U2=I*R2; } else { Rz=R1*R2/(R1+R2); I1=U/R1; I2=U/R2; I=I1+I2; U1=U2=U; }
+  $('#sp-t').textContent=SPM==='s'?'Szeregowo: wspólny prąd':'Równolegle: wspólne napięcie';
+  $('#sp-f').innerHTML=SPM==='s'?'R = R₁ + R₂ = '+fmt(Rz,1)+' Ω':'R = R₁·R₂/(R₁+R₂) = '+fmt(Rz,1)+' Ω';
+  $('#sp-tab').innerHTML=`<tr><td></td><td><b>R₁</b></td><td><b>R₂</b></td><td><b>całość</b></td></tr><tr><td>U</td><td>${fmt(U1,2)} V</td><td>${fmt(U2,2)} V</td><td>${U} V</td></tr><tr><td>I</td><td>${amp(I1)}</td><td>${amp(I2)}</td><td>${amp(I)}</td></tr><tr><td>P</td><td>${watt(U1*I1)}</td><td>${watt(U2*I2)}</td><td>${watt(U*I)}</td></tr>`;
+  $('#sp-msg').textContent=SPM==='s'?'Większe napięcie odkłada się na większym rezystorze.':'Większy prąd płynie przez mniejszy rezystor. R zastępcza mniejsza od najmniejszej.';
+  const x0=w*0.12,x1=w*0.88,y0=h*0.2,y1=h*0.8,ym=(y0+y1)/2;
+  line(g,x0,y0,x0,y1,C.muted,3); g.fillStyle=C.panel; g.fillRect(x0-28,ym-22,56,44); line(g,x0-24,ym-6,x0+24,ym-6,C.fg,4); line(g,x0-12,ym+8,x0+12,ym+8,C.fg,4); text(g,U+' V',x0-34,ym,C.fg,14,'right',800);
+  if(SPM==='s'){ const a=x0+(x1-x0)*0.3, b=x0+(x1-x0)*0.62; line(g,x0,y0,x1,y0,C.muted,3); line(g,x1,y0,x1,y1,C.muted,3); line(g,x1,y1,x0,y1,C.muted,3);
+    g.fillStyle=C.panel; g.fillRect(a-50,y0-16,100,32); resistor(g,a-50,y0-16,100,32,C.accent,'R₁ '+R1+' Ω'); g.fillStyle=C.panel; g.fillRect(b-50,y0-16,100,32); resistor(g,b-50,y0-16,100,32,C.accent2,''); text(g,'R₂ '+R2+' Ω',b,y0,C.fg,13,'center',800);
+    text(g,fmt(U1,2)+' V',a,y0-32,C.accent,14,'center',800); text(g,fmt(U2,2)+' V',b,y0-32,C.accent2,14,'center',800); text(g,'I = '+amp(I)+' (wszędzie ten sam)',(x0+x1)/2,y1+22,C.accent3,15,'center',800); }
+  else { const xa=x0+(x1-x0)*0.5, xb=x1; line(g,x0,y0,xb,y0,C.muted,3); line(g,x0,y1,xb,y1,C.muted,3); line(g,xa,y0,xa,y1,C.muted,3); line(g,xb,y0,xb,y1,C.muted,3);
+    g.fillStyle=C.panel; g.fillRect(xa-17,ym-50,34,100); resistor(g,xa-17,ym-50,34,100,C.accent,''); g.fillStyle=C.panel; g.fillRect(xb-17,ym-50,34,100); resistor(g,xb-17,ym-50,34,100,C.accent2,'');
+    text(g,'R₁ '+R1+' Ω',xa-24,ym-12,C.accent,13,'right',800); text(g,amp(I1),xa-24,ym+10,C.accent,13,'right',800); text(g,'R₂ '+R2+' Ω',xb-24,ym-12,C.accent2,13,'right',800); text(g,amp(I2),xb-24,ym+10,C.accent2,13,'right',800);
+    text(g,'I = '+amp(I)+' = I₁ + I₂',(x0+xa)/2,y0-18,C.accent3,15,'center',800); text(g,'na obu: '+U+' V',(xa+xb)/2,y1+22,C.fg,14,'center',700); } };
+
+/* ===== dzielnik ===== */
+slide('dv-x',v=>v+' %');
+frame['s-div']=()=>{ const {g,w,h}=fit($('#cv-div')); const x=+$('#dv-x').value/100, R2=10000*x, R1=10000-R2, U=10*x;
+  $('#dv-r1').textContent=ohm(R1); $('#dv-r2').textContent=ohm(R2); $('#dv-u').textContent=fmt(U,2)+' V'; $('#dv-pv').textContent=fmt(Math.round(27648*x),0);
+  const cx=w*0.35, yt=h*0.12, yb=h*0.88, rt=h*0.22, rb=h*0.78, ys=rb-(rb-rt)*x;
+  line(g,cx,yt,cx,rt,C.muted,3); line(g,cx,rb,cx,yb,C.muted,3); text(g,'+10 V',cx,yt-8,C.danger,14,'center',800); text(g,'0 V',cx,yb+12,C.fg,14,'center',800);
+  g.fillStyle=C.accent; g.globalAlpha=.25; g.fillRect(cx-18,rt,36,ys-rt); g.fillStyle=C.accent2; g.fillRect(cx-18,ys,36,rb-ys); g.globalAlpha=1; resistor(g,cx-18,rt,36,rb-rt,C.fg,'');
+  text(g,'R₁',cx-26,(rt+ys)/2,C.accent,15,'right',800); text(g,'R₂',cx-26,(ys+rb)/2,C.accent2,15,'right',800);
+  line(g,cx+60,ys,cx+22,ys,C.fg,3); g.fillStyle=C.fg; g.beginPath(); g.moveTo(cx+20,ys); g.lineTo(cx+32,ys-7); g.lineTo(cx+32,ys+7); g.fill(); line(g,cx+60,ys,w*0.7,ys,C.fg,2);
+  g.fillStyle=C.panel; g.strokeStyle=C.accent3; g.lineWidth=2; g.fillRect(w*0.7,ys-24,w*0.24,48); g.strokeRect(w*0.7,ys-24,w*0.24,48); text(g,'PLC AI: '+fmt(U,2)+' V',w*0.82,ys,C.accent3,14,'center',800);
+  text(g,'suwak',cx+64,ys-14,C.muted,12,'left',600); };
+
+/* ===== Kirchhoff I: gniazda ===== */
+const K1=[['czajnik',2000,true],['grzejnik olejowy',1500,false],['ekspres do kawy',1200,false],['komputer + monitor',300,true],['lampa',100,false],['odkurzacz przemysłowy',1400,false]];
+$('#k1-list').innerHTML=K1.map((d,i)=>`<label class="dev"><input type="checkbox" data-k1="${i}" ${d[2]?'checked':''}> ${d[0]} — ${d[1]} W → <b>${fmt(d[1]/230,2)} A</b></label>`).join('');
+$$('[data-k1]').forEach(c=>c.onchange=()=>K1[+c.dataset.k1][2]=c.checked);
+frame['s-k1']=()=>{ const {g,w,h}=fit($('#cv-k1')); const on=K1.filter(d=>d[2]), I=on.reduce((s,d)=>s+d[1]/230,0); const pal=[C.accent,C.accent2,C.accent3,C.violet,C.gold,C.danger];
+  const x0=20,x1=w-20, M=Math.max(24,I*1.1), X=v=>x0+(x1-x0)*v/M, yb=h*0.35, bh=h*0.3; let s=0;
+  K1.forEach((d,i)=>{ if(!d[2]) return; const v=d[1]/230; g.fillStyle=pal[i]; g.fillRect(X(s),yb,X(s+v)-X(s)-2,bh); if(X(s+v)-X(s)>40) text(g,fmt(v,1),(X(s)+X(s+v))/2,yb+bh/2,'#fff',13,'center',800); s+=v; });
+  line(g,X(16),yb-30,X(16),yb+bh+20,C.danger,3,[6,4]); text(g,'16 A',X(16),yb-40,C.danger,14,'center',800);
+  for(let v=0;v<=M;v+=4){ text(g,v,X(v),yb+bh+34,C.muted,11,'center',500); }
+  $('#k1-i').textContent=fmt(I,1)+' A'; $('#k1-i').style.color=I>16?C.danger:C.accent3;
+  $('#k1-msg').innerHTML=I>16?`<span class="bad">Przeciążenie ${fmt(100*I/16,0)}% — wyłącznik zadziała</span> (przy małym przeciążeniu po kilkudziesięciu sekundach lub minutach).`:`Zapas: ${fmt(16-I,1)} A. I = I₁ + I₂ + … (I prawo Kirchhoffa).`; };
+
+/* ===== Kirchhoff II: kabel ===== */
+slide('k2-l',v=>v+' m'); slide('k2-i',v=>fmt(v,1)+' A');
+frame['s-k2']=()=>{ const {g,w,h}=fit($('#cv-k2')); const l=+$('#k2-l').value, S=+$('#k2-s').value, I=+$('#k2-i').value, Rk=0.0175*2*l/S; let du=Rk*I; if(du>24) du=24; const Uo=24-du;
+  $('#k2-r').textContent=fmt(Rk,2)+' Ω'; $('#k2-du').textContent=fmt(du,2)+' V'; $('#k2-u').textContent=fmt(Uo,2)+' V'; $('#k2-u').style.color=Uo<20.4?C.danger:C.accent3;
+  $('#k2-msg').innerHTML=Uo<20.4?'<span class="bad">Poniżej 20,4 V (−15%)</span> — zawór może nie zadziałać. Większy przekrój lub krótsza trasa.':'Napięcie w tolerancji odbiornika (24 V −15% / +20%). Straty w kablu: '+fmt(I*du,1)+' W.';
+  const x0=40,x1=w-30, X=v=>x0+(x1-x0)*v/24, yb=h*0.18, bh=h*0.16;
+  g.fillStyle=C.danger; g.globalAlpha=.8; g.fillRect(X(0),yb,X(du/2)-X(0),bh); g.fillRect(X(24-du/2),yb,X(24)-X(24-du/2),bh); g.globalAlpha=1;
+  g.fillStyle=Uo<20.4?C.accent2:C.accent3; g.fillRect(X(du/2),yb,X(24-du/2)-X(du/2),bh); text(g,'odbiornik '+fmt(Uo,1)+' V',(X(du/2)+X(24-du/2))/2,yb+bh/2,'#fff',15,'center',800);
+  text(g,'kabel „tam” + „z powrotem”: '+fmt(du,2)+' V',x0,yb-14,C.danger,13,'left',800); text(g,'24 V z zasilacza = suma spadków',x1,yb+bh+18,C.fg,13,'right',700);
+  const ys=h*0.68; line(g,x0+40,ys-30,x1-60,ys-30,C.danger,3); line(g,x0+40,ys+30,x1-60,ys+30,C.danger,3);
+  g.fillStyle=C.panel; g.fillRect(x0,ys-40,80,80); g.strokeStyle=C.accent; g.lineWidth=2; g.strokeRect(x0,ys-40,80,80); text(g,'zasilacz',x0+40,ys-8,C.fg,13,'center',800); text(g,'24 V',x0+40,ys+12,C.accent,14,'center',800);
+  g.fillStyle=C.panel; g.fillRect(x1-80,ys-40,80,80); g.strokeStyle=C.accent3; g.strokeRect(x1-80,ys-40,80,80); text(g,'zawór',x1-40,ys-8,C.fg,13,'center',800); text(g,fmt(Uo,1)+' V',x1-40,ys+12,Uo<20.4?C.danger:C.accent3,14,'center',800);
+  text(g,l+' m · '+String(S).replace('.',',')+' mm² · R = '+fmt(Rk/2,2)+' Ω',(x0+x1)/2,ys-44,C.fg,13,'center',700); text(g,'powrót: '+l+' m · '+fmt(Rk/2,2)+' Ω',(x0+x1)/2,ys+48,C.fg,13,'center',700); };
+
+/* ===== źródło rzeczywiste ===== */
+slide('sr-r',v=>v===0?'0 Ω (zwarcie)':v+' Ω');
+frame['s-src']=()=>{ const {g,w,h}=fit($('#cv-src')); const E=9, Rw=2, R=+$('#sr-r').value, I=E/(R+Rw), U=E-I*Rw;
+  $('#sr-i').textContent=fmt(I,2)+' A'; $('#sr-u').textContent=fmt(U,2)+' V'; $('#sr-z').textContent=fmt(E/Rw,1)+' A';
+  const x0=56,x1=w-24,y0=h-40,y1=24, X=i=>x0+(x1-x0)*i/5, Y=u=>y0-(y0-y1)*u/10;
+  axes(g,x0,y0,x1,y1,5,10,'I [A]','U [V]',5,5,v=>fmt(v,0),v=>fmt(v,0));
+  line(g,X(0),Y(E),X(E/Rw),Y(0),C.accent,3); line(g,X(0),Y(E),X(5),Y(E),C.muted,1.2,[5,4]); text(g,'E = 9 V (bez obciążenia)',X(5)-4,Y(E)-12,C.muted,12,'right',700);
+  dot(g,X(E/Rw),Y(0),6,C.danger); text(g,'zwarcie 4,5 A',X(E/Rw),Y(0)-16,C.danger,12,'center',800);
+  line(g,X(I),Y(U),X(I),y0,C.accent2,1.5,[4,4]); line(g,x0,Y(U),X(I),Y(U),C.accent2,1.5,[4,4]); dot(g,X(I),Y(U),7,C.accent2);
+  g.fillStyle=C.danger; g.globalAlpha=.25; g.fillRect(X(I)-5,Y(E),10,Y(U)-Y(E)); g.globalAlpha=1; text(g,'I·Rw = '+fmt(I*Rw,2)+' V',X(I)+10,(Y(E)+Y(U))/2,C.danger,12,'left',800); };
+
+/* ===== rezystor: kod paskowy ===== */
+const RCOL=[['czarny','#111'],['brązowy','#7b3f12'],['czerwony','#d62020'],['pomarańczowy','#f07c00'],['żółty','#f5d000'],['zielony','#1f9a3a'],['niebieski','#1f5fd1'],['fioletowy','#7a3fc9'],['szary','#888'],['biały','#f4f4f4']];
+const RMUL=[...RCOL.slice(0,7).map((c,i)=>[c[0],c[1],10**i]),['złoty','#c9a227',0.1],['srebrny','#b8b8c0',0.01]];
+const RTOL=[['brązowy','#7b3f12',1],['czerwony','#d62020',2],['złoty','#c9a227',5],['srebrny','#b8b8c0',10]];
+const RCS={a:4,b:7,m:2,t:2};
+const opt=(arr,sel)=>arr.map((c,i)=>`<option value="${i}" ${i===sel?'selected':''}>${c[0]}</option>`).join('');
+$('#rc-ctl').innerHTML=`<label>1. <select id="rc-a">${opt(RCOL,RCS.a)}</select></label><label>2. <select id="rc-b">${opt(RCOL,RCS.b)}</select></label><label>3. <select id="rc-m">${opt(RMUL,RCS.m)}</select></label><label>4. <select id="rc-tl">${opt(RTOL,RCS.t)}</select></label>`;
+function rcDraw(){ const a=+$('#rc-a').value,b=+$('#rc-b').value,m=+$('#rc-m').value,t=+$('#rc-tl').value; const v=(10*a+b)*RMUL[m][2], tol=RTOL[t][2];
+  const band=(x,c)=>`<rect x="${x}" y="42" width="22" height="76" style="fill:${c};stroke:#0004"/>`;
+  $('#rc-svg').innerHTML=`<line x1="20" y1="80" x2="580" y2="80" stroke="#999" stroke-width="6"/><rect x="150" y="38" width="300" height="84" rx="34" style="fill:#d9c49a;stroke:#9a8556" stroke-width="2"/>`
+   +band(185,RCOL[a][1])+band(230,RCOL[b][1])+band(275,RMUL[m][1])+band(395,RTOL[t][1])
+   +`<text x="196" y="145" text-anchor="middle" font-size="16" style="fill:var(--fg)">1</text><text x="241" y="145" text-anchor="middle" font-size="16" style="fill:var(--fg)">2</text><text x="286" y="145" text-anchor="middle" font-size="16" style="fill:var(--fg)">×</text><text x="406" y="145" text-anchor="middle" font-size="16" style="fill:var(--fg)">±</text>`;
+  $('#rc-v').textContent=ohm(v); $('#rc-t').textContent='±'+tol+'%'; $('#rc-rng').textContent=ohm(v*(1-tol/100))+' … '+ohm(v*(1+tol/100)); }
+$$('#rc-ctl select').forEach(s=>s.onchange=rcDraw); rcDraw();
+
+/* ===== kondensator RC ===== */
+slide('rc-r',v=>v+' kΩ'); slide('rc-c',v=>v+' µF');
+frame['s-cap']=()=>{ const {g,w,h}=fit($('#cv-rc')); const R=+$('#rc-r').value*1e3, Cc=+$('#rc-c').value*1e-6, tau=R*Cc; $('#rc-tau').textContent=fmt(tau,tau<1?3:2)+' s'; $('#rc-5').textContent=fmt(5*tau,tau<1?3:1)+' s';
+  const T=6*tau, x0=56,x1=w-20,y0=h-40,y1=20, X=t=>x0+(x1-x0)*t/T, Y=u=>y0-(y0-y1)*u/12;
+  axes(g,x0,y0,x1,y1,T,12,'t [s]','u [V]',6,6,v=>fmt(v,tau<1?2:1),v=>fmt(v,0));
+  const pts=[]; for(let k=0;k<=200;k++){ const t=T*k/200; pts.push([X(t),Y(12*(1-Math.exp(-t/tau)))]); } poly(g,pts,C.accent,3);
+  line(g,x0,Y(12),x1,Y(12),C.muted,1.2,[5,4]); text(g,'U = 12 V',x1-4,Y(12)-10,C.muted,12,'right',700);
+  [[1,'τ: 63%'],[5,'5τ: 99%']].forEach(([k,l])=>{ const u=12*(1-Math.exp(-k)); line(g,X(k*tau),y0,X(k*tau),Y(u),C.accent2,1.5,[4,4]); dot(g,X(k*tau),Y(u),6,C.accent2); text(g,l,X(k*tau)+8,Y(u)+16,C.accent2,13,'left',800); }); };
+
+/* ===== dioda ===== */
+const DI={si:[0.65,'dioda krzemowa',C.accent],led:[2.0,'LED czerwona',C.danger],ledb:[3.0,'LED niebieska',C.accent]}; let DIM='si';
+selGroup('data-di',v=>{DIM=v; diUpd();});
+const diUpd=()=>{ const Uf=DI[DIM][0], I=+$('#di-i').value/1000, R=(24-Uf)/I; $('#di-r').textContent=ohm(R); $('#di-p').textContent=watt((24-Uf)*I); };
+slide('di-i',v=>v+' mA',diUpd);
+frame['s-diode']=()=>{ const {g,w,h}=fit($('#cv-di')); const x0=56,x1=w-20,y0=h-40,y1=20, X=u=>x0+(x1-x0)*(u+1)/5, Y=i=>y0-(y0-y1)*i/25;
+  axes(g,x0,y0,x1,y1,4,25,'U [V]','I [mA]',5,5,v=>fmt(v,0),v=>fmt(v,0),-1,0);
+  const col={si:C.accent3,led:C.danger,ledb:C.accent};
+  Object.entries(DI).forEach(([k,d])=>{ const pts=[]; for(let u=-1;u<=4;u+=0.01){ const i=u<=0?0:10*Math.exp((u-d[0])/(k==='si'?0.045:0.09)); if(i>25) break; pts.push([X(u),Y(i)]); }
+    poly(g,pts,col[k],k===DIM?4:1.5); if(k===DIM) text(g,d[1]+' — próg ok. '+fmt(d[0],1)+' V',X(d[0])-8,Y(20),col[k],13,'right',800); });
+  text(g,'kierunek zaporowy: I ≈ 0',X(-0.95),Y(1.5),C.muted,12,'left',700); };
+diUpd();
+
+/* ===== zasilacz ===== */
+let PSU=0;
+chain('#psu-chain',[
+ ['sieć','230 V AC','Napięcie przemienne sinusoidalne, wartość skuteczna 230 V, szczytowa ok. 325 V, 50 Hz.'],
+ ['transformator','obniża','Obniża napięcie (tu do ok. 24 V skutecznie) i oddziela galwanicznie obwód 24 V od sieci.'],
+ ['prostownik','mostek z diod','Mostek z czterech diod przepuszcza obie połówki sinusoidy „w tę samą stronę”: napięcie jednokierunkowe, ale tętniące 100 razy na sekundę.'],
+ ['kondensator','wygładza','Ładuje się w szczytach i oddaje ładunek między nimi — zostają niewielkie tętnienia.'],
+ ['stabilizator','24 V DC','Utrzymuje stałe 24 V niezależnie od obciążenia i wahań sieci. Zasilacze na szynę DIN mają regulację, np. 24–28 V.'],
+],(c,i)=>{ PSU=i; $('#psu-t').textContent=c[0]+' — '+c[1]; $('#psu-d').textContent=c[2]; });
+frame['s-psu']=()=>{ const {g,w,h}=fit($('#cv-psu')); const x0=56,x1=w-16,y0=h-24,y1=14, ym=(y0+y1)/2, A=PSU===0?340:40, X=t=>x0+(x1-x0)*t/0.04, Y=u=>ym-(ym-y1)*u/A;
+  line(g,x0,ym,x1,ym,C.muted,1.2); line(g,x0,y1,x0,y0,C.muted,1.2); text(g,'+'+A+' V',x0-4,y1+6,C.muted,11,'right',600); text(g,'−'+A+' V',x0-4,y0-6,C.muted,11,'right',600); text(g,'40 ms',x1,y0+12,C.muted,11,'right',600);
+  const f=t=>{ const s=Math.sin(2*Math.PI*50*t); if(PSU===0) return 325*s; if(PSU===1) return 34*s; if(PSU===2) return 34*Math.abs(s); if(PSU===3){ const ph=(t*100)%1; return Math.max(34*Math.abs(s), 34-4*ph); } return 24; };
+  const pts=[]; for(let k=0;k<=400;k++){ const t=0.04*k/400; pts.push([X(t),Y(f(t))]); } poly(g,pts,PSU===4?C.accent3:C.accent,2.5);
+  if(PSU===4){ text(g,'24 V DC',x1-8,Y(24)-12,C.accent3,14,'right',800); } };
+
+/* ===== tranzystor ===== */
+let TRON=false;
+function trDraw(){ const on=TRON, c=on?'var(--accent3)':'var(--muted)', cp=on?'var(--danger)':'var(--muted)';
+  const box=(x,y,w,t1,t2,col)=>`<rect x="${x}" y="${y}" width="${w}" height="64" rx="10" style="fill:var(--panel);stroke:${col}" stroke-width="3"/><text x="${x+w/2}" y="${y+28}" text-anchor="middle" font-size="15" font-weight="800" style="fill:var(--fg)">${t1}</text><text x="${x+w/2}" y="${y+48}" text-anchor="middle" font-size="12" style="fill:var(--muted)">${t2}</text>`;
+  const ar=(x1,x2,y,col,l)=>`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" style="stroke:${col}" stroke-width="${on?5:2}"/><text x="${(x1+x2)/2}" y="${y-8}" text-anchor="middle" font-size="12" font-weight="700" style="fill:${col}">${l}</text>`;
+  $('#tr-svg').innerHTML=box(10,40,130,'PLC: Q0.0 = '+(on?1:0),'program, mA',c)+ar(140,175,72,c,on?'+24 V':'0 V')
+   +box(175,40,110,'tranzystor','wyjście 0,5 A',c)+ar(285,325,72,c,on?'~20 mA':'')
+   +box(325,40,140,'stycznik K1','cewka 24 V',c)+ar(465,520,72,cp,on?'400 V':'')
+   +`<circle cx="560" cy="72" r="40" style="fill:var(--panel);stroke:${cp}" stroke-width="3"/><text x="560" y="78" text-anchor="middle" font-size="22" font-weight="800" style="fill:${cp}">M</text><text x="560" y="132" text-anchor="middle" font-size="12" style="fill:var(--muted)">silnik 7,5 kW, ~15 A</text>`
+   +`<text x="250" y="170" text-anchor="middle" font-size="13" style="fill:var(--fg)">obwód sterowania 24 V DC</text><text x="580" y="170" text-anchor="middle" font-size="13" style="fill:var(--fg)">obwód mocy 3 × 400 V AC</text>`
+   +`<line x1="492" y1="20" x2="492" y2="190" stroke-dasharray="6 5" style="stroke:var(--violet)" stroke-width="2"/><text x="492" y="210" text-anchor="middle" font-size="12" font-weight="700" style="fill:var(--violet)">separacja galwaniczna</text>`
+   +`<text x="250" y="260" text-anchor="middle" font-size="13" style="fill:var(--muted)">dioda gasząca równolegle do cewki — patrz slajd o cewce</text>`;
+  $('#tr-b').textContent='program PLC: wyjście Q0.0 = '+(on?1:0)+' (kliknij)';
+  $('#tr-st').innerHTML=on?'<p><b>Q0.0 = 1</b>: tranzystor przewodzi, cewka przekaźnika/stycznika zasilona, styki zamknięte — silnik pracuje.</p>':'<p><b>Q0.0 = 0</b>: tranzystor zatkany, cewka bez prądu, styki otwarte — silnik stoi.</p>'; }
+$('#tr-b').onclick=()=>{ TRON=!TRON; trDraw(); }; trDraw();
+
+/* ===== czujnik Pt100 + 4–20 mA ===== */
+slide('se-t',v=>v+' °C');
+frame['s-sens']=()=>{ const {g,w,h}=fit($('#cv-sen')); const T=+$('#se-t').value, R=100*(1+0.00385*T); let I=4+16*T/150; let st='';
+  if(I<3.8){ I=3.8; st='Poniżej zakresu: przetwornik nasyca się na ok. 3,8 mA. Poniżej 3,6 mA = sygnał błędu (NAMUR NE 43).'; } else if(I>20.5){ I=20.5; st='Powyżej zakresu: przetwornik nasyca się na ok. 20,5 mA. Powyżej 21 mA = sygnał błędu.'; } else st='W zakresie 0…150 °C: prąd proporcjonalny do temperatury.';
+  $('#se-r').textContent=fmt(R,1)+' Ω'; $('#se-i').textContent=fmt(I,2)+' mA'; $('#se-msg').textContent=st;
+  const x0=56,x1=w-20,y0=h-40,y1=20, X=t=>x0+(x1-x0)*(t+50)/250, Y=i=>y0-(y0-y1)*i/24;
+  axes(g,x0,y0,x1,y1,200,24,'T [°C]','I [mA]',5,6,v=>fmt(v,0),v=>fmt(v,0),-50,0);
+  g.fillStyle=C.danger; g.globalAlpha=.1; g.fillRect(x0,Y(3.6),x1-x0,y0-Y(3.6)); g.fillRect(x0,y1,x1-x0,Y(21)-y1); g.globalAlpha=1;
+  text(g,'błąd < 3,6 mA',x1-6,Y(1.8),C.danger,12,'right',700); text(g,'błąd > 21 mA',x1-6,Y(22.5),C.danger,12,'right',700);
+  const pts=[]; for(let t=-50;t<=200;t+=1){ pts.push([X(t),Y(Math.min(20.5,Math.max(3.8,4+16*t/150)))]); } poly(g,pts,C.accent,3);
+  line(g,X(0),y0,X(0),Y(4),C.muted,1,[3,3]); line(g,X(150),y0,X(150),Y(20),C.muted,1,[3,3]);
+  dot(g,X(T),Y(I),7,C.accent2); text(g,fmt(I,1)+' mA',X(T)+10,Y(I)-12,C.accent2,13,'left',800); };
+
+/* ---------------- nawigacja ---------------- */
+const slides=$$('.slide'); let cur=0, spk=null;
+const title=i=>slides[i].querySelector('h1,h2').textContent;
+function notesHTML(i){const n=slides[i].querySelector('.notes'); return n?n.innerHTML:'<p>(brak komentarza)</p>';}
+function updSpeaker(){ if(!spk||spk.closed) return; const nx=slides[cur+1]?title(cur+1):'— koniec —';
+  spk.document.body.innerHTML=`<p style="color:#777;margin:0">${slides[cur].dataset.blok||''}</p><h3 style="margin:.1em 0 .4em">Slajd ${cur+1}/${slides.length}: ${title(cur)}</h3>${notesHTML(cur)}<hr><p style="color:#777">Następny: ${nx}</p>`; }
+function show(i){ i=Math.max(0,Math.min(slides.length-1,i)); slides[cur].classList.remove('active'); cur=i; slides[cur].classList.add('active');
+  $('#prog div').style.width=(100*(cur+1)/slides.length)+'%'; $('#cnt').textContent=(cur+1)+' / '+slides.length; $('#blk').textContent=slides[cur].dataset.blok||''; $('#notes').innerHTML=notesHTML(cur); updSpeaker(); history.replaceState(null,'','#'+(cur+1)); }
+const next=()=>show(cur+1), prev=()=>show(cur-1);
+$('#b-next').onclick=next; $('#b-prev').onclick=prev; $('#b-theme').onclick=toggleTheme;
+const fsToggle=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen(); $('#b-fs').onclick=fsToggle;
+function openSpeaker(){ spk=window.open('','komentarze_pe1','width=760,height=640'); if(!spk) return; spk.document.title='Notatki do slajdów';
+  spk.document.head.innerHTML='<meta charset="utf-8"><style>body{font:18px/1.5 system-ui,sans-serif;padding:16px 22px;background:#fffdf6;color:#222}b{color:#b5520c}.mono{font-family:monospace}</style>'; updSpeaker(); }
+$('#b-spk').onclick=openSpeaker; $('#b-notes').onclick=()=>$('#notes').classList.toggle('show');
+document.addEventListener('keydown',e=>{ const tag=e.target.tagName, k=e.key;
+  if(tag==='INPUT'&&(e.target.type==='text'||e.target.type==='number'||k.startsWith('Arrow'))) return; if(tag==='SELECT') return;
+  if(k==='ArrowRight'||k==='PageDown'||(k===' '&&tag!=='BUTTON'&&tag!=='SUMMARY')){e.preventDefault();next();}
+  else if(k==='ArrowLeft'||k==='PageUp'){e.preventDefault();prev();}
+  else if(k==='Home') show(0); else if(k==='End') show(slides.length-1);
+  else if(k==='n'||k==='N') $('#notes').classList.toggle('show'); else if(k==='s'||k==='S') openSpeaker(); else if(k==='f'||k==='F') fsToggle(); else if(k==='t'||k==='T') toggleTheme(); });
+document.addEventListener('click',e=>{ if(e.target.tagName==='BUTTON') e.target.blur(); });
+function loop(now){ DT=Math.min(0.05,(now-LAST)/1000||0); LAST=now; NOW=now/1000; const f=frame[slides[cur].id]; if(f){ readColors(); try{f(NOW);}catch(err){console.error(err);} } requestAnimationFrame(loop); }
+show((parseInt(location.hash.slice(1))||1)-1); requestAnimationFrame(loop);
+</script>
+</body>
+</html>
