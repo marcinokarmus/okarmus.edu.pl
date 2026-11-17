@@ -378,21 +378,25 @@ svg.stages .st{display:none} svg.stages .st.on{display:inline}
 </section>
 <!-- 12 -->
 <section class="slide" id="s-twoja2" data-blok="Część C · obwody mieszane — obliczenia">
-  <div class="kicker">Twoja kolej</div>
+  <div class="kicker">Twoja kolej · wyniki na czat</div>
   <h2>Połączenia rezystorów</h2>
-  <div class="cols c3">
-    <div class="you"><h3>1. Szeregowo</h3><p>R1 = 100 Ω, R2 = 220 Ω, R3 = 680 Ω połączono szeregowo i zasilono z 12 V. Oblicz R<sub>z</sub>, I oraz U<sub>3</sub>.</p>
-      <details><summary>odpowiedź</summary><p>R<sub>z</sub> = 1000 Ω; I = 12 mA; U<sub>3</sub> = 680 · 0,012 = 8,16 V</p></details></div>
-    <div class="you"><h3>2. Równolegle</h3><p>R1 = 1 kΩ i R2 = 4,7 kΩ połączono równolegle do 9 V. Oblicz R<sub>z</sub>, I<sub>1</sub>, I<sub>2</sub> i prąd całkowity.</p>
-      <details><summary>odpowiedź</summary><p>R<sub>z</sub> ≈ 825 Ω; I<sub>1</sub> = 9 mA; I<sub>2</sub> ≈ 1,91 mA; I ≈ 10,9 mA</p></details></div>
-    <div class="you"><h3>3. Dzielnik</h3><p>Z akumulatora 24 V trzeba uzyskać 5 V do wejścia pomiarowego. R2 = 1 kΩ. Ile musi wynosić R1?</p>
-      <details><summary>odpowiedź</summary><p>5 = 24 · 1000 / (R1 + 1000) → R1 = 3800 Ω (np. 3,9 kΩ z E12 → U<sub>wy</sub> ≈ 4,9 V)</p></details></div>
+  <div class="cols">
+    <div>
+      <div class="you"><h3>1. Szeregowo</h3><p>R1 = 100 Ω, R2 = 220 Ω, R3 = 680 Ω połączono szeregowo i zasilono z 12 V. Oblicz R<sub>z</sub>, I oraz U<sub>3</sub>.</p>
+        <details><summary>odpowiedź</summary><p>R<sub>z</sub> = 1000 Ω; I = 12 mA; U<sub>3</sub> = 680 · 0,012 = 8,16 V</p></details></div>
+      <div class="you"><h3>2. Równolegle</h3><p>R1 = 1 kΩ i R2 = 4,7 kΩ połączono równolegle do 9 V. Oblicz R<sub>z</sub>, I<sub>1</sub>, I<sub>2</sub> i prąd całkowity.</p>
+        <details><summary>odpowiedź</summary><p>R<sub>z</sub> ≈ 825 Ω; I<sub>1</sub> = 9 mA; I<sub>2</sub> ≈ 1,91 mA; I ≈ 10,9 mA</p></details></div>
+    </div>
+    <div class="you"><h3>3. Gałąź z dwoma rezystorami: R1 + (R2 ‖ (R3 + R4))</h3>
+      <svg class="dia" viewBox="0 0 470 260" style="max-width:470px"><g style="stroke:var(--fg,#1d2330);fill:none" stroke-width="3"><polyline points="40,230 40,140"/><polyline points="40,120 40,40 100,40"/><line x1="20" y1="120" x2="60" y2="120"/><line x1="28" y1="140" x2="52" y2="140"/><rect x="100" y="27" width="80" height="26" rx="4"/><polyline points="180,40 250,40 250,80"/><polyline points="250,40 380,40 380,62"/><rect x="237" y="80" width="26" height="76" rx="4"/><rect x="367" y="62" width="26" height="60" rx="4"/><polyline points="380,122 380,140"/><rect x="367" y="140" width="26" height="60" rx="4"/><polyline points="250,156 250,230 40,230"/><polyline points="380,200 380,230 250,230"/></g><circle cx="250" cy="40" r="5" style="fill:var(--fg,#1d2330)"/><circle cx="250" cy="230" r="5" style="fill:var(--fg,#1d2330)"/><text x="140" y="18" text-anchor="middle" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">R1 = 100 Ω</text><text x="230" y="124" text-anchor="end" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">R2 = 600 Ω</text><text x="402" y="97" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">R3 =</text><text x="402" y="116" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">200 Ω</text><text x="402" y="175" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">R4 =</text><text x="402" y="194" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">100 Ω</text><text x="58" y="192" style="fill:var(--accent2,#e2741d)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">U = 24 V</text></svg>
+      <p>Oblicz R<sub>34</sub>, R<sub>234</sub>, R<sub>z</sub>, I, U<sub>234</sub>, I<sub>2</sub>, I<sub>34</sub> oraz U<sub>3</sub> i U<sub>4</sub>.</p>
+      <details><summary>odpowiedź</summary><p>R<sub>34</sub> = 300 Ω; R<sub>234</sub> = 600·300/900 = 200 Ω; R<sub>z</sub> = 300 Ω; I = 80 mA; U<sub>1</sub> = 8 V, U<sub>234</sub> = 16 V; I<sub>2</sub> = 16/600 ≈ 26,7 mA; I<sub>34</sub> = 16/300 ≈ 53,3 mA; U<sub>3</sub> ≈ 10,7 V, U<sub>4</sub> ≈ 5,33 V (suma 16 V ✔)</p></details></div>
   </div>
   <aside class="notes">
     <p><b>Rozwiązania:</b></p>
 <ol><li><b>Szeregowo:</b> R<sub>z</sub> = 100 + 220 + 680 = 1000 Ω; I = 12 V / 1000 Ω = 12 mA; U<sub>3</sub> = 680 · 0,012 = 8,16 V.</li>
 <li><b>Równolegle:</b> R<sub>z</sub> = 1000 · 4700 / 5700 ≈ 825 Ω; I<sub>1</sub> = 9 / 1000 = 9 mA; I<sub>2</sub> = 9 / 4700 ≈ 1,91 mA; I = 10,9 mA (= 9 V / 825 Ω ✔).</li>
-<li><b>Dzielnik napięcia:</b> U<sub>wy</sub> = U · R2 / (R1 + R2) → 5 = 24 · 1000 / (R1 + 1000) → R1 + 1000 = 4800 → R1 = 3800 Ω. W szeregu E12 najbliższa większa wartość to 3,9 kΩ → U<sub>wy</sub> = 24 · 1000 / 4900 ≈ 4,9 V (bezpiecznie poniżej 5 V).</li></ol>
+<li><b>R1 + (R2 ‖ (R3 + R4)):</b> zaczynamy „od środka”: R3 i R4 są w szeregu → R<sub>34</sub> = 200 + 100 = 300 Ω. Ta gałąź jest równoległa z R2 → R<sub>234</sub> = 600 · 300 / (600 + 300) = 200 Ω. Całość w szeregu z R1 → R<sub>z</sub> = 100 + 200 = 300 Ω. Prąd źródła I = 24 / 300 = 80 mA. Napięcia: U<sub>1</sub> = 100 · 0,08 = 8 V, U<sub>234</sub> = 200 · 0,08 = 16 V (8 + 16 = 24 ✔). Prądy gałęzi: I<sub>2</sub> = 16 / 600 ≈ 26,7 mA, I<sub>34</sub> = 16 / 300 ≈ 53,3 mA (suma 80 mA ✔). W gałęzi R3–R4 jeden prąd: U<sub>3</sub> = 200 · 0,0533 ≈ 10,7 V, U<sub>4</sub> = 100 · 0,0533 ≈ 5,33 V (suma 16 V ✔).</li></ol>
   </aside>
 </section>
 <!-- 13 -->
@@ -406,7 +410,7 @@ svg.stages .st{display:none} svg.stages .st.on{display:inline}
       <li>Wyniki wpisuj w pola — zapisują się automatycznie w przeglądarce.</li>
       <li>Na koniec „💾 Zapisz plik z odpowiedziami” → <b>oddaj pobrany plik</b> w Teams.</li></ol></div>
     <div class="card"><h3>🧮 Co w karcie</h3><ol>
-      <li>energia i koszt pracy maszyny</li><li>układ mieszany (jak przykład 2)</li><li>spadek napięcia na kablu 24 V</li><li>obwód gniazd 16 A</li>
+      <li>energia i koszt pracy maszyny</li><li>układ mieszany R1 + (R2 ‖ (R3 + R4)) — jak „Twoja kolej”, zad. 3</li><li>spadek napięcia na kablu 24 V</li><li>obwód gniazd 16 A</li>
       <li>I prawo Kirchhoffa — węzeł</li><li>II prawo Kirchhoffa — oczko</li><li>rezystor do LED</li><li>dzielnik napięcia</li></ol>
       <p class="info">Liczby wpisuj zwyczajnie: <span class="mono">19,8</span> albo <span class="mono">0,0198</span> — w jednostce podanej przy polu.</p></div>
   </div>

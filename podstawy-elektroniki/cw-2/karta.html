@@ -81,7 +81,7 @@ function variant(al){
   const R=rngOf(seedFrom('PE2-'+normAlbum(al))), pick=a=>a[Math.floor(R()*a.length)], V={};
   V.z1={n:pick(['suszarka komorowa','zgrzewarka do folii','nagrzewnica powietrza','piec laboratoryjny','grzejnik hali magazynowej','podgrzewacz wody technologicznej']),
         P:pick([1.2,1.5,1.8,2.0,2.3,2.5,3.0,3.5]), h:pick([8,16]), d:pick([220,250,260]), c:pick([0.75,0.8,0.85,0.9,0.95,1.0,1.1])};
-  V.z2={R1:pick([47,68,100,150,220]), R2:pick([100,150,220,330,470]), R3:pick([220,330,470,680,1000]), U:pick([9,12,24])};
+  V.z2={R1:pick([47,68,100,150,220]), R2:pick([220,330,470,680,1000]), R3:pick([100,150,220,330,470]), R4:pick([47,68,100,150,220]), U:pick([9,12,24])};
   V.z3={l:pick([25,30,40,50,60,75]), S:pick([0.5,0.75,1,1.5]), I:pick([0.5,0.75,1,1.5,2])};
   V.z4={d:shuffled(DEV,R).slice(0,4)};
   { const v=()=>pick([0.5,1,1.5,2,2.5,3,3.5,4,5,6]); V.z5={a:v(), b:v(), c:v(), d:v()}; if(V.z5.a+V.z5.b===V.z5.c+V.z5.d) V.z5.d+=0.5; }   // I1,I2 wpływają; I3,I4 wypływają; I5 = ?
@@ -94,8 +94,8 @@ function variant(al){
 function results(V){
   const r={}, z1=V.z1, z2=V.z2, z3=V.z3, z5=V.z5, z6=V.z6, z7=V.z7, z8=V.z8;
   r.z1_I=z1.P*1000/UN; r.z1_R=UN/r.z1_I; r.z1_E=z1.P*z1.h*z1.d; r.z1_K=r.z1_E*z1.c;
-  r.z2_R23=z2.R2*z2.R3/(z2.R2+z2.R3); r.z2_Rz=z2.R1+r.z2_R23; const I=z2.U/r.z2_Rz; r.z2_I=I*1000;
-  r.z2_U1=z2.R1*I; r.z2_U23=r.z2_R23*I; r.z2_I2=r.z2_U23/z2.R2*1000; r.z2_I3=r.z2_U23/z2.R3*1000; r.z2_P=z2.U*I;
+  r.z2_R34=z2.R3+z2.R4; r.z2_R234=z2.R2*r.z2_R34/(z2.R2+r.z2_R34); r.z2_Rz=z2.R1+r.z2_R234; const I=z2.U/r.z2_Rz; r.z2_I=I*1000;
+  r.z2_U1=z2.R1*I; r.z2_U234=r.z2_R234*I; r.z2_I2=r.z2_U234/z2.R2*1000; const I34=r.z2_U234/r.z2_R34; r.z2_I34=I34*1000; r.z2_U3=z2.R3*I34; r.z2_U4=z2.R4*I34;
   r.z3_R=RHO*2*z3.l/z3.S; r.z3_dU=r.z3_R*z3.I; r.z3_U=U24-r.z3_dU; r.z3_ok=r.z3_U>=UMIN?'tak':'nie';
   r.z4_I=V.z4.d.reduce((s,d)=>s+d[1],0)/UN; r.z4_w=r.z4_I>IB?'zadziała (przeciążenie)':'nie zadziała'; r.z4_dP=IB*UN-V.z4.d.reduce((s,d)=>s+d[1],0);
   r.z5_x=z5.a+z5.b-z5.c-z5.d; r.z5_I=Math.abs(r.z5_x); r.z5_k=r.z5_x>=0?'wypływa z węzła':'wpływa do węzła';
@@ -105,6 +105,7 @@ function results(V){
   return r;
 }
 
+const sch4=(a,b,c,d,u)=>`<svg class="dia" viewBox="0 0 470 260" style="max-width:470px"><g style="stroke:var(--fg,#1d2330);fill:none" stroke-width="3"><polyline points="40,230 40,140"/><polyline points="40,120 40,40 100,40"/><line x1="20" y1="120" x2="60" y2="120"/><line x1="28" y1="140" x2="52" y2="140"/><rect x="100" y="27" width="80" height="26" rx="4"/><polyline points="180,40 250,40 250,80"/><polyline points="250,40 380,40 380,62"/><rect x="237" y="80" width="26" height="76" rx="4"/><rect x="367" y="62" width="26" height="60" rx="4"/><polyline points="380,122 380,140"/><rect x="367" y="140" width="26" height="60" rx="4"/><polyline points="250,156 250,230 40,230"/><polyline points="380,200 380,230 250,230"/></g><circle cx="250" cy="40" r="5" style="fill:var(--fg,#1d2330)"/><circle cx="250" cy="230" r="5" style="fill:var(--fg,#1d2330)"/><text x="140" y="18" text-anchor="middle" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">R1 = ${a}</text><text x="230" y="124" text-anchor="end" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">R2 = ${b}</text><text x="402" y="97" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">R3 =</text><text x="402" y="116" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">${c}</text><text x="402" y="175" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">R4 =</text><text x="402" y="194" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">${d}</text><text x="58" y="192" style="fill:var(--accent2,#e2741d)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">U = ${u}</text></svg>`;
 
 function esc(s){ return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 const IN=(k,u,w)=>`<input type="text" class="f" data-k="${k}" style="width:${w||'7em'}" autocomplete="off"> ${u||''}`;
@@ -120,12 +121,14 @@ function questions(V){
       <tr><td>b) rezystancja odbiornika (grzałki)</td><td>R = ${IN('z1_R','Ω')}</td></tr>
       <tr><td>c) energia zużyta w ciągu roku</td><td>E = ${IN('z1_E','kWh')}</td></tr>
       <tr><td>d) roczny koszt energii</td><td>K = ${IN('z1_K','zł')}</td></tr></table>`},
-   {t:'Zadanie 2. Układ mieszany: R1 + (R2 ‖ R3)', p:4,
-    q:`Rezystor <b>R1 = ${z2.R1} Ω</b> połączono szeregowo z równoległym połączeniem <b>R2 = ${z2.R2} Ω</b> i <b>R3 = ${z2.R3} Ω</b>. Całość zasilono napięciem <b>U = ${z2.U} V</b> (jak przykład 2 na ćwiczeniach).
-      <table><tr><td>rezystancja R2 ‖ R3</td><td>R<sub>23</sub> = ${IN('z2_R23','Ω')}</td><td>rezystancja zastępcza</td><td>R<sub>z</sub> = ${IN('z2_Rz','Ω')}</td></tr>
-      <tr><td>prąd źródła</td><td>I = ${IN('z2_I','mA')}</td><td>moc oddana przez źródło</td><td>P = ${IN('z2_P','W')}</td></tr>
-      <tr><td>napięcie na R1</td><td>U<sub>1</sub> = ${IN('z2_U1','V')}</td><td>napięcie na R2 ‖ R3</td><td>U<sub>23</sub> = ${IN('z2_U23','V')}</td></tr>
-      <tr><td>prąd przez R2</td><td>I<sub>2</sub> = ${IN('z2_I2','mA')}</td><td>prąd przez R3</td><td>I<sub>3</sub> = ${IN('z2_I3','mA')}</td></tr></table>${TOK('z2_tok')}`},
+   {t:'Zadanie 2. Układ mieszany: R1 + (R2 ‖ (R3 + R4))', p:4,
+    q:`Układ jak na schemacie zasilono napięciem <b>U = ${z2.U} V</b>. R3 i R4 są połączone szeregowo, ta gałąź jest równoległa do R2, a całość jest w szeregu z R1 (jak „Twoja kolej”, zad. 3).
+      <div style="margin:.4em 0">${sch4(z2.R1+' Ω',z2.R2+' Ω',z2.R3+' Ω',z2.R4+' Ω',z2.U+' V')}</div>
+      <table><tr><td>rezystancja R3 + R4</td><td>R<sub>34</sub> = ${IN('z2_R34','Ω')}</td><td>rezystancja R2 ‖ R<sub>34</sub></td><td>R<sub>234</sub> = ${IN('z2_R234','Ω')}</td></tr>
+      <tr><td>rezystancja zastępcza</td><td>R<sub>z</sub> = ${IN('z2_Rz','Ω')}</td><td>prąd źródła</td><td>I = ${IN('z2_I','mA')}</td></tr>
+      <tr><td>napięcie na R1</td><td>U<sub>1</sub> = ${IN('z2_U1','V')}</td><td>napięcie na gałęziach równoległych</td><td>U<sub>234</sub> = ${IN('z2_U234','V')}</td></tr>
+      <tr><td>prąd przez R2</td><td>I<sub>2</sub> = ${IN('z2_I2','mA')}</td><td>prąd przez R3 i R4</td><td>I<sub>34</sub> = ${IN('z2_I34','mA')}</td></tr>
+      <tr><td>napięcie na R3</td><td>U<sub>3</sub> = ${IN('z2_U3','V')}</td><td>napięcie na R4</td><td>U<sub>4</sub> = ${IN('z2_U4','V')}</td></tr></table>${TOK('z2_tok')}`},
    {t:'Zadanie 3. Spadek napięcia na kablu 24 V', p:3,
     q:`Zawór elektromagnetyczny 24 V DC zasilany jest z szafy sterowniczej kablem miedzianym o długości <b>${z3.l} m</b> (odległość szafa–zawór) i przekroju żył <b>${fmt(z3.S,2)} mm²</b>. Zawór pobiera <b>${fmt(z3.I,2)} A</b>. Rezystywność miedzi ρ = 0,0175 Ω·mm²/m. Pamiętaj: prąd płynie do zaworu i z powrotem.
       <table><tr><td>a) rezystancja obu żył kabla</td><td>R<sub>k</sub> = ${IN('z3_R','Ω')}</td></tr>
