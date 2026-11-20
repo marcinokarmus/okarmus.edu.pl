@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Karta pracy 1 — Elektrotechnika I</title>
+<style>
+:root{--fg:#1d2330;--muted:#5d6675;--grid:#d9dce2;--accent:#1f6fd1;--accent2:#e2741d;--ok:#1f9a5a;--bad:#d23b3b;--bg:#f7f7f4;--panel:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:960px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:26px;margin:.2em 0} h2{font-size:19px;margin:1.2em 0 .3em}
+.box{background:var(--panel);border:1px solid var(--grid);border-radius:12px;padding:12px 16px;margin:10px 0}
+.task{background:var(--panel);border:1px solid var(--grid);border-radius:12px;padding:12px 16px;margin:12px 0}
+.task h3{margin:0 0 .3em;font-size:17px;display:flex;justify-content:space-between;gap:1em}
+.pts{color:var(--muted);font-weight:600;white-space:nowrap}
+.muted{color:var(--muted)} .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+label{display:inline-flex;gap:.5em;align-items:center;margin-right:1em}
+input[type=text]{font:inherit;padding:.35em .6em;border:1px solid var(--grid);border-radius:8px;min-width:12em}
+textarea{font:inherit;width:100%;min-height:8em;padding:.5em;border:1px solid var(--grid);border-radius:8px}
+button{font:inherit;padding:.4em .9em;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-weight:600}
+button.sec{background:#fff;color:var(--accent)}
+table{border-collapse:collapse;width:100%;margin:.4em 0}
+th,td{border:1px solid var(--grid);padding:.3em .5em;text-align:left;vertical-align:middle}
+th{background:#f0f2f6}
+.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;color:var(--accent2)}
+.hdr{display:flex;justify-content:space-between;gap:1em;flex-wrap:wrap;align-items:baseline}
+.f{font:inherit;font-size:15px;padding:.25em .4em;border:1px solid #b9bfca;border-radius:6px;background:#fff;color:var(--fg)}
+input.f{min-width:0} textarea.f{width:100%;min-height:0;resize:vertical;display:block}
+.f:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+.savebar{position:sticky;bottom:0;display:flex;justify-content:space-between;align-items:center;gap:1em;flex-wrap:wrap;background:#fff;border:1px solid var(--grid);border-radius:12px;padding:8px 12px;margin-top:12px;box-shadow:0 -2px 12px rgba(0,0,0,.08)}
+span.odp{display:inline-block;min-width:2em;padding:0 .35em;border-bottom:2px solid var(--accent);color:#0b3d91;font-weight:600}
+span.odp.long{display:block;white-space:pre-wrap;font-weight:500;border:1px solid var(--grid);border-radius:6px;padding:.2em .4em;margin:.2em 0}
+span.odp.empty{color:#999;font-weight:400}
+@media print{ body{background:#fff;font-size:12.5px} .noprint{display:none!important} .wrap{padding:0;max-width:none}
+  .task{border:1px solid #bbb;padding:8px 10px;margin:8px 0;break-inside:avoid} h1{font-size:20px} th{background:#fff} }
+</style></head>
+<body><div class="wrap">
+<div class="hdr"><h1>Karta pracy 1: prawa Kirchhoffa i obwody mieszane</h1><span class="muted">Elektrotechnika I · Energetyka, I rok · ćwiczenia 1</span></div>
+
+<div class="box noprint">
+  <h2 style="margin-top:0">Jak pracować z kartą</h2>
+  <ol>
+    <li>Wpisz <b>imię i nazwisko</b> oraz <b>numer albumu</b> i kliknij „Generuj moje zadania”. Każdy numer albumu daje <b>inne dane liczbowe</b>.</li>
+    <li>Wyniki wpisuj <b>w polach</b>, w jednostce podanej przy polu (np. mA). Odpowiedzi zapisują się same w tej przeglądarce — możesz zamknąć kartę i wrócić później (na tym samym komputerze).</li>
+    <li>Liczby wpisuj zwyczajnie, np. <span class="mono">19,8</span> albo <span class="mono">0,0198</span>; zaokrąglaj do 3 cyfr znaczących. W polach „Tok obliczeń” krótko zapisz obliczenia.</li>
+    <li>Na koniec kliknij <b>„💾 Zapisz plik z odpowiedziami”</b>. Pobierze się plik <span class="mono">ET_Karta1_&lt;nr albumu&gt;.html</span> — <b>ten plik oddaj</b> w MS Teams → Zadania, do <b>piątku 27.11.2026, godz. 23:59</b>.</li>
+    <li>Na cudzym komputerze: po oddaniu kliknij „Usuń moje odpowiedzi z tego komputera”.</li>
+  </ol>
+  <p><label>Imię i nazwisko <input type="text" id="nm"></label><label>Nr albumu <input type="text" id="al"></label>
+  <button id="go">Generuj moje zadania</button></p>
+</div>
+
+<div id="sheet" style="display:none">
+  <div class="box"><div class="hdr"><span>Student: <b id="o-nm"></b></span><span>Nr albumu: <b id="o-al"></b></span><span>Kod wariantu: <span class="code" id="o-code"></span></span></div>
+  <p class="muted" style="margin:.3em 0 0">Pomoc: U = R·I · P = U·I · E = P·t · R<sub>1‖2</sub> = R1·R2/(R1+R2) · R<sub>kabla</sub> = ρ·2l/S · węzeł: ΣI<sub>wpływ</sub> = ΣI<sub>wypływ</sub> · oczko: E = ΣU · R<sub>LED</sub> = (U − U<sub>LED</sub>)/I · dzielnik: U<sub>wy</sub> = U·R2/(R1+R2) · 1 mA = 0,001 A · 1 kΩ = 1000 Ω</p></div>
+  <div id="tasks"></div>
+  <p class="muted">Razem: <b id="sum"></b> pkt.</p>
+</div>
+<div id="bar" class="savebar noprint" style="display:none">
+  <span id="prog" class="muted"></span>
+  <span><button id="save">💾 Zapisz plik z odpowiedziami</button> <button class="sec" id="pr">🖨 Drukuj</button> <button class="sec" id="clr">Usuń moje odpowiedzi z tego komputera</button></span>
+</div>
+</div>
+<script>
+
+function seedFrom(s){ let h=2166136261>>>0; for(const c of s){h^=c.charCodeAt(0); h=Math.imul(h,16777619)>>>0;} return h; }
+function rngOf(a){ return ()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}; }
+function normAlbum(s){ return String(s||'').replace(/\s+/g,'').toUpperCase(); }
+function variantCode(album){ return (seedFrom('KOD-ET1-'+normAlbum(album))%9000+1000).toString(); }
+function shuffled(a,R){ const b=a.slice(); for(let i=b.length-1;i>0;i--){ const j=Math.floor(R()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; } return b; }
+function fmt(x,d=2){ if(!isFinite(x)) return '—'; const s=(Math.round(x*10**d)/10**d).toFixed(d); let [a,b]=s.split('.'); const neg=a.startsWith('-'); if(neg) a=a.slice(1);
+  a=a.replace(/\B(?=(\d{3})+(?!\d))/g,' '); return (neg?'−':'')+(b&&+b?a+','+b.replace(/0+$/,''):a); }
+function f3(x){ if(!isFinite(x)) return '—'; if(x===0) return '0'; const d=Math.max(0,2-Math.floor(Math.log10(Math.abs(x)))); return fmt(x,Math.min(d,4)); }   // ok. 3 cyfry znaczące
+const COL=['czarny','brązowy','czerwony','pomarańczowy','żółty','zielony','niebieski','fioletowy','szary','biały'];
+const TOLC=[['brązowy',1],['czerwony',2],['złoty',5],['srebrny',10]];
+const RHO=0.0175, U24=24, UMIN=20.4, UN=230, IB=16;
+const PWR=['0,25 W','0,5 W','1 W','2 W'], PWRV=[0.25,0.5,1,2];
+const E12=[1,1.2,1.5,1.8,2.2,2.7,3.3,3.9,4.7,5.6,6.8,8.2];
+function e12up(r){ for(let d=1;d<=1e6;d*=10) for(const v of E12){ if(v*d>=r*(1-1e-9)) return v*d; } return r; }
+const DEV=[['czajnik',2000],['ekspres do kawy',1300],['grzejnik olejowy',1500],['odkurzacz przemysłowy',1400],['wiertarka stołowa',750],['opalarka',1800],
+  ['lodówka',150],['kuchenka mikrofalowa',1100],['szlifierka kątowa',1200],['sprężarka warsztatowa',1500],['ładowarka akumulatorów',600],['lampa warsztatowa',100]];
+function variant(al){
+  const R=rngOf(seedFrom('ET1-'+normAlbum(al))), pick=a=>a[Math.floor(R()*a.length)], V={};
+  V.z1={n:pick(['suszarka komorowa','zgrzewarka do folii','nagrzewnica powietrza','piec laboratoryjny','grzejnik hali magazynowej','podgrzewacz wody technologicznej']),
+        P:pick([1.2,1.5,1.8,2.0,2.3,2.5,3.0,3.5]), h:pick([8,16]), d:pick([220,250,260]), c:pick([0.75,0.8,0.85,0.9,0.95,1.0,1.1])};
+  V.z2={R1:pick([47,68,100,150,220]), R2:pick([220,330,470,680,1000]), R3:pick([100,150,220,330,470]), R4:pick([47,68,100,150,220]), U:pick([9,12,24])};
+  V.z3={l:pick([25,30,40,50,60,75]), S:pick([0.5,0.75,1,1.5]), I:pick([0.5,0.75,1,1.5,2])};
+  V.z4={d:shuffled(DEV,R).slice(0,4)};
+  { const v=()=>pick([0.5,1,1.5,2,2.5,3,3.5,4,5,6]); V.z5={a:v(), b:v(), c:v(), d:v()}; if(V.z5.a+V.z5.b===V.z5.c+V.z5.d) V.z5.d+=0.5; }   // I1,I2 wpływają; I3,I4 wypływają; I5 = ?
+  { const E=pick([12,24,48]); V.z6={E, U1:E*pick([0.1,0.15,0.2,0.25]), U2:E*pick([0.3,0.35,0.4,0.45]), I:pick([0.1,0.2,0.25,0.5,0.8,1.2])}; }
+  V.z7={led:pick([['czerwona',2.0],['zielona',2.2],['niebieska',3.0],['biała',3.2]]), I:pick([5,10,15,20])};
+  V.z8={U:pick([12,24]), Uw:pick([3.3,5,10]), R2:pick([1000,2200,4700,10000])};
+  return V;
+}
+/* wyniki — jedno źródło prawdy dla klucza i automatycznego sprawdzania */
+function results(V){
+  const r={}, z1=V.z1, z2=V.z2, z3=V.z3, z5=V.z5, z6=V.z6, z7=V.z7, z8=V.z8;
+  r.z1_I=z1.P*1000/UN; r.z1_R=UN/r.z1_I; r.z1_E=z1.P*z1.h*z1.d; r.z1_K=r.z1_E*z1.c;
+  r.z2_R34=z2.R3+z2.R4; r.z2_R234=z2.R2*r.z2_R34/(z2.R2+r.z2_R34); r.z2_Rz=z2.R1+r.z2_R234; const I=z2.U/r.z2_Rz; r.z2_I=I*1000;
+  r.z2_U1=z2.R1*I; r.z2_U234=r.z2_R234*I; r.z2_I2=r.z2_U234/z2.R2*1000; const I34=r.z2_U234/r.z2_R34; r.z2_I34=I34*1000; r.z2_U3=z2.R3*I34; r.z2_U4=z2.R4*I34;
+  r.z3_R=RHO*2*z3.l/z3.S; r.z3_dU=r.z3_R*z3.I; r.z3_U=U24-r.z3_dU; r.z3_ok=r.z3_U>=UMIN?'tak':'nie';
+  r.z4_I=V.z4.d.reduce((s,d)=>s+d[1],0)/UN; r.z4_w=r.z4_I>IB?'zadziała (przeciążenie)':'nie zadziała'; r.z4_dP=IB*UN-V.z4.d.reduce((s,d)=>s+d[1],0);
+  r.z5_x=z5.a+z5.b-z5.c-z5.d; r.z5_I=Math.abs(r.z5_x); r.z5_k=r.z5_x>=0?'wypływa z węzła':'wpływa do węzła';
+  r.z6_U3=z6.E-z6.U1-z6.U2; r.z6_R3=r.z6_U3/z6.I; r.z6_P=z6.E*z6.I;
+  r.z7_R=(U24-z7.led[1])/(z7.I/1000); r.z7_P=(U24-z7.led[1])*z7.I/1000; r.z7_w=PWR[PWRV.findIndex(p=>p>=2*r.z7_P)]||'2 W';
+  r.z8_R1=z8.R2*(z8.U-z8.Uw)/z8.Uw; r.z8_E=e12up(r.z8_R1); r.z8_U=z8.U*z8.R2/(r.z8_E+z8.R2);
+  return r;
+}
+
+const sch4=(a,b,c,d,u)=>`<svg class="dia" viewBox="0 0 470 260" style="max-width:470px"><g style="stroke:var(--fg,#1d2330);fill:none" stroke-width="3"><polyline points="40,230 40,140"/><polyline points="40,120 40,40 100,40"/><line x1="20" y1="120" x2="60" y2="120"/><line x1="28" y1="140" x2="52" y2="140"/><rect x="100" y="27" width="80" height="26" rx="4"/><polyline points="180,40 250,40 250,80"/><polyline points="250,40 380,40 380,62"/><rect x="237" y="80" width="26" height="76" rx="4"/><rect x="367" y="62" width="26" height="60" rx="4"/><polyline points="380,122 380,140"/><rect x="367" y="140" width="26" height="60" rx="4"/><polyline points="250,156 250,230 40,230"/><polyline points="380,200 380,230 250,230"/></g><circle cx="250" cy="40" r="5" style="fill:var(--fg,#1d2330)"/><circle cx="250" cy="230" r="5" style="fill:var(--fg,#1d2330)"/><text x="140" y="18" text-anchor="middle" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">R1 = ${a}</text><text x="230" y="124" text-anchor="end" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">R2 = ${b}</text><text x="402" y="97" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">R3 =</text><text x="402" y="116" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">${c}</text><text x="402" y="175" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">R4 =</text><text x="402" y="194" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">${d}</text><text x="58" y="192" style="fill:var(--accent2,#e2741d)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">U = ${u}</text></svg>`;
+
+function esc(s){ return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+const IN=(k,u,w)=>`<input type="text" class="f" data-k="${k}" style="width:${w||'7em'}" autocomplete="off"> ${u||''}`;
+const SEL=(k,o)=>`<select class="f" data-k="${k}"><option value="">—</option>${o.map(v=>`<option value="${v}">${v}</option>`).join('')}</select>`;
+const TA=(k,r)=>`<textarea class="f" data-k="${k}" rows="${r||2}"></textarea>`;
+const TOK=k=>`<div class="muted" style="margin-top:.4em">Tok obliczeń (pomaga dostać część punktów, gdy wynik się nie zgadza):</div>${TA(k,3)}`;
+function questions(V){
+  const z1=V.z1, z2=V.z2, z3=V.z3, z5=V.z5, z6=V.z6, z7=V.z7, z8=V.z8;
+  return [
+   {t:'Zadanie 1. Energia i koszt pracy odbiornika', p:3,
+    q:`Odbiornik <b>${z1.n}</b> (jednofazowy, 230 V) ma moc <b>${fmt(z1.P,1)} kW</b>. Pracuje <b>${z1.h} h</b> dziennie przez <b>${z1.d} dni</b> w roku. Energia kosztuje <b>${fmt(z1.c,2)} zł/kWh</b>.
+      <table><tr><td>a) prąd pobierany z sieci</td><td>I = ${IN('z1_I','A')}</td></tr>
+      <tr><td>b) rezystancja odbiornika (grzałki)</td><td>R = ${IN('z1_R','Ω')}</td></tr>
+      <tr><td>c) energia zużyta w ciągu roku</td><td>E = ${IN('z1_E','kWh')}</td></tr>
+      <tr><td>d) roczny koszt energii</td><td>K = ${IN('z1_K','zł')}</td></tr></table>`},
+   {t:'Zadanie 2. Układ mieszany: R1 + (R2 ‖ (R3 + R4))', p:4,
+    q:`Układ jak na schemacie zasilono napięciem <b>U = ${z2.U} V</b>. R3 i R4 są połączone szeregowo, ta gałąź jest równoległa do R2, a całość jest w szeregu z R1 (jak „Twoja kolej”, zad. 3).
+      <div style="margin:.4em 0">${sch4(z2.R1+' Ω',z2.R2+' Ω',z2.R3+' Ω',z2.R4+' Ω',z2.U+' V')}</div>
+      <table><tr><td>rezystancja R3 + R4</td><td>R<sub>34</sub> = ${IN('z2_R34','Ω')}</td><td>rezystancja R2 ‖ R<sub>34</sub></td><td>R<sub>234</sub> = ${IN('z2_R234','Ω')}</td></tr>
+      <tr><td>rezystancja zastępcza</td><td>R<sub>z</sub> = ${IN('z2_Rz','Ω')}</td><td>prąd źródła</td><td>I = ${IN('z2_I','mA')}</td></tr>
+      <tr><td>napięcie na R1</td><td>U<sub>1</sub> = ${IN('z2_U1','V')}</td><td>napięcie na gałęziach równoległych</td><td>U<sub>234</sub> = ${IN('z2_U234','V')}</td></tr>
+      <tr><td>prąd przez R2</td><td>I<sub>2</sub> = ${IN('z2_I2','mA')}</td><td>prąd przez R3 i R4</td><td>I<sub>34</sub> = ${IN('z2_I34','mA')}</td></tr>
+      <tr><td>napięcie na R3</td><td>U<sub>3</sub> = ${IN('z2_U3','V')}</td><td>napięcie na R4</td><td>U<sub>4</sub> = ${IN('z2_U4','V')}</td></tr></table>${TOK('z2_tok')}`},
+   {t:'Zadanie 3. Spadek napięcia na kablu 24 V', p:3,
+    q:`Zawór elektromagnetyczny 24 V DC zasilany jest z szafy sterowniczej kablem miedzianym o długości <b>${z3.l} m</b> (odległość szafa–zawór) i przekroju żył <b>${fmt(z3.S,2)} mm²</b>. Zawór pobiera <b>${fmt(z3.I,2)} A</b>. Rezystywność miedzi ρ = 0,0175 Ω·mm²/m. Pamiętaj: prąd płynie do zaworu i z powrotem.
+      <table><tr><td>a) rezystancja obu żył kabla</td><td>R<sub>k</sub> = ${IN('z3_R','Ω')}</td></tr>
+      <tr><td>b) spadek napięcia na kablu</td><td>ΔU = ${IN('z3_dU','V')}</td></tr>
+      <tr><td>c) napięcie na zaciskach zaworu</td><td>U = ${IN('z3_U','V')}</td></tr>
+      <tr><td>d) zawór działa poprawnie od 20,4 V (24 V − 15%). Czy zadziała?</td><td>${SEL('z3_ok',['tak','nie'])}</td></tr></table>${TOK('z3_tok')}`},
+   {t:'Zadanie 4. Obwód gniazd z wyłącznikiem 16 A', p:3,
+    q:`Do gniazd jednego obwodu 230 V (wyłącznik nadprądowy 16 A) w warsztacie podłączono jednocześnie:
+      <ul>${V.z4.d.map(d=>`<li>${d[0]} — <b>${d[1]} W</b></li>`).join('')}</ul>
+      <table><tr><td>a) łączny prąd w przewodzie obwodu</td><td>I = ${IN('z4_I','A')}</td></tr>
+      <tr><td>b) czy wyłącznik 16 A zadziała?</td><td>${SEL('z4_w',['nie zadziała','zadziała (przeciążenie)'])}</td></tr>
+      <tr><td>c) zapas mocy do granicy 16 A (wpisz z minusem, jeśli obwód jest przeciążony)</td><td>ΔP = ${IN('z4_dP','W')}</td></tr></table>`},
+   {t:'Zadanie 5. I prawo Kirchhoffa — węzeł', p:2,
+    q:`W węźle rozdzielnicy łączy się pięć przewodów. Do węzła <b>wpływają</b> prądy I<sub>1</sub> = <b>${fmt(z5.a,1)} A</b> i I<sub>2</sub> = <b>${fmt(z5.b,1)} A</b>, a <b>wypływają</b> I<sub>3</sub> = <b>${fmt(z5.c,1)} A</b> i I<sub>4</sub> = <b>${fmt(z5.d,1)} A</b>. Prąd I<sub>5</sub> w piątym przewodzie jest nieznany.
+      <table><tr><td>a) wartość prądu I<sub>5</sub></td><td>I<sub>5</sub> = ${IN('z5_I','A')}</td></tr>
+      <tr><td>b) kierunek prądu I<sub>5</sub></td><td>${SEL('z5_k',['wpływa do węzła','wypływa z węzła'])}</td></tr></table>
+      <span class="muted">Wskazówka: załóż, że I<sub>5</sub> wypływa; jeśli wyjdzie ujemny — płynie w drugą stronę. Wartość wpisz bez znaku.</span>`},
+   {t:'Zadanie 6. II prawo Kirchhoffa — oczko', p:2,
+    q:`Zasilacz <b>E = ${z6.E} V</b> zasila połączone szeregowo trzy elementy. Zmierzono napięcia: na pierwszym <b>U<sub>1</sub> = ${fmt(z6.U1,2)} V</b>, na drugim <b>U<sub>2</sub> = ${fmt(z6.U2,2)} V</b>; w obwodzie płynie prąd <b>I = ${fmt(z6.I,2)} A</b>. Pomiń rezystancję przewodów i zasilacza.
+      <table><tr><td>a) napięcie na trzecim elemencie</td><td>U<sub>3</sub> = ${IN('z6_U3','V')}</td></tr>
+      <tr><td>b) rezystancja trzeciego elementu</td><td>R<sub>3</sub> = ${IN('z6_R3','Ω')}</td></tr>
+      <tr><td>c) moc oddawana przez zasilacz</td><td>P = ${IN('z6_P','W')}</td></tr></table>`},
+   {t:'Zadanie 7. Rezystor do kontrolki LED na 24 V', p:2,
+    q:`Kontrolka z diodą LED <b>${z7.led[0]}</b> (napięcie przewodzenia <b>${fmt(z7.led[1],1)} V</b>) ma świecić przy prądzie <b>${z7.I} mA</b> z napięcia 24 V.
+      <table><tr><td>a) rezystancja rezystora szeregowego</td><td>R = ${IN('z7_R','Ω')}</td></tr>
+      <tr><td>b) moc wydzielana w rezystorze</td><td>P = ${IN('z7_P','W')}</td></tr>
+      <tr><td>c) wybierz moc znamionową rezystora z zapasem co najmniej 2× (P<sub>znam</sub> ≥ 2·P)</td><td>${SEL('z7_w',PWR)}</td></tr></table>`},
+   {t:'Zadanie 8. Dzielnik napięcia do wejścia pomiarowego', p:3,
+    q:`Wejście pomiarowe przyjmuje najwyżej <b>${fmt(z8.Uw,1)} V</b>. Napięcie z instalacji <b>${z8.U} V</b> trzeba obniżyć dzielnikiem napięcia R1–R2 (wyjście = napięcie na R2). Dobrano <b>R2 = ${fmt(z8.R2,0)} Ω</b>.
+      <table><tr><td>a) obliczona rezystancja R1, przy której U<sub>wy</sub> = ${fmt(z8.Uw,1)} V</td><td>R1 = ${IN('z8_R1','Ω','8em')}</td></tr>
+      <tr><td>b) rezystor R1 z szeregu E12 — najbliższa wartość <b>nie mniejsza</b> niż obliczona<br><span class="muted">E12: 1,0 1,2 1,5 1,8 2,2 2,7 3,3 3,9 4,7 5,6 6,8 8,2 × 10<sup>n</sup></span></td><td>R1 = ${IN('z8_E','Ω','8em')}</td></tr>
+      <tr><td>c) napięcie wyjściowe z rezystorem z punktu b)</td><td>U<sub>wy</sub> = ${IN('z8_U','V')}</td></tr></table>`}
+  ];
+}
+
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+let AL='';
+const KEY=()=>'et1-odp-'+AL;
+function collect(){ const A={}; $$('#tasks [data-k]').forEach(el=>{ A[el.dataset.k]=el.value; }); return A; }
+function progress(){ const f=$$('#tasks [data-k]'), n=f.filter(el=>el.value.trim()).length;
+  $('#prog').textContent=`Wypełniono ${n} z ${f.length} pól · zapis automatyczny w przeglądarce`; }
+function store(){ try{ localStorage.setItem(KEY(),JSON.stringify(collect())); }catch(e){} progress(); }
+function gen(){
+  const al=normAlbum($('#al').value); if(!al){ $('#al').focus(); return; }
+  AL=al; const V=variant(al), Q=questions(V);
+  $('#o-nm').textContent=$('#nm').value.trim()||'—'; $('#o-al').textContent=al; $('#o-code').textContent=variantCode(al);
+  $('#tasks').innerHTML=Q.map(t=>`<div class="task"><h3><span>${t.t}</span><span class="pts">${t.p} pkt</span></h3><div>${t.q}</div></div>`).join('');
+  $('#sum').textContent=Q.reduce((a,t)=>a+t.p,0);
+  let A={}; try{ A=JSON.parse(localStorage.getItem(KEY())||'{}')||{}; }catch(e){}
+  $$('#tasks [data-k]').forEach(el=>{ if(A[el.dataset.k]!=null) el.value=A[el.dataset.k]; el.addEventListener('input',store); el.addEventListener('change',store); });
+  $('#sheet').style.display='block'; $('#bar').style.display='flex'; progress();
+  try{ localStorage.setItem('et1-karta',JSON.stringify({nm:$('#nm').value,al})); }catch(e){}
+}
+function saveFile(){
+  if(!AL) return;
+  const nm=$('#nm').value.trim(); if(!nm){ $('#nm').focus(); $('#prog').textContent='Wpisz imię i nazwisko przed zapisaniem pliku.'; return; }
+  $('#o-nm').textContent=nm;
+  const A=collect(), now=new Date();
+  const clone=$('#sheet').cloneNode(true);
+  clone.querySelectorAll('[data-k]').forEach(el=>{ const v=A[el.dataset.k]||'', s=document.createElement('span');
+    s.className='odp'+(el.tagName==='TEXTAREA'?' long':''); if(v.trim()) s.textContent=v; else { s.textContent='—'; s.classList.add('empty'); } el.replaceWith(s); });
+  const data={kurs:'eti-ene1-karta1',wersja:1,nm,al:AL,kod:variantCode(AL),zapisano:now.toISOString(),A};
+  const css=document.querySelector('style').textContent;
+  const html=`<!doctype html>\n<html lang="pl"><head><meta charset="utf-8"><title>Odpowiedzi — ${esc(nm)} — ${esc(AL)}</title><style>${css}</style></head>
+<body><div class="wrap"><div class="hdr"><h1>Odpowiedzi: karta pracy 1 (Elektrotechnika I)</h1><span class="muted">zapisano ${now.toLocaleString('pl-PL')}</span></div>
+<p class="muted">Plik z odpowiedziami studenta. Prowadzący wczytuje go w kluczu („Sprawdzanie oddanych prac”).</p>
+${clone.innerHTML}</div>
+<script type="application/json" id="odp">${JSON.stringify(data).replace(/</g,'\\u003c')}<\/script>
+</body></html>`;
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download=`ET_Karta1_${AL.replace(/[^A-Z0-9_-]/gi,'_')}.html`; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000);
+  $('#prog').textContent=`Zapisano plik ${a.download} (folder „Pobrane”). Oddaj go w Teams → Zadania.`;
+}
+function clearMe(){
+  try{ localStorage.removeItem(KEY()); localStorage.removeItem('et1-karta'); }catch(e){}
+  $$('#tasks [data-k]').forEach(el=>el.value=''); $('#nm').value=''; $('#al').value='';
+  $('#sheet').style.display='none'; $('#bar').style.display='none'; AL='';
+}
+$('#go').onclick=gen; $('#al').addEventListener('keydown',e=>{ if(e.key==='Enter') gen(); });
+$('#save').onclick=saveFile; $('#pr').onclick=()=>window.print(); $('#clr').onclick=clearMe;
+$('#nm').addEventListener('input',()=>{ if(AL){ $('#o-nm').textContent=$('#nm').value.trim()||'—'; try{ localStorage.setItem('et1-karta',JSON.stringify({nm:$('#nm').value,al:AL})); }catch(e){} } });
+try{ const s=JSON.parse(localStorage.getItem('et1-karta')||'null'); if(s){ $('#nm').value=s.nm||''; $('#al').value=s.al||''; if(s.al) gen(); } }catch(e){}
+</script>
+</body></html>

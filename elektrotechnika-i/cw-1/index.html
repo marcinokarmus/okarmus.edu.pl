@@ -1,0 +1,1006 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elektrotechnika I — ćwiczenia 1</title>
+<style>
+:root{
+  --bg:#f7f7f4; --panel:#ffffff; --fg:#1d2330; --muted:#5d6675; --grid:#d9dce2;
+  --accent:#1f6fd1; --accent2:#e2741d; --accent3:#1f9a5a; --danger:#d23b3b; --violet:#7a4cc9; --gold:#c49a00;
+  --chip:#eef2f8;
+}
+:root[data-theme="dark"]{
+  --bg:#12151b; --panel:#1b2029; --fg:#e9edf3; --muted:#9aa4b4; --grid:#323a47;
+  --accent:#5aa2ff; --accent2:#ff9a4a; --accent3:#43c785; --danger:#ff6464; --violet:#ae8cff; --gold:#e8c040;
+  --chip:#232a36;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;overflow:hidden}
+.slide{position:absolute;inset:0;padding:3.2vh 5vw 9vh;display:none;flex-direction:column;gap:1.4vh;overflow:auto}
+.slide.active{display:flex}
+.kicker{font-size:clamp(13px,1.05vw,18px);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{font-size:clamp(32px,4.4vw,76px);margin:0;line-height:1.05}
+h2{font-size:clamp(24px,2.8vw,46px);margin:0;line-height:1.1}
+p,li,td,th,label,.txt{font-size:clamp(16px,1.45vw,25px);line-height:1.4}
+p{margin:.2em 0}
+ul,ol{margin:.2em 0;padding-left:1.3em} li{margin:.2em 0}
+.muted{color:var(--muted)}
+.big{font-size:clamp(21px,2vw,34px)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:2vw;align-items:start}
+.cols.c3{grid-template-columns:1fr 1fr 1fr}
+.cols.c64{grid-template-columns:1.5fr 1fr}
+.cols.c46{grid-template-columns:1fr 1.5fr}
+.card{background:var(--panel);border:1px solid var(--grid);border-radius:14px;padding:1.2vh 1.2vw}
+.card h3{margin:.1em 0 .3em;font-size:clamp(17px,1.5vw,27px)}
+.card p,.card li,.card td,.card th{font-size:clamp(14px,1.25vw,21px)}
+.def{border-left:6px solid var(--accent);background:var(--panel);border-radius:10px;padding:.9vh 1.3vw}
+.def p{font-size:clamp(17px,1.6vw,28px)}
+.formula{font-family:"Cambria Math","Times New Roman",serif;font-size:clamp(20px,2.1vw,36px);background:var(--panel);border:2px solid var(--grid);border-radius:12px;padding:.25em .7em;display:inline-block}
+canvas.viz{width:100%;height:44vh;display:block;background:var(--panel);border:1px solid var(--grid);border-radius:14px}
+canvas.short{height:30vh}
+canvas.tall{height:54vh}
+canvas.mini{height:19vh;margin:.4vh 0}
+.ctrl{display:flex;gap:.9vw;align-items:center;flex-wrap:wrap}
+.ctrl label{display:flex;align-items:center;gap:.5em;font-size:clamp(14px,1.2vw,20px)}
+input[type=range]{width:clamp(140px,14vw,280px);accent-color:var(--accent);height:28px}
+input[type=checkbox]{width:1.2em;height:1.2em;accent-color:var(--accent3)}
+button,select,input[type=text],input[type=number]{font:inherit;font-size:clamp(14px,1.2vw,20px);padding:.3em .7em;border-radius:10px;border:1px solid var(--grid);background:var(--panel);color:var(--fg)}
+input[type=number]{width:6.5em}
+button,select{cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+button.sel{background:var(--accent);color:#fff;border-color:var(--accent)}
+.val{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent)}
+.res{font-variant-numeric:tabular-nums;font-weight:800;color:var(--accent3);font-size:clamp(20px,2vw,34px)}
+.bad{color:var(--danger);font-weight:800}
+.info{font-size:clamp(14px,1.2vw,20px);color:var(--muted)}
+.info b{color:var(--fg)}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+table{border-collapse:collapse;width:100%}
+th,td{border-bottom:1px solid var(--grid);padding:.3em .55em;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+.ex{background:var(--panel);border:1px solid var(--grid);border-left:6px solid var(--accent2);border-radius:12px;padding:.9vh 1.2vw}
+.ex h3{margin:0 0 .3em;font-size:clamp(16px,1.45vw,25px);color:var(--accent2)}
+.ex ol li{display:none}
+.ex ol li.on{display:list-item}
+.ex .step{margin-top:.4em}
+.you{background:var(--panel);border:1px dashed var(--accent3);border-radius:12px;padding:.8vh 1.2vw}
+.you h3{margin:0 0 .3em;font-size:clamp(16px,1.45vw,25px);color:var(--accent3)}
+details summary{cursor:pointer;font-weight:600;font-size:clamp(15px,1.3vw,22px)}
+details p{color:var(--accent3);font-weight:700}
+.plan{display:grid;grid-template-columns:repeat(4,1fr);gap:.8vw}
+.plan .card{border-top:6px solid var(--accent)}
+.plan .card:nth-child(2){border-top-color:var(--accent2)}
+.plan .card:nth-child(3){border-top-color:var(--accent3)}
+.plan .card:nth-child(4){border-top-color:var(--violet)}
+.plan .time{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;font-size:clamp(13px,1.1vw,18px)}
+.pyr{display:flex;flex-direction:column;align-items:center;gap:6px}
+.pyr button{display:block;text-align:center;font-weight:700;border-width:2px;padding:.55em .5em;font-size:clamp(14px,1.25vw,21px)}
+.pyr button.sel{box-shadow:0 0 0 4px var(--accent2)}
+.chain{display:flex;align-items:stretch;gap:.4vw;flex-wrap:wrap}
+.chain button{flex:1;min-width:110px;text-align:center;font-weight:700;padding:.6em .4em;font-size:clamp(13px,1.1vw,19px);line-height:1.25}
+.chain .arr{align-self:center;color:var(--muted);font-size:clamp(18px,1.8vw,30px)}
+.chain button small{display:block;font-weight:500;color:var(--muted);font-size:.8em}
+.chain button.sel small{color:#fff}
+.title-wrap{margin:auto 0;display:flex;flex-direction:column;gap:2vh}
+.hint{position:fixed;right:1.2vw;top:1vh;font-size:13px;color:var(--muted);opacity:.7}
+#bar{position:fixed;left:0;right:0;bottom:0;height:6vh;min-height:44px;display:flex;align-items:center;gap:.8vw;padding:0 1.2vw;background:var(--panel);border-top:1px solid var(--grid);z-index:10}
+#bar button{padding:.2em .7em}
+#prog{flex:1;height:6px;background:var(--grid);border-radius:4px;overflow:hidden}
+#prog div{height:100%;background:var(--accent);width:0}
+#cnt{font-variant-numeric:tabular-nums;color:var(--muted);font-size:15px;min-width:5ch;text-align:right}
+#blk{color:var(--muted);font-size:15px;white-space:nowrap}
+.notes{display:none}
+#notes{position:fixed;left:0;right:0;bottom:6vh;max-height:42vh;overflow:auto;background:var(--panel);border-top:3px solid var(--accent2);padding:1.2vh 2vw;display:none;z-index:9;box-shadow:0 -8px 24px rgba(0,0,0,.15)}
+#notes.show{display:block}
+#notes, #notes *{font-size:clamp(14px,1.12vw,19px)}
+@media (max-width:800px){.cols,.cols.c3,.cols.c64,.cols.c46,.plan{grid-template-columns:1fr}}
+
+.card p,.card li,.card td,.card th{font-size:clamp(14px,1.3vw,22px)}
+table.cmp td,table.cmp th{font-size:clamp(13px,1.2vw,20px)}
+table.cmp td:first-child{font-weight:600}
+table.mini td{font-size:clamp(12px,1vw,17px);padding:.12em .4em}
+svg.dia{width:100%;height:auto;display:block;max-height:50vh}
+svg.dia text{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+.formula{font-size:clamp(17px,1.65vw,28px)!important}
+.dev{display:flex;align-items:center;gap:.6vw;margin:.5vh 0;font-size:clamp(14px,1.25vw,21px)}
+.dev input{width:1.3em;height:1.3em}
+#rc-ctl select{min-width:7.5em}
+
+.cols.c4{grid-template-columns:repeat(4,1fr)}
+svg.stages .st{display:none} svg.stages .st.on{display:inline}
+@media (max-width:800px){.cols.c4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="hint">← → przewijanie · N notatki · S notatki w osobnym oknie · F pełny ekran · T motyw</div>
+<!-- 1 -->
+<section class="slide" id="s-title" data-blok="Część A · obwód elektryczny">
+  <div class="title-wrap">
+    <div class="kicker">Elektrotechnika I · Energetyka, I rok · ćwiczenia 1</div>
+    <h1>Obwód elektryczny prądu stałego</h1>
+    <p class="big muted">wielkości i jednostki · prawo Ohma · moc i energia · połączenia · dzielnik napięcia · prawa Kirchhoffa · źródło rzeczywiste · obwody mieszane</p>
+    <p class="muted">Energetyka · I rok · studia stacjonarne · ćwiczenia rachunkowe</p>
+  </div>
+  <aside class="notes">
+    <p><b>O czym są te zajęcia.</b> Ćwiczenia rachunkowe z elektrotechniki zaczynamy od fundamentu: <b>sześć wielkości</b> (ładunek, prąd, napięcie, rezystancja, moc, energia) i <b>trzy prawa</b> — Ohma i dwa prawa Kirchhoffa. Z nich wynika prawie cała reszta: obliczenia obwodów, spadki napięć na liniach, straty mocy, dobór zabezpieczeń.</p>
+<p><b>Sterowanie prezentacją:</b> ← → slajdy, N — notatki pod slajdem, S — notatki w osobnym oknie, F — pełny ekran, T — motyw jasny/ciemny. Notatki są materiałem do nauki — rozwijają to, co widać na slajdzie.</p>
+  </aside>
+</section>
+<!-- 2 -->
+<section class="slide" id="s-plan" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Plan · 3 godziny</div>
+  <h2>Dziś: obwód elektryczny od podstaw do układów mieszanych</h2>
+  <div class="cols">
+    <div class="card" style="border-top:6px solid var(--accent)"><h3>A. Obwód elektryczny</h3><ul>
+      <li>przedrostki, sześć wielkości</li><li>prawo Ohma, moc i energia, koszt energii</li>
+      <li>połączenie szeregowe i równoległe, dzielnik napięcia</li><li>prawa Kirchhoffa: obwód gniazd 16 A, spadek napięcia na kablu</li><li>źródło rzeczywiste i zwarcie</li></ul></div>
+    <div class="card" style="border-top:6px solid var(--accent2)"><h3>B. Obwody mieszane — obliczenia</h3><ul>
+      <li>jak mierzyć napięcie i prąd</li><li>rezystancja zastępcza krok po kroku</li><li>prądy gałęzi, bilans mocy</li><li>wirtualna płytka</li><li>karta pracy 1 — formularz na ocenę</li></ul></div>
+  </div>
+  <div class="def" style="border-left-color:var(--violet)"><p><b>Zajęcia zdalne:</b> pytania i odpowiedzi — <b>na czacie</b>. W przykładach przed każdym krokiem podajcie wynik na czacie. Przerwa ok. 20:00.</p></div>
+  <aside class="notes">
+    <p><b>Część A</b> to obwód elektryczny prądu stałego: wielkości i jednostki, prawo Ohma, moc i energia, łączenie odbiorników, dzielnik napięcia, prawa Kirchhoffa, źródło rzeczywiste.</p>
+<p><b>Część B</b> to obliczenia obwodów mieszanych (szeregowo-równoległych): rezystancja zastępcza, prąd źródła, napięcia i prądy gałęzi, bilans mocy. Na koniec karta pracy — formularz z indywidualnymi danymi.</p>
+  </aside>
+</section>
+<!-- 3 -->
+<section class="slide" id="s-units" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Rozgrzewka · przedrostki</div>
+  <h2>Zamień jednostki — odpowiedzi na czat</h2>
+  <div class="cols">
+    <div class="card"><table class="cmp">
+      <tr><th>przedrostek</th><th>symbol</th><th>mnożnik</th></tr>
+      <tr><td>mega</td><td>M</td><td>10⁶ = 1 000 000</td></tr><tr><td>kilo</td><td>k</td><td>10³ = 1 000</td></tr>
+      <tr><td>—</td><td></td><td>1</td></tr><tr><td>mili</td><td>m</td><td>10⁻³ = 0,001</td></tr>
+      <tr><td>mikro</td><td>µ</td><td>10⁻⁶ = 0,000 001</td></tr><tr><td>nano</td><td>n</td><td>10⁻⁹</td></tr></table></div>
+    <div>
+      <div class="you"><h3>1. 20 mA = ? A</h3><details><summary>odpowiedź</summary><p>0,02 A</p></details></div>
+      <div class="you"><h3>2. 4,7 kΩ = ? Ω</h3><details><summary>odpowiedź</summary><p>4 700 Ω</p></details></div>
+      <div class="you"><h3>3. 0,4 kW = ? W</h3><details><summary>odpowiedź</summary><p>400 W</p></details></div>
+      <div class="you"><h3>4. 100 µF = ? F</h3><details><summary>odpowiedź</summary><p>0,0001 F</p></details></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> W elektrotechnice wartości różnią się o wiele rzędów: prąd czujnika to miliampery, prąd silnika — dziesiątki amperów, rezystancja izolacji — megaomy. Przedrostki trzeba zamieniać bez zastanowienia.</p>
+<ul><li>z „większej” jednostki na „mniejszą” (kA → A, A → mA) — <b>mnożymy</b> przez 1000,</li><li>z „mniejszej” na „większą” (mA → A) — <b>dzielimy</b> przez 1000.</li></ul>
+<p><b>Częsty błąd.</b> Wstawienie do wzoru miliamperów i kiloomów bez zamiany: U = R·I = 4,7 kΩ · 20 mA. Bezpiecznie: zamień wszystko na jednostki podstawowe (Ω, A, V, W): 4700 Ω · 0,02 A = 94 V. (Para kΩ · mA też daje wolty, bo 10³ · 10⁻³ = 1 — ale łatwo się pomylić przy innych parach.)</p>
+<p><b>Uwaga na zapis:</b> m (mili, 10⁻³) i M (mega, 10⁶) różnią się tylko wielkością litery — różnica to miliard razy.</p>
+  </aside>
+</section>
+<!-- 4 -->
+<section class="slide" id="s-quant" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Słownik</div>
+  <h2>Sześć wielkości, które trzeba znać</h2>
+  <table class="cmp">
+    <tr><th>wielkość</th><th>symbol</th><th>jednostka</th><th>co to jest</th><th>przykład w zakładzie</th></tr>
+    <tr><td>ładunek</td><td>Q</td><td>C (kulomb), A·h</td><td>„ilość elektryczności”</td><td>pojemność akumulatora wózka: 500 Ah</td></tr>
+    <tr><td>natężenie prądu</td><td>I</td><td>A (amper)</td><td>ładunek przepływający w czasie: I = Q / t</td><td>silnik 7,5 kW: ok. 15 A; czujnik: 4–20 mA</td></tr>
+    <tr><td>napięcie</td><td>U</td><td>V (wolt)</td><td>„siła”, która pcha ładunki; różnica potencjałów</td><td>sieć 230/400 V; sterowanie 24 V DC</td></tr>
+    <tr><td>rezystancja</td><td>R</td><td>Ω (om)</td><td>opór dla przepływu prądu</td><td>grzałka 26 Ω; Pt100: 100 Ω w 0 °C</td></tr>
+    <tr><td>moc</td><td>P</td><td>W (wat)</td><td>szybkość przetwarzania energii: P = U · I</td><td>sprężarka 11 kW</td></tr>
+    <tr><td>energia</td><td>E (W)</td><td>J (dżul), kWh</td><td>praca prądu: E = P · t</td><td>rachunek: zł za kWh</td></tr>
+  </table>
+  <div class="def"><p><b>1 kWh</b> = 1000 W przez 1 h = 3 600 000 J. To jednostka, za którą zakład płaci.</p></div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b></p>
+<ul><li><b>Prąd I</b> [A] — ile ładunku przepływa przez przekrój przewodu w sekundzie: 1 A = 1 C/s. Prąd mierzymy amperomierzem włączonym <b>szeregowo</b> (prąd musi przez niego płynąć).</li>
+<li><b>Napięcie U</b> [V] — różnica potencjałów między dwoma punktami; to ona „wymusza” przepływ prądu. Mierzymy woltomierzem włączonym <b>równolegle</b> (między dwoma punktami).</li>
+<li><b>Rezystancja R</b> [Ω] — opór elementu; zależy od materiału (rezystywność ρ), długości l i przekroju S przewodu: R = ρ · l / S. Miedź: ρ ≈ 0,0175 Ω·mm²/m.</li>
+<li><b>Moc P</b> [W] — ile energii na sekundę element pobiera lub oddaje: P = U · I.</li>
+<li><b>Energia E</b> [J lub kWh] — moc razy czas: E = P · t.</li>
+<li><b>Ładunek Q</b> [C lub Ah] — prąd razy czas: Q = I · t; w akumulatorach podaje się go w amperogodzinach (1 Ah = 3600 C).</li></ul>
+<p><b>Częsty błąd.</b> „Silnik zużywa 11 kW na godzinę” — niepoprawne. Moc (kW) mówi, jak szybko zużywa energię; zużycie to energia (kWh): 11 kW przez 1 h = 11 kWh.</p>
+  </aside>
+</section>
+<!-- 5 -->
+<section class="slide" id="s-model" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Model</div>
+  <h2>Obwód elektryczny: źródło, przewody, odbiornik</h2>
+  <div class="cols c64">
+    <canvas id="cv-mod" class="viz"></canvas>
+    <div>
+      <div class="ctrl"><label>napięcie U <input type="range" id="md-u" min="0" max="24" step="1" value="12"> <span class="val" id="md-uv"></span></label></div>
+      <div class="ctrl"><label>rezystancja R <input type="range" id="md-r" min="2" max="48" step="1" value="12"> <span class="val" id="md-rv"></span></label></div>
+      <div class="ctrl"><label><input type="checkbox" id="md-sw" checked> łącznik zamknięty</label></div>
+      <div class="card" style="margin-top:1vh"><p>prąd I = U / R = <span class="res" id="md-i"></span></p><p>moc P = U · I = <span class="val" id="md-p"></span></p></div>
+      <p class="info">Kropki = ładunki. Szybkość ruchu ~ natężenie prądu.</p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Prąd płynie tylko w <b>obwodzie zamkniętym</b>: źródło (bateria, zasilacz, sieć) → przewód → odbiornik (grzałka, silnik, lampa) → przewód powrotny → źródło. Otwarcie łącznika w dowolnym miejscu przerywa prąd w całym obwodzie.</p>
+<ul><li>Źródło <b>nie „wytwarza” ładunków</b> — tylko je pompuje w obiegu. Ładunki są w przewodach cały czas.</li>
+<li><b>Umowny kierunek prądu</b>: od „+” do „−” na zewnątrz źródła (elektrony w metalu płyną odwrotnie — to historyczna umowa, w obliczeniach jej się trzymamy).</li>
+<li>Większe napięcie → większy prąd; większa rezystancja → mniejszy prąd. Dokładnie mówi o tym prawo Ohma (następny slajd).</li></ul>
+<p><b>Na slajdzie.</b> Zmień napięcie i rezystancję: kropki poruszają się szybciej przy większym prądzie. Otwórz łącznik — prąd znika w całym obwodzie, nie tylko „za łącznikiem”.</p>
+<p><b>Analogia (tylko orientacyjnie):</b> napięcie ~ ciśnienie wody, prąd ~ przepływ, rezystancja ~ zwężenie rury, źródło ~ pompa.</p>
+  </aside>
+</section>
+<!-- 6 -->
+<section class="slide" id="s-ohm" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Prawo Ohma</div>
+  <h2>U = R · I &nbsp;→&nbsp; I = U / R &nbsp;→&nbsp; R = U / I</h2>
+  <div class="cols c64">
+    <canvas id="cv-ohm" class="viz"></canvas>
+    <div>
+      <div class="ctrl"><label>R <input type="range" id="oh-r" min="5" max="100" step="5" value="20"> <span class="val" id="oh-rv"></span></label></div>
+      <div class="ctrl"><label>U <input type="range" id="oh-u" min="0" max="24" step="0.5" value="12"> <span class="val" id="oh-uv"></span></label></div>
+      <div class="card" style="margin-top:1vh"><p>I = <span class="res" id="oh-i"></span></p></div>
+      <div class="def"><p>Charakterystyka I(U) rezystora to <b>prosta</b> przez zero. Nachylenie = 1/R.</p></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Dla przewodników metalowych i rezystorów w stałej temperaturze prąd jest <b>proporcjonalny</b> do napięcia: I = U / R. Dwukrotnie większe napięcie → dwukrotnie większy prąd.</p>
+<p>Trzy postacie tego samego prawa (zapamiętaj trójkąt: U na górze, R i I na dole):</p>
+<ul><li>U = R · I — ile napięcia „odkłada się” na elemencie, przez który płynie prąd,</li><li>I = U / R — jaki prąd popłynie przy danym napięciu,</li><li>R = U / I — rezystancja z pomiaru napięcia i prądu.</li></ul>
+<p><b>Przykład.</b> Czujnik zasilany 24 V pobiera 20 mA. Jaka jest jego „zastępcza” rezystancja? R = 24 V / 0,02 A = 1200 Ω.</p>
+<p><b>Warto wiedzieć.</b> Nie wszystkie elementy są liniowe. Żarówka ma inną rezystancję zimna i gorąca (włókno nagrzane ma ok. 10 razy większą rezystancję — dlatego żarówki przepalają się przy włączaniu), a dioda przewodzi dopiero powyżej pewnego napięcia (część B).</p>
+<p><b>Częsty błąd.</b> Mylenie jednostek (mA, kΩ) — patrz rozgrzewka.</p>
+  </aside>
+</section>
+<!-- 7 -->
+<section class="slide" id="s-power" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Moc i energia</div>
+  <h2>P = U · I = I² · R = U² / R · E = P · t</h2>
+  <div class="cols c46">
+    <div class="ex" data-steps>
+      <h3>Grzałka 230 V, 2 kW. Policz I, R, koszt 3 min pracy (0,90 zł/kWh).</h3>
+      <ol>
+        <li>I = P / U = 2000 W / 230 V = <b>8,7 A</b></li>
+        <li>R = U² / P = 230² / 2000 = 52 900 / 2000 = <b>26,5 Ω</b></li>
+        <li>sprawdzenie: R = U / I = 230 / 8,7 = 26,4 Ω ✔</li>
+        <li>E = P · t = 2 kW · 0,05 h = <b>0,1 kWh</b></li>
+        <li>koszt = 0,1 kWh · 0,90 zł/kWh = <b>0,09 zł</b></li>
+      </ol>
+      <div class="step ctrl"><button class="primary" data-next>Następny krok ▶</button><button data-reset>Od początku</button></div>
+    </div>
+    <div class="card">
+      <h3>Kalkulator: ile kosztuje praca urządzenia?</h3>
+      <div class="ctrl"><label>moc <input type="range" id="en-p" min="0.1" max="55" step="0.1" value="11"> <span class="val" id="en-pv"></span></label></div>
+      <div class="ctrl"><label>godzin na dobę <input type="range" id="en-h" min="1" max="24" step="1" value="16"> <span class="val" id="en-hv"></span></label></div>
+      <div class="ctrl"><label>dni w roku <input type="range" id="en-d" min="50" max="365" step="5" value="250"> <span class="val" id="en-dv"></span></label></div>
+      <div class="ctrl"><label>cena <input type="range" id="en-c" min="0.4" max="1.5" step="0.05" value="0.9"> <span class="val" id="en-cv"></span></label></div>
+      <p>energia: <span class="val" id="en-e"></span> · koszt roczny: <span class="res" id="en-k"></span></p>
+      <p class="info" id="en-msg"></p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Moc elektryczna P = U · I. Łącząc ją z prawem Ohma, dostajemy dwie inne postacie: P = I² · R (przydatna, gdy znamy prąd — np. straty w przewodach) i P = U² / R (gdy znamy napięcie — np. grzałka w sieci 230 V). Energia E = P · t.</p>
+<p><b>Przykład krok po kroku</b> (taki typ zadania może być na kolokwium): grzałka 2 kW w sieci 230 V pobiera I = 8,7 A; jej rezystancja w stanie gorącym to ok. 26,5 Ω; przez 3 minuty (0,05 h) zużywa 0,1 kWh, co przy cenie 0,90 zł/kWh kosztuje 9 groszy.</p>
+<p><b>Na slajdzie — kalkulator.</b> Sprężarka 11 kW pracująca 16 h na dobę przez 250 dni w roku zużywa 11 · 16 · 250 = 44 000 kWh, czyli ok. 39 600 zł rocznie (przy 0,90 zł/kWh — przyjęta cena orientacyjna; w zakładzie dochodzą opłaty dystrybucyjne i za moc). Każdy kilowat pracujący na dwie zmiany kosztuje rocznie ok. 3600 zł.</p>
+<p><b>Warto wiedzieć.</b> Moc z tabliczki znamionowej silnika to moc <b>mechaniczna na wale</b>; z sieci pobiera on więcej (sprawność 85–95%). Urządzenie rzadko pracuje stale z pełną mocą — rzeczywiste zużycie mierzy się licznikiem energii (podlicznikiem na maszynie).</p>
+<p><b>Częsty błąd.</b> Mnożenie W przez godziny i podawanie wyniku w kWh bez dzielenia przez 1000.</p>
+  </aside>
+</section>
+<!-- 8 -->
+<section class="slide" id="s-led" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Decyzja z liczb</div>
+  <h2>Wymiana oświetlenia hali — opłaca się?</h2>
+  <div class="cols c46">
+    <div class="card"><table class="cmp">
+      <tr><td>liczba opraw</td><td><b>40</b></td></tr>
+      <tr><td>stara oprawa (metalohalogenkowa)</td><td><b>400 W</b></td></tr>
+      <tr><td>nowa oprawa LED (podobny strumień światła)</td><td><b>150 W</b>, koszt 900 zł/szt. z montażem</td></tr>
+      <tr><td>praca</td><td><b>16 h × 250 dni</b></td></tr>
+      <tr><td>cena energii</td><td><b>0,90 zł/kWh</b></td></tr></table></div>
+    <div class="ex" data-steps>
+      <h3>Policz roczną oszczędność i prosty czas zwrotu.</h3>
+      <ol>
+        <li>różnica mocy: 40 · (400 − 150) W = 10 000 W = <b>10 kW</b></li>
+        <li>czas pracy w roku: 16 · 250 = <b>4000 h</b></li>
+        <li>oszczędność energii: 10 kW · 4000 h = <b>40 000 kWh</b></li>
+        <li>oszczędność: 40 000 · 0,90 = <b>36 000 zł/rok</b></li>
+        <li>nakład: 40 · 900 = 36 000 zł → prosty czas zwrotu ≈ <b>1 rok</b></li>
+      </ol>
+      <div class="step ctrl"><button class="primary" data-next>Następny krok ▶</button><button data-reset>Od początku</button></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Przykład decyzji opartej na mocy i energii.</b> 40 opraw po 400 W zastępujemy oprawami LED po 150 W. Różnica mocy 40 · 250 W = 10 kW. Przy 4000 h pracy rocznie oszczędzamy 40 000 kWh, czyli ok. 36 000 zł rocznie. Nakład 36 000 zł zwraca się po ok. roku.</p>
+<p><b>Prosty czas zwrotu</b> (SPBT) = nakład / roczna oszczędność. Nie uwzględnia wartości pieniądza w czasie ani kosztów utrzymania — ale do pierwszej oceny wystarcza.</p>
+<p><b>Warto wiedzieć.</b> W rzeczywistości dochodzą dodatkowe korzyści (dłuższa żywotność LED, mniej wymian na wysokości, natychmiastowe włączanie, możliwość ściemniania i czujników ruchu) i dodatkowe koszty (utylizacja, przestój na montaż). Takie inwestycje często kwalifikują się do <b>białych certyfikatów</b> (świadectw efektywności energetycznej).</p>
+  </aside>
+</section>
+<!-- 9 -->
+<section class="slide" id="s-series" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Łączenie odbiorników</div>
+  <h2>Połączenie szeregowe i równoległe</h2>
+  <div class="ctrl"><button data-sp="s" class="sel">szeregowo</button><button data-sp="p">równolegle</button>
+    <label>U <input type="range" id="sp-u" min="6" max="24" step="1" value="12"> <span class="val" id="sp-uv"></span></label>
+    <label>R₁ <input type="range" id="sp-1" min="10" max="300" step="10" value="100"> <span class="val" id="sp-1v"></span></label>
+    <label>R₂ <input type="range" id="sp-2" min="10" max="300" step="10" value="200"> <span class="val" id="sp-2v"></span></label></div>
+  <div class="cols c64">
+    <canvas id="cv-sp" class="viz"></canvas>
+    <div class="card"><h3 id="sp-t"></h3><p id="sp-f" class="formula"></p><table class="mini" id="sp-tab"></table><p class="info" id="sp-msg"></p></div>
+  </div>
+  <aside class="notes">
+    <p><b>Połączenie szeregowe</b> — elementy jeden za drugim, jedna droga dla prądu:</p>
+<ul><li>przez wszystkie płynie <b>ten sam prąd</b>,</li><li>napięcia się <b>sumują</b>: U = U₁ + U₂ (większe napięcie na większej rezystancji),</li><li>rezystancja zastępcza: <b>R = R₁ + R₂</b> (zawsze większa od największej),</li><li>przerwa w jednym elemencie wyłącza wszystkie (stare lampki choinkowe).</li></ul>
+<p><b>Połączenie równoległe</b> — elementy obok siebie, między tymi samymi dwoma punktami:</p>
+<ul><li>na wszystkich jest <b>to samo napięcie</b>,</li><li>prądy się <b>sumują</b>: I = I₁ + I₂ (większy prąd przez mniejszą rezystancję),</li><li>rezystancja zastępcza: <b>1/R = 1/R₁ + 1/R₂</b>, dla dwóch: R = R₁·R₂ / (R₁ + R₂) (zawsze mniejsza od najmniejszej),</li><li>każdy odbiornik działa niezależnie — tak są podłączone gniazdka, lampy i maszyny w instalacji.</li></ul>
+<p><b>Przykład.</b> U = 12 V, R₁ = 100 Ω, R₂ = 200 Ω. Szeregowo: R = 300 Ω, I = 40 mA, U₁ = 4 V, U₂ = 8 V. Równolegle: R = 66,7 Ω, I₁ = 120 mA, I₂ = 60 mA, I = 180 mA.</p>
+<p><b>Częsty błąd.</b> Dodawanie rezystancji równoległych wprost (100 + 200) — wynik musi być mniejszy od 100 Ω.</p>
+  </aside>
+</section>
+<!-- 10 -->
+<section class="slide" id="s-div" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Zastosowanie połączenia szeregowego</div>
+  <h2>Dzielnik napięcia — tak sterownik „czyta” położenie</h2>
+  <div class="cols c64">
+    <canvas id="cv-div" class="viz"></canvas>
+    <div>
+      <div class="ctrl"><label>położenie suwaka potencjometru <input type="range" id="dv-x" min="0" max="100" step="1" value="35"> <span class="val" id="dv-xv"></span></label></div>
+      <div class="card"><p class="formula">U<sub>wy</sub> = U · R₂ / (R₁ + R₂)</p>
+        <p>R₁ = <span class="val" id="dv-r1"></span>, R₂ = <span class="val" id="dv-r2"></span></p>
+        <p>U<sub>wy</sub> = <span class="res" id="dv-u"></span> → wejście analogowe PLC 0–10 V</p>
+        <p>odczyt w sterowniku: <span class="val" id="dv-pv"></span> (przetwornik 0–27 648)</p></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Dwa rezystory połączone szeregowo dzielą napięcie zasilania w stosunku swoich rezystancji. Napięcie na dolnym rezystorze: <b>U<sub>wy</sub> = U · R₂ / (R₁ + R₂)</b>.</p>
+<p><b>Potencjometr</b> to rezystor z ruchomym suwakiem — dzieli się na dwie części R₁ i R₂, których suma jest stała. Napięcie na suwaku jest proporcjonalne do jego położenia. Tak działają proste <b>czujniki położenia</b> (przepustnica, dźwignia, poziom w zbiorniku z pływakiem) i pokrętła zadawania prędkości.</p>
+<p><b>Przykład.</b> Potencjometr 10 kΩ zasilany 10 V, suwak w 35%: R₂ = 3,5 kΩ, R₁ = 6,5 kΩ, U<sub>wy</sub> = 10 · 3,5 / 10 = 3,5 V. Sterownik (np. Siemens S7, zakres 0–27 648 dla 0–10 V) odczyta liczbę ok. 9677.</p>
+<p><b>Warto wiedzieć.</b> Wzór działa, gdy z dzielnika nie pobieramy prądu (wejście pomiarowe ma bardzo dużą rezystancję). Dzielnika <b>nie używa się do zasilania</b> odbiorników — do tego służą zasilacze i stabilizatory.</p>
+  </aside>
+</section>
+<!-- 11 -->
+<section class="slide" id="s-kl1" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Prawa Kirchhoffa</div>
+  <h2>I prawo Kirchhoffa — węzeł</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-kl1"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <label>I<sub>1</sub> <input type="range" id="kl1-a" min="0" max="5" step="0.1" value="3"> <span class="val" id="kl1-av"></span></label>
+        <label>I<sub>2</sub> <input type="range" id="kl1-b" min="0" max="5" step="0.1" value="2"> <span class="val" id="kl1-bv"></span></label>
+        <label>I<sub>3</sub> <input type="range" id="kl1-c" min="0" max="5" step="0.1" value="1.5"> <span class="val" id="kl1-cv"></span></label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="def"><p>Suma prądów <b>wpływających</b> do węzła = suma prądów <b>wypływających</b> z węzła.</p></div>
+      <p style="text-align:center;margin:1vh 0"><span class="formula">I<sub>1</sub> + I<sub>2</sub> = I<sub>3</sub> + I<sub>4</sub></span></p>
+      <p>I<sub>4</sub> = <span class="res" id="kl1-d"></span></p>
+      <p class="info" id="kl1-msg"></p>
+      <p class="info">Ładunek w węźle nie znika i się nie gromadzi. Przykład (za chwilę policzymy): prądy odbiorników podłączonych do gniazd jednego obwodu sumują się w przewodzie zasilającym — dlatego wyłącznik 16 A zadziałał.</p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>I prawo Kirchhoffa (prądowe).</b> W węźle — punkcie, w którym łączą się co najmniej trzy przewody — ładunek nie znika i się nie gromadzi. Dlatego <b>suma prądów wpływających do węzła = suma prądów wypływających</b>. Równoważnie: suma prądów w węźle (z umową znaków: wpływające +, wypływające −) wynosi zero.</p>
+<p><b>Zwrot strzałki</b> nieznanego prądu zakładamy dowolnie. Jeśli z obliczeń wyjdzie wartość ujemna, prąd płynie w przeciwną stronę niż strzałka — wynik jest poprawny, zmienia się tylko interpretacja kierunku.</p>
+<p><b>Przykład.</b> I<sub>1</sub> = 3 A i I<sub>2</sub> = 2 A wpływają, I<sub>3</sub> = 1,5 A wypływa: I<sub>4</sub> = 3 + 2 − 1,5 = 3,5 A (wypływa). Gdy I<sub>3</sub> = 5 A: I<sub>4</sub> = −0,5 A, czyli 0,5 A <b>wpływa</b> do węzła.</p>
+<p><b>Gdzie to spotkamy:</b> prądy odbiorników na jednym obwodzie gniazd sumują się w przewodzie zasilającym (ćwiczenia 1, wyłącznik 16 A); w połączeniu równoległym prąd źródła = suma prądów gałęzi.</p>
+  </aside>
+</section>
+<!-- 12 -->
+<section class="slide" id="s-kl2" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Prawa Kirchhoffa</div>
+  <h2>II prawo Kirchhoffa — oczko</h2>
+  <div class="cols c64">
+    <canvas class="viz" id="cv-kl2"></canvas>
+    <div class="card">
+      <div class="def"><p>W zamkniętym obwodzie (oczku) suma napięć źródeł = suma spadków napięć na odbiornikach.</p></div>
+      <p style="text-align:center;margin:1vh 0"><span class="formula">U<sub>bat</sub> = U<sub>R</sub> + U<sub>LED</sub></span></p>
+      <h3>Przykład: bateria + rezystor 470 Ω + LED — wpisz napięcia lub kliknij „przykładowe wyniki”</h3>
+      <table>
+        <tr><td>U<sub>bat</sub></td><td><input type="number" id="kl2-b" step="0.01"> V</td></tr>
+        <tr><td>U<sub>R</sub></td><td><input type="number" id="kl2-r" step="0.01"> V</td></tr>
+        <tr><td>U<sub>LED</sub></td><td><input type="number" id="kl2-l" step="0.01"> V</td></tr>
+      </table>
+      <p id="kl2-out"></p>
+      <div class="ctrl"><button id="kl2-demo">przykładowe wyniki</button></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>II prawo Kirchhoffa (napięciowe).</b> W każdym zamkniętym obwodzie (oczku) <b>suma napięć źródeł = suma spadków napięć na odbiornikach</b>. Inaczej: obchodząc oczko dookoła i wracając do punktu startu, wracamy do tego samego potencjału — suma wszystkich napięć (ze znakami) wynosi zero.</p>
+<p><b>Przykład.</b> Bateria 9,4 V, rezystor 470 Ω i dioda LED w szeregu. Na diodzie mierzymy 1,9 V, więc na rezystorze musi być 9,4 − 1,9 = 7,5 V. Prąd w oczku: I = 7,5 V / 470 Ω ≈ 16 mA.</p>
+<p><b>Zastosowania:</b> dobór rezystora do diody LED: R = (U − U<sub>LED</sub>) / I; spadek napięcia na kablu: napięcie na odbiorniku = napięcie zasilacza − spadek na obu żyłach (ćwiczenia 1); źródło rzeczywiste: U = E − I · R<sub>w</sub>.</p>
+  </aside>
+</section>
+<!-- 13 -->
+<section class="slide" id="s-k1" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">I prawo Kirchhoffa — węzeł</div>
+  <h2>Suma prądów wpływających = suma prądów wypływających</h2>
+  <div class="cols c46">
+    <div class="card"><h3>Obwód gniazd 230 V, wyłącznik 16 A — włącz odbiorniki:</h3><div id="k1-list"></div></div>
+    <div><canvas id="cv-k1" class="viz short"></canvas>
+      <div class="card"><p>prąd w przewodzie zasilającym: <span class="res" id="k1-i"></span></p><p id="k1-msg"></p></div></div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> W węźle (punkcie połączenia przewodów) ładunek nie znika ani się nie gromadzi, więc <b>suma prądów wpływających = suma prądów wypływających</b>: I = I₁ + I₂ + I₃ + … To wprost połączenie równoległe.</p>
+<p><b>Przykład.</b> Obwód gniazd zabezpieczony wyłącznikiem 16 A. Prąd odbiornika: I = P / U. Czajnik 2000 W → 8,7 A; grzejnik 1500 W → 6,5 A; ekspres 1200 W → 5,2 A. Razem 20,4 A &gt; 16 A — wyłącznik zadziała.</p>
+<p><b>Warto wiedzieć.</b> Wyłącznik nadprądowy (typowo charakterystyka B lub C) przy niewielkim przeciążeniu wyłącza <b>po czasie</b> (od kilkunastu sekund do godzin — człon termiczny), a przy zwarciu natychmiast (człon elektromagnetyczny). Chroni <b>przewody</b> przed przegrzaniem, a nie ludzi przed porażeniem — do tego służy wyłącznik różnicowoprądowy (RCD, 30 mA).</p>
+<p><b>Częsty błąd.</b> „Dołożę mocniejszy wyłącznik, to nie będzie wybijać” — wyłącznik dobiera się do przekroju przewodu (np. 2,5 mm² Cu → 16 A); większy wyłącznik = ryzyko przegrzania i pożaru.</p>
+  </aside>
+</section>
+<!-- 14 -->
+<section class="slide" id="s-k2" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">II prawo Kirchhoffa — oczko</div>
+  <h2>Ile napięcia dociera do zaworu na końcu długiego kabla?</h2>
+  <div class="cols c64">
+    <canvas id="cv-k2" class="viz"></canvas>
+    <div>
+      <div class="ctrl"><label>długość kabla <input type="range" id="k2-l" min="5" max="200" step="5" value="80"> <span class="val" id="k2-lv"></span></label></div>
+      <div class="ctrl"><label>przekrój żyły <select id="k2-s"><option value="0.5">0,5 mm²</option><option value="0.75" selected>0,75 mm²</option><option value="1.5">1,5 mm²</option><option value="2.5">2,5 mm²</option></select></label></div>
+      <div class="ctrl"><label>prąd odbiornika <input type="range" id="k2-i" min="0.1" max="3" step="0.1" value="1"> <span class="val" id="k2-iv"></span></label></div>
+      <div class="card"><p>R przewodów (tam i z powrotem): <span class="val" id="k2-r"></span></p>
+        <p>U<sub>zas</sub> = U<sub>kabel</sub> + U<sub>odb</sub>: 24 V = <span class="val" id="k2-du"></span> + <span class="res" id="k2-u"></span></p><p id="k2-msg"></p></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> W zamkniętej pętli (oczku) <b>suma napięć źródeł = suma spadków napięć na elementach</b>: E = U₁ + U₂ + … Napięcie źródła „rozkłada się” na wszystkie elementy połączone szeregowo — także na przewody.</p>
+<p><b>Przykład.</b> Zawór elektromagnetyczny 24 V DC pobiera 1 A, kabel ma 80 m, żyły 0,75 mm² Cu. Prąd płynie tam i z powrotem, więc długość przewodu to 160 m: R = 0,0175 · 160 / 0,75 = 3,73 Ω. Spadek: 3,73 Ω · 1 A = 3,7 V. Do zaworu dociera 24 − 3,7 = 20,3 V — na granicy działania (typowo −15%, czyli 20,4 V).</p>
+<p><b>Rozwiązania:</b> większy przekrój żył, krótsza trasa (szafka lokalna, wyspa zaworowa), wyższe napięcie zasilania lub zasilacz z regulacją napięcia (np. 26–28 V).</p>
+<p><b>Warto wiedzieć.</b> Spadek napięcia na przewodach to też <b>strata mocy</b>: P = I² · R — kabel się grzeje. Dlatego energię przesyła się wysokim napięciem (mniejszy prąd przy tej samej mocy).</p>
+  </aside>
+</section>
+<!-- 15 -->
+<section class="slide" id="s-src" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Źródło rzeczywiste</div>
+  <h2>Dlaczego napięcie akumulatora spada pod obciążeniem?</h2>
+  <div class="cols c64">
+    <canvas id="cv-src" class="viz"></canvas>
+    <div>
+      <div class="card"><p class="formula">U = E − I · R<sub>w</sub></p><p>E — siła elektromotoryczna (napięcie bez obciążenia), R<sub>w</sub> — rezystancja wewnętrzna</p></div>
+      <div class="ctrl"><label>R obciążenia <input type="range" id="sr-r" min="0" max="100" step="1" value="40"> <span class="val" id="sr-rv"></span></label></div>
+      <div class="card"><p>I = <span class="val" id="sr-i"></span> · U = <span class="res" id="sr-u"></span></p><p>prąd zwarcia I<sub>z</sub> = E / R<sub>w</sub> = <span class="val" id="sr-z"></span></p></div>
+      <p class="info">Bateria 9 V: E = 9 V, R<sub>w</sub> = 2 Ω. Suwak w lewo do końca = zwarcie.</p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> Każde rzeczywiste źródło ma <b>rezystancję wewnętrzną R<sub>w</sub></b>. Gdy płynie prąd, część napięcia „zostaje” wewnątrz źródła: <b>U = E − I · R<sub>w</sub></b>. Im większy prąd, tym niższe napięcie na zaciskach.</p>
+<ul><li><b>stan jałowy</b> (bez obciążenia, I = 0): U = E — to pokazuje woltomierz na nieobciążonej baterii,</li><li><b>obciążenie</b>: U &lt; E,</li><li><b>zwarcie</b> (R = 0): U = 0, prąd I<sub>z</sub> = E / R<sub>w</sub> — największy możliwy.</li></ul>
+<p><b>Przykład.</b> Bateria 9 V, R<sub>w</sub> = 2 Ω, obciążenie 16 Ω: I = 9 / (16 + 2) = 0,5 A, U = 9 − 0,5 · 2 = 8 V.</p>
+<p><b>Warto wiedzieć.</b> Akumulator samochodowy 12 V ma R<sub>w</sub> rzędu 0,01 Ω — prąd zwarcia to ok. 1000 A. Metalowy klucz lub obrączka zwierające zaciski rozgrzewają się do czerwoności. Dlatego przy pracy z akumulatorami (wózki widłowe, UPS) zdejmuje się biżuterię i używa izolowanych narzędzi. Rosnąca R<sub>w</sub> to też objaw <b>zużycia akumulatora</b> — „pokazuje 12 V, ale nie kręci rozrusznikiem”.</p>
+<p><b>Jak wyznaczyć E i R<sub>w</sub>:</b> zmierz U bez obciążenia (= E), potem U i I przy obciążeniu: R<sub>w</sub> = (E − U) / I.</p>
+  </aside>
+</section>
+<!-- 16 -->
+<section class="slide" id="s-quizA" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Sprawdź się · odpowiedzi na czat</div>
+  <h2>Pytania kontrolne — część A</h2>
+  <div class="cols">
+    <div class="you"><h3>1. Silnik 4 kW pracuje 8 h. Ile energii zużył?</h3><details><summary>odpowiedź</summary><p>32 kWh (moc razy czas; przy 0,90 zł/kWh — ok. 29 zł).</p></details></div>
+    <div class="you"><h3>2. Dwa rezystory 100 Ω równolegle — ile wynosi R zastępcza?</h3><details><summary>odpowiedź</summary><p>50 Ω (dla dwóch jednakowych: połowa).</p></details></div>
+    <div class="you"><h3>3. Przez rezystor 1 kΩ płynie 12 mA. Jakie jest na nim napięcie i moc?</h3><details><summary>odpowiedź</summary><p>U = 1000 · 0,012 = 12 V; P = 12 · 0,012 = 0,144 W.</p></details></div>
+    <div class="you"><h3>4. Dlaczego nie wolno zastąpić wyłącznika 16 A wyłącznikiem 25 A, „bo wybija”?</h3><details><summary>odpowiedź</summary><p>Wyłącznik chroni przewód; przewód dobrany do 16 A przy 25 A się przegrzeje — ryzyko pożaru. Trzeba rozdzielić odbiorniki na inne obwody.</p></details></div>
+  </div>
+  <aside class="notes">
+    <p><b>Odpowiedzi z uzasadnieniem:</b></p>
+<ol><li>E = P · t = 4 kW · 8 h = <b>32 kWh</b>.</li>
+<li>R = R₁·R₂/(R₁+R₂) = 100·100/200 = <b>50 Ω</b>. Dla n jednakowych rezystorów równolegle: R/n.</li>
+<li>U = R · I = 1000 Ω · 0,012 A = <b>12 V</b>; P = U · I = 12 · 0,012 = <b>0,144 W</b> (albo I² · R = 0,000144 · 1000). Typowy mały rezystor ma moc znamionową 0,25 W — wystarczy.</li>
+<li>Wyłącznik nadprądowy dobiera się do <b>obciążalności przewodu</b>; chroni instalację przed przegrzaniem. Większy wyłącznik nie zadziała, gdy przewód będzie już przegrzany.</li></ol>
+  </aside>
+</section>
+<!-- 17 -->
+<section class="slide" id="s-sum" data-blok="Część A · obwód elektryczny">
+  <div class="kicker">Podsumowanie części A · przerwa</div>
+  <h2>Ściąga wzorów</h2>
+  <div class="cols c3">
+    <div class="card"><h3>Prawo Ohma i moc</h3><p>U = R · I</p><p>P = U · I = I² · R = U² / R</p><p>E = P · t &nbsp;[kWh]</p><p>Q = I · t &nbsp;[Ah]</p><p>R = ρ · l / S (Cu: ρ = 0,0175 Ω·mm²/m)</p></div>
+    <div class="card"><h3>Połączenia</h3><p>szeregowo: I wspólny, R = R₁ + R₂, U = U₁ + U₂</p><p>równolegle: U wspólne, 1/R = 1/R₁ + 1/R₂, I = I₁ + I₂</p><p>dzielnik: U<sub>wy</sub> = U · R₂ / (R₁ + R₂)</p></div>
+    <div class="card"><h3>Kirchhoff i źródło</h3><p>węzeł: Σ I<sub>wpł</sub> = Σ I<sub>wypł</sub></p><p>oczko: Σ E = Σ R · I</p><p>źródło: U = E − I · R<sub>w</sub></p><p>zwarcie: I<sub>z</sub> = E / R<sub>w</sub></p></div>
+  </div>
+  <div class="def"><p><b>Trzy rzeczy do zapamiętania:</b> płacimy za <b>energię</b> (kWh), nie za moc; wyłącznik chroni <b>przewód</b>; na długim kablu <b>ginie napięcie</b>.</p></div>
+  <aside class="notes">
+    <p><b>Zestaw wzorów z części A</b> — wszystkie wynikają z trzech praw (Ohma i dwóch praw Kirchhoffa) oraz definicji mocy.</p>
+<ul><li>Prawo Ohma: U = R · I. Moc: P = U · I, a po podstawieniu prawa Ohma: P = I² · R = U² / R. Energia: E = P · t. Ładunek: Q = I · t.</li>
+<li>Rezystancja przewodu: R = ρ · l / S; pamiętaj, że prąd płynie tam i z powrotem (długość × 2).</li>
+<li>Szeregowo: wspólny prąd, napięcia i rezystancje się sumują. Równolegle: wspólne napięcie, prądy i przewodności (1/R) się sumują.</li>
+<li>I prawo Kirchhoffa (węzeł) — bilans prądów; II prawo Kirchhoffa (oczko) — bilans napięć.</li>
+<li>Źródło rzeczywiste: U = E − I · R<sub>w</sub>; prąd zwarcia E / R<sub>w</sub>.</li></ul>
+  </aside>
+</section>
+<!-- 18 -->
+<section class="slide" id="s-kquiz" data-blok="Część B · obwody mieszane — obliczenia">
+  <div class="kicker">Twoja kolej · odpowiedzi na czat</div>
+  <h2>Prawa Kirchhoffa w praktyce</h2>
+  <div class="cols">
+    <div class="you"><h3>1. Węzeł: wpływają 4 A i 2,5 A, wypływa 3 A. Jaki jest czwarty prąd i w którą stronę płynie?</h3><details><summary>odpowiedź</summary><p>4 + 2,5 − 3 = <b>3,5 A</b>, wypływa z węzła.</p></details></div>
+    <div class="you"><h3>2. Zasilacz 24 V, zawór na końcu kabla. Na każdej z dwóch żył kabla spada 0,6 V. Jakie napięcie jest na zaworze?</h3><details><summary>odpowiedź</summary><p>24 − 0,6 − 0,6 = <b>22,8 V</b> (oczko: zasilacz → żyła → zawór → żyła).</p></details></div>
+    <div class="you"><h3>3. Kontrolka: 24 V, LED 2 V, prąd 10 mA. Ile woltów jest na rezystorze i jaka jest jego rezystancja?</h3><details><summary>odpowiedź</summary><p>U<sub>R</sub> = 24 − 2 = <b>22 V</b>; R = 22 / 0,01 = <b>2,2 kΩ</b>.</p></details></div>
+    <div class="you"><h3>4. Dzielnik: U = 12 V, R1 = 1 kΩ, R2 = 2,2 kΩ. Ile wynosi U<sub>wy</sub>?</h3><details><summary>odpowiedź</summary><p>12 · 2,2 / 3,2 = <b>8,25 V</b>.</p></details></div>
+  </div>
+  <aside class="notes">
+    <p><b>Rozwiązania:</b></p>
+<ol><li><b>Węzeł:</b> suma wpływających = suma wypływających: 4 + 2,5 = 3 + I<sub>4</sub> → I<sub>4</sub> = 3,5 A, wypływa (wynik dodatni przy założeniu „wypływa”).</li>
+<li><b>Oczko:</b> 24 V = 0,6 V + U<sub>zaworu</sub> + 0,6 V → U<sub>zaworu</sub> = 22,8 V. To ten sam rachunek co spadek napięcia na kablu z części A.</li>
+<li><b>LED:</b> oczko: 24 V = U<sub>R</sub> + 2 V → U<sub>R</sub> = 22 V; prawo Ohma: R = 22 V / 0,01 A = 2200 Ω = 2,2 kΩ. Moc na rezystorze: 22 · 0,01 = 0,22 W — bezpieczniej dobrać rezystor 0,5 W.</li>
+<li><b>Dzielnik:</b> U<sub>wy</sub> = 12 · 2200 / (1000 + 2200) = 8,25 V.</li></ol>
+  </aside>
+</section>
+<!-- 19 -->
+<section class="slide" id="s-pomiar" data-blok="Część B · obwody mieszane — obliczenia">
+  <div class="kicker">Jak mierzyć</div>
+  <h2>Woltomierz równolegle, amperomierz szeregowo</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-pom"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <button data-pm="ok" class="sel">✔ poprawnie</button>
+        <button data-pm="apar">✘ amperomierz równolegle</button>
+        <button data-pm="vser">✘ woltomierz szeregowo</button>
+      </div>
+    </div>
+    <div class="card">
+      <p id="pm-msg" class="big"></p>
+      <h3>Multimetr — gniazda</h3>
+      <ul>
+        <li><b>COM</b> — zawsze przewód czarny,</li>
+        <li><b>VΩ</b> — pomiar napięcia i rezystancji,</li>
+        <li><b>mA</b> — małe prądy (zwykle do 200–400 mA, z bezpiecznikiem),</li>
+        <li><b>10 A</b> (lub 20 A) — duże prądy.</li>
+      </ul>
+      <p class="info">Po pomiarze prądu przełóż przewód z powrotem do gniazda VΩ!</p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Najważniejsze.</b> <b>Amperomierz</b> włączamy <b>szeregowo</b> (prąd musi przez niego przepłynąć) — ma rezystancję bliską zeru. <b>Woltomierz</b> włączamy <b>równolegle</b> do elementu (mierzy różnicę potencjałów między jego końcami) — ma bardzo dużą rezystancję (typowo 10 MΩ).</p>
+<p><b>Typowe błędy:</b> amperomierz włączony równolegle robi <b>zwarcie</b> — przepala się bezpiecznik miernika (albo miernik); woltomierz włączony szeregowo prawie zatrzymuje prąd — odbiornik nie działa, a miernik pokazuje napięcie źródła.</p>
+<p><b>Multimetr:</b> COM — przewód czarny; VΩ — napięcie i rezystancja; mA — małe prądy (z bezpiecznikiem); 10 A — duże prądy. Po pomiarze prądu przełóż przewód z powrotem do VΩ. <b>Rezystancję mierzy się tylko w obwodzie bez zasilania.</b></p>
+<p><b>W zakładzie</b> prąd w instalacji mierzy się zwykle <b>miernikiem cęgowym</b> (obejmuje jeden przewód, bez rozłączania obwodu); pomiary w rozdzielnicach wykonują wyłącznie osoby z uprawnieniami (świadectwo kwalifikacyjne).</p>
+  </aside>
+</section>
+<!-- 20 -->
+<section class="slide" id="s-miesz" data-blok="Część B · obwody mieszane — obliczenia">
+  <div class="kicker">Przykład 1 · krok po kroku</div>
+  <h2>Układ mieszany — gałęzie równe</h2>
+  <div class="cols">
+    <svg class="dia stages" viewBox="0 0 580 300"><g class="st on" data-st="0"><g style="stroke:var(--fg);fill:none" stroke-width="3"><polyline points="60,250 60,160"/><polyline points="60,140 60,50"/><line x1="40" y1="140" x2="80" y2="140"/><line x1="48" y1="160" x2="72" y2="160"/></g><text x="88" y="156" style="fill:var(--accent2)" font-size="18" font-weight="700" font-family="system-ui,sans-serif">U = 9 V</text><g style="stroke:var(--fg);fill:none" stroke-width="3"><polyline points="60,50 150,50"/><rect x="150" y="35" width="90" height="30" rx="4"/></g><text x="195" y="26" text-anchor="middle" style="fill:var(--fg)" font-size="18" font-weight="700" font-family="system-ui,sans-serif">R1 = 220 Ω</text><g style="stroke:var(--fg);fill:none" stroke-width="3"><polyline points="240,50 300,50 300,90"/><polyline points="300,50 440,50 440,90"/><rect x="285" y="90" width="30" height="80" rx="4"/><rect x="425" y="90" width="30" height="80" rx="4"/><polyline points="300,170 300,250 60,250"/><polyline points="440,170 440,250 300,250"/></g><circle cx="300" cy="50" r="6" style="fill:var(--fg)"/><circle cx="300" cy="250" r="6" style="fill:var(--fg)"/><text x="278" y="135" text-anchor="end" style="fill:var(--fg)" font-size="18" font-weight="700" font-family="system-ui,sans-serif">R2 = 470 Ω</text><text x="465" y="128" style="fill:var(--fg)" font-size="18" font-weight="700" font-family="system-ui,sans-serif">R3 =</text><text x="465" y="150" style="fill:var(--fg)" font-size="18" font-weight="700" font-family="system-ui,sans-serif">470 Ω</text><g data-from="3"><polygon points="51,104 69,104 60,88" style="fill:var(--accent)"/><text x="72" y="122" text-anchor="start" style="fill:var(--accent)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">I = 19,8 mA</text></g><g data-from="4"><text x="195" y="88" text-anchor="middle" style="fill:var(--accent3)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">U₁ = 4,35 V</text></g><g data-from="5"><text x="370" y="236" text-anchor="middle" style="fill:var(--accent3)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">U₂₃ = 4,65 V</text></g><g data-from="6"><polygon points="291,188 309,188 300,204" style="fill:var(--accent)"/><text x="290" y="202" text-anchor="end" style="fill:var(--accent)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">I₂ = 9,9 mA</text></g><g data-from="6"><polygon points="431,188 449,188 440,204" style="fill:var(--accent)"/><text x="452" y="202" text-anchor="start" style="fill:var(--accent)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">I₃ = 9,9 mA</text></g><text x="270" y="292" text-anchor="middle" style="fill:var(--muted)" font-size="15" font-weight="400" font-family="system-ui,sans-serif">schemat</text></g><g class="st" data-st="1"><g style="stroke:var(--fg);fill:none" stroke-width="3"><polyline points="60,250 60,160"/><polyline points="60,140 60,50"/><line x1="40" y1="140" x2="80" y2="140"/><line x1="48" y1="160" x2="72" y2="160"/></g><text x="88" y="156" style="fill:var(--accent2)" font-size="18" font-weight="700" font-family="system-ui,sans-serif">U = 9 V</text><g style="stroke:var(--fg);fill:none" stroke-width="3"><polyline points="60,50 150,50"/><rect x="150" y="35" width="90" height="30" rx="4"/></g><text x="195" y="26" text-anchor="middle" style="fill:var(--fg)" font-size="18" font-weight="700" font-family="system-ui,sans-serif">R1 = 220 Ω</text><g style="stroke:var(--fg);fill:none" stroke-width="3"><polyline points="240,50 370,50 370,90"/><polyline points="370,170 370,250 60,250"/></g><rect x="355" y="90" width="30" height="80" rx="4" style="stroke:var(--accent2);fill:none" stroke-width="4"/><text x="398" y="128" style="fill:var(--accent2)" font-size="18" font-weight="800" font-family="system-ui,sans-serif">R₂₃ =</text><text x="398" y="150" style="fill:var(--accent2)" font-size="18" font-weight="800" font-family="system-ui,sans-serif">235 Ω</text><g data-from="3"><polygon points="51,104 69,104 60,88" style="fill:var(--accent)"/><text x="72" y="122" text-anchor="start" style="fill:var(--accent)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">I = 19,8 mA</text></g><g data-from="4"><text x="195" y="88" text-anchor="middle" style="fill:var(--accent3)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">U₁ = 4,35 V</text></g><g data-from="5"><text x="398" y="178" text-anchor="start" style="fill:var(--accent3)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">U₂₃ = 4,65 V</text></g><text x="270" y="292" text-anchor="middle" style="fill:var(--accent2)" font-size="15" font-weight="700" font-family="system-ui,sans-serif">R2 ‖ R3 zastąpione jednym rezystorem R₂₃</text></g><g class="st" data-st="2"><g style="stroke:var(--fg);fill:none" stroke-width="3"><polyline points="60,250 60,160"/><polyline points="60,140 60,50"/><line x1="40" y1="140" x2="80" y2="140"/><line x1="48" y1="160" x2="72" y2="160"/></g><text x="88" y="156" style="fill:var(--accent2)" font-size="18" font-weight="700" font-family="system-ui,sans-serif">U = 9 V</text><g style="stroke:var(--fg);fill:none" stroke-width="3"><polyline points="60,50 300,50 300,90"/><polyline points="300,170 300,250 60,250"/></g><rect x="285" y="90" width="30" height="80" rx="4" style="stroke:var(--accent2);fill:none" stroke-width="4"/><text x="328" y="128" style="fill:var(--accent2)" font-size="18" font-weight="800" font-family="system-ui,sans-serif">R<tspan font-size="13" dy="4">z</tspan><tspan dy="-4"> =</tspan></text><text x="328" y="150" style="fill:var(--accent2)" font-size="18" font-weight="800" font-family="system-ui,sans-serif">455 Ω</text><g data-from="3"><polygon points="51,104 69,104 60,88" style="fill:var(--accent)"/><text x="72" y="122" text-anchor="start" style="fill:var(--accent)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">I = 19,8 mA</text></g><text x="270" y="292" text-anchor="middle" style="fill:var(--accent2)" font-size="15" font-weight="700" font-family="system-ui,sans-serif">cały obwód = jedna rezystancja zastępcza</text></g></svg>
+    <div class="ex" data-steps>
+      <h3>R1 = 220 Ω, R2 = R3 = 470 Ω, U = 9 V. Oblicz R<sub>z</sub>, prąd I oraz napięcia U<sub>1</sub> i U<sub>23</sub>.</h3>
+      <ol>
+        <li data-st="1">R2 ‖ R3: dwa jednakowe → R<sub>23</sub> = 470 / 2 = <b>235 Ω</b> — rysujemy R<sub>23</sub> w miejsce R2 i R3</li>
+        <li data-st="2">R<sub>23</sub> jest w szeregu z R1: R<sub>z</sub> = 220 + 235 = <b>455 Ω</b></li>
+        <li data-st="2">I = U / R<sub>z</sub> = 9 V / 455 Ω ≈ <b>19,8 mA</b></li>
+        <li data-st="1">wracamy do R1 + R<sub>23</sub>: U<sub>1</sub> = 220 Ω · 0,0198 A ≈ <b>4,35 V</b></li>
+        <li data-st="1">U<sub>23</sub> = 235 · 0,0198 ≈ <b>4,65 V</b>; kontrola: 4,35 + 4,65 = 9 V ✔</li>
+        <li data-st="0">wracamy do schematu: na obu gałęziach jest to samo U<sub>23</sub>, więc I<sub>2</sub> = I<sub>3</sub> = U<sub>23</sub> / 470 Ω = 4,65 V / 470 Ω ≈ <b>9,9 mA</b>; kontrola: 9,9 + 9,9 = 19,8 mA ✔</li>
+      </ol>
+      <div class="step ctrl"><button class="primary" data-next>Następny krok ▶</button><button data-reset>Od początku</button></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Metoda „od środka na zewnątrz”.</b> (1) Znajdź grupę elementów połączonych <b>czysto</b> szeregowo albo równolegle i zastąp ją jedną rezystancją. (2) Powtarzaj, aż zostanie jedna rezystancja zastępcza R<sub>z</sub>. (3) Prąd źródła I = U / R<sub>z</sub>. (4) „Wracaj” do szczegółów: napięcia na częściach szeregowych, prądy w gałęziach równoległych.</p>
+<p><b>Dwa jednakowe rezystory równolegle</b> dają połowę: 470 ‖ 470 = 235 Ω. Ogólnie dla dwóch: R<sub>12</sub> = R1 · R2 / (R1 + R2) („iloczyn przez sumę”).</p>
+<p><b>Rozwiązanie przykładu:</b> R<sub>23</sub> = 235 Ω; R<sub>z</sub> = 455 Ω; I = 9 / 455 ≈ 19,8 mA; U<sub>1</sub> ≈ 4,35 V; U<sub>23</sub> ≈ 4,65 V (kontrola: 9 V); I<sub>2</sub> = I<sub>3</sub> ≈ 9,9 mA (kontrola: 19,8 mA).</p>
+  </aside>
+</section>
+<!-- 21 -->
+<section class="slide" id="s-bilans" data-blok="Część B · obwody mieszane — obliczenia">
+  <div class="kicker">Przykład 2 · krok po kroku</div>
+  <h2>Gałęzie różne — prądy gałęzi i bilans mocy</h2>
+  <div class="cols">
+    <svg class="dia stages" viewBox="0 0 580 300"><g class="st on" data-st="0"><g style="stroke:var(--fg);fill:none" stroke-width="3"><polyline points="60,250 60,160"/><polyline points="60,140 60,50"/><line x1="40" y1="140" x2="80" y2="140"/><line x1="48" y1="160" x2="72" y2="160"/></g><text x="88" y="156" style="fill:var(--accent2)" font-size="18" font-weight="700" font-family="system-ui,sans-serif">U = 24 V</text><g style="stroke:var(--fg);fill:none" stroke-width="3"><polyline points="60,50 150,50"/><rect x="150" y="35" width="90" height="30" rx="4"/></g><text x="195" y="26" text-anchor="middle" style="fill:var(--fg)" font-size="18" font-weight="700" font-family="system-ui,sans-serif">R1 = 100 Ω</text><g style="stroke:var(--fg);fill:none" stroke-width="3"><polyline points="240,50 300,50 300,90"/><polyline points="300,50 440,50 440,90"/><rect x="285" y="90" width="30" height="80" rx="4"/><rect x="425" y="90" width="30" height="80" rx="4"/><polyline points="300,170 300,250 60,250"/><polyline points="440,170 440,250 300,250"/></g><circle cx="300" cy="50" r="6" style="fill:var(--fg)"/><circle cx="300" cy="250" r="6" style="fill:var(--fg)"/><text x="278" y="135" text-anchor="end" style="fill:var(--fg)" font-size="18" font-weight="700" font-family="system-ui,sans-serif">R2 = 300 Ω</text><text x="465" y="128" style="fill:var(--fg)" font-size="18" font-weight="700" font-family="system-ui,sans-serif">R3 =</text><text x="465" y="150" style="fill:var(--fg)" font-size="18" font-weight="700" font-family="system-ui,sans-serif">600 Ω</text><g data-from="2"><polygon points="51,104 69,104 60,88" style="fill:var(--accent)"/><text x="72" y="122" text-anchor="start" style="fill:var(--accent)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">I = 80 mA</text></g><g data-from="6"><text x="74" y="214" text-anchor="start" style="fill:var(--violet)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">P<tspan font-size="12" dy="4">źr</tspan><tspan dy="-4"></tspan> = 1,92 W</text></g><g data-from="3"><text x="195" y="88" text-anchor="middle" style="fill:var(--accent3)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">U₁ = 8 V</text></g><g data-from="5"><text x="195" y="108" text-anchor="middle" style="fill:var(--violet)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">P₁ = 0,64 W</text></g><g data-from="3"><text x="370" y="236" text-anchor="middle" style="fill:var(--accent3)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">U₂₃ = 16 V</text></g><g data-from="4"><polygon points="291,188 309,188 300,204" style="fill:var(--accent)"/><text x="290" y="202" text-anchor="end" style="fill:var(--accent)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">I₂ = 53,3 mA</text></g><g data-from="5"><text x="290" y="222" text-anchor="end" style="fill:var(--violet)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">P₂ = 0,853 W</text></g><g data-from="4"><polygon points="431,188 449,188 440,204" style="fill:var(--accent)"/><text x="452" y="202" text-anchor="start" style="fill:var(--accent)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">I₃ = 26,7 mA</text></g><g data-from="5"><text x="452" y="222" text-anchor="start" style="fill:var(--violet)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">P₃ = 0,427 W</text></g><text x="270" y="292" text-anchor="middle" style="fill:var(--muted)" font-size="15" font-weight="400" font-family="system-ui,sans-serif">schemat</text></g><g class="st" data-st="1"><g style="stroke:var(--fg);fill:none" stroke-width="3"><polyline points="60,250 60,160"/><polyline points="60,140 60,50"/><line x1="40" y1="140" x2="80" y2="140"/><line x1="48" y1="160" x2="72" y2="160"/></g><text x="88" y="156" style="fill:var(--accent2)" font-size="18" font-weight="700" font-family="system-ui,sans-serif">U = 24 V</text><g style="stroke:var(--fg);fill:none" stroke-width="3"><polyline points="60,50 150,50"/><rect x="150" y="35" width="90" height="30" rx="4"/></g><text x="195" y="26" text-anchor="middle" style="fill:var(--fg)" font-size="18" font-weight="700" font-family="system-ui,sans-serif">R1 = 100 Ω</text><g style="stroke:var(--fg);fill:none" stroke-width="3"><polyline points="240,50 370,50 370,90"/><polyline points="370,170 370,250 60,250"/></g><rect x="355" y="90" width="30" height="80" rx="4" style="stroke:var(--accent2);fill:none" stroke-width="4"/><text x="398" y="128" style="fill:var(--accent2)" font-size="18" font-weight="800" font-family="system-ui,sans-serif">R₂₃ =</text><text x="398" y="150" style="fill:var(--accent2)" font-size="18" font-weight="800" font-family="system-ui,sans-serif">200 Ω</text><g data-from="2"><polygon points="51,104 69,104 60,88" style="fill:var(--accent)"/><text x="72" y="122" text-anchor="start" style="fill:var(--accent)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">I = 80 mA</text></g><g data-from="6"><text x="74" y="214" text-anchor="start" style="fill:var(--violet)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">P<tspan font-size="12" dy="4">źr</tspan><tspan dy="-4"></tspan> = 1,92 W</text></g><g data-from="3"><text x="195" y="88" text-anchor="middle" style="fill:var(--accent3)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">U₁ = 8 V</text></g><g data-from="5"><text x="195" y="108" text-anchor="middle" style="fill:var(--violet)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">P₁ = 0,64 W</text></g><g data-from="3"><text x="398" y="178" text-anchor="start" style="fill:var(--accent3)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">U₂₃ = 16 V</text></g><text x="270" y="292" text-anchor="middle" style="fill:var(--accent2)" font-size="15" font-weight="700" font-family="system-ui,sans-serif">R2 ‖ R3 zastąpione jednym rezystorem R₂₃</text></g><g class="st" data-st="2"><g style="stroke:var(--fg);fill:none" stroke-width="3"><polyline points="60,250 60,160"/><polyline points="60,140 60,50"/><line x1="40" y1="140" x2="80" y2="140"/><line x1="48" y1="160" x2="72" y2="160"/></g><text x="88" y="156" style="fill:var(--accent2)" font-size="18" font-weight="700" font-family="system-ui,sans-serif">U = 24 V</text><g style="stroke:var(--fg);fill:none" stroke-width="3"><polyline points="60,50 300,50 300,90"/><polyline points="300,170 300,250 60,250"/></g><rect x="285" y="90" width="30" height="80" rx="4" style="stroke:var(--accent2);fill:none" stroke-width="4"/><text x="328" y="128" style="fill:var(--accent2)" font-size="18" font-weight="800" font-family="system-ui,sans-serif">R<tspan font-size="13" dy="4">z</tspan><tspan dy="-4"> =</tspan></text><text x="328" y="150" style="fill:var(--accent2)" font-size="18" font-weight="800" font-family="system-ui,sans-serif">300 Ω</text><g data-from="2"><polygon points="51,104 69,104 60,88" style="fill:var(--accent)"/><text x="72" y="122" text-anchor="start" style="fill:var(--accent)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">I = 80 mA</text></g><g data-from="6"><text x="74" y="214" text-anchor="start" style="fill:var(--violet)" font-size="16" font-weight="800" font-family="system-ui,sans-serif">P<tspan font-size="12" dy="4">źr</tspan><tspan dy="-4"></tspan> = 1,92 W</text></g><text x="270" y="292" text-anchor="middle" style="fill:var(--accent2)" font-size="15" font-weight="700" font-family="system-ui,sans-serif">cały obwód = jedna rezystancja zastępcza</text></g></svg>
+    <div class="ex" data-steps>
+      <h3>R1 = 100 Ω w szeregu z (R2 = 300 Ω ‖ R3 = 600 Ω), U = 24 V. Oblicz prądy, napięcia i moce.</h3>
+      <ol>
+        <li data-st="1">R<sub>23</sub> = 300 · 600 / (300 + 600) = <b>200 Ω</b> („iloczyn przez sumę”)</li>
+        <li data-st="2">R<sub>z</sub> = 100 + 200 = <b>300 Ω</b>; I = 24 V / 300 Ω = <b>80 mA</b></li>
+        <li data-st="1">U<sub>1</sub> = 100 · 0,08 = <b>8 V</b>; U<sub>23</sub> = 200 · 0,08 = <b>16 V</b> (8 + 16 = 24 ✔)</li>
+        <li data-st="0">wracamy do schematu: I<sub>2</sub> = U<sub>23</sub> / R2 = 16 / 300 ≈ <b>53,3 mA</b>; I<sub>3</sub> = U<sub>23</sub> / R3 = 16 / 600 ≈ <b>26,7 mA</b> (suma 80 ✔ — większy prąd płynie przez mniejszą rezystancję)</li>
+        <li data-st="0">moce: P<sub>1</sub> = 8 · 0,08 = <b>0,64 W</b>; P<sub>2</sub> = 16 · 0,0533 ≈ <b>0,853 W</b>; P<sub>3</sub> = 16 · 0,0267 ≈ <b>0,427 W</b></li>
+        <li data-st="0">bilans mocy: 0,64 + 0,853 + 0,427 = <b>1,92 W</b> = U · I = 24 · 0,08 ✔ — moc oddana przez źródło = suma mocy odbiorników</li>
+      </ol>
+      <div class="step ctrl"><button class="primary" data-next>Następny krok ▶</button><button data-reset>Od początku</button></div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Prądy gałęzi równoległych</b> liczymy z napięcia, które jest na nich wspólne: I<sub>2</sub> = U<sub>23</sub> / R2, I<sub>3</sub> = U<sub>23</sub> / R3. Większy prąd płynie przez mniejszą rezystancję; suma prądów gałęzi musi dać prąd źródła (I prawo Kirchhoffa). <span class="muted">Ten sam wynik daje wzór na tzw. dzielnik prądu, I<sub>2</sub> = I · R3 / (R2 + R3) — przydaje się, gdy znamy tylko prąd I, a nie napięcie.</span></p>
+<p><b>Bilans mocy</b>: moc oddana przez źródło (U · I) jest równa sumie mocy wydzielonych we wszystkich odbiornikach. Jeśli się nie zgadza — w obliczeniach jest błąd. To najlepsza kontrola całego zadania.</p>
+<p><b>Dobór rezystorów.</b> Moc wydzielana w rezystorze to ciepło. R2 wydziela 0,85 W — rezystor 0,25 W by się przegrzał; w praktyce dobiera się element o mocy znamionowej co najmniej <b>dwa razy większej</b> od obliczonej (tu 2 W).</p>
+  </aside>
+</section>
+<!-- 22 -->
+<section class="slide" id="s-plytka" data-blok="Część B · obwody mieszane — obliczenia">
+  <div class="kicker">Podsumowanie · wirtualna płytka</div>
+  <h2>Rozpływ prądów w układach, które policzyliśmy</h2>
+  <div class="cols c64">
+    <div>
+      <canvas class="viz" id="cv-pl"></canvas>
+      <div class="ctrl" style="margin-top:1vh">
+        <button data-pl="s" class="sel">szeregowo</button><button data-pl="p">równolegle</button><button data-pl="m">R1 + (R2 ‖ R3)</button> <button class="primary" data-ex="1">przykład 1</button><button class="primary" data-ex="2">przykład 2</button>
+        <label>U <input type="range" id="pl-u" min="1" max="24" step="1" value="12"> <span class="val" id="pl-uv"></span></label>
+      </div>
+      <div class="ctrl">
+        <label>R1 <select id="pl-r1"></select></label><label>R2 <select id="pl-r2"></select></label><label>R3 <select id="pl-r3"></select></label>
+      </div>
+    </div>
+    <div class="card">
+      <p>rezystancja zastępcza R<sub>z</sub> = <span class="res" id="pl-rz"></span></p>
+      <p>prąd ze źródła I = U / R<sub>z</sub> = <span class="res" id="pl-i"></span></p>
+      <table id="pl-tab"></table>
+      <p class="info" id="pl-chk"></p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p><b>Wirtualna płytka</b> pokazuje rozpływ prądów w układzie, który liczyliśmy w przykładach: przyciski „przykład 1” i „przykład 2” ustawiają te same wartości. Tabela podaje U, I i P na każdym rezystorze, a kropki płyną z prędkością proporcjonalną do prądu — w gałęzi o mniejszej rezystancji płyną szybciej.</p>
+<ul><li><b>Szeregowo:</b> jeden prąd I = U / (R1 + R2 + R3); napięcia sumują się do U (II prawo Kirchhoffa). Na większym rezystorze odkłada się większe napięcie.</li>
+<li><b>Równolegle:</b> na każdym rezystorze to samo napięcie U; prądy gałęzi sumują się do prądu źródła (I prawo Kirchhoffa). Większy prąd płynie przez mniejszy rezystor; rezystancja zastępcza jest <b>mniejsza od najmniejszej</b>.</li>
+<li><b>Mieszany R1 + (R2 ‖ R3):</b> prąd źródła płynie przez R1, a w węźle rozdziela się na gałęzie R2 i R3. Gdy jedną gałąź zwiększymy do bardzo dużej rezystancji, prawie cały prąd płynie drugą.</li></ul>
+<p><b>Kontrola wyniku:</b> zawsze sprawdź sumę napięć w oczku i sumę prądów w węźle — wyłapuje większość błędów rachunkowych.</p>
+  </aside>
+</section>
+<!-- 23 -->
+<section class="slide" id="s-twoja2" data-blok="Część B · obwody mieszane — obliczenia">
+  <div class="kicker">Twoja kolej · wyniki na czat</div>
+  <h2>Połączenia rezystorów</h2>
+  <div class="cols">
+    <div>
+      <div class="you"><h3>1. Szeregowo</h3><p>R1 = 100 Ω, R2 = 220 Ω, R3 = 680 Ω połączono szeregowo i zasilono z 12 V. Oblicz R<sub>z</sub>, I oraz U<sub>3</sub>.</p>
+        <details><summary>odpowiedź</summary><p>R<sub>z</sub> = 1000 Ω; I = 12 mA; U<sub>3</sub> = 680 · 0,012 = 8,16 V</p></details></div>
+      <div class="you"><h3>2. Równolegle</h3><p>R1 = 1 kΩ i R2 = 4,7 kΩ połączono równolegle do 9 V. Oblicz R<sub>z</sub>, I<sub>1</sub>, I<sub>2</sub> i prąd całkowity.</p>
+        <details><summary>odpowiedź</summary><p>R<sub>z</sub> ≈ 825 Ω; I<sub>1</sub> = 9 mA; I<sub>2</sub> ≈ 1,91 mA; I ≈ 10,9 mA</p></details></div>
+    </div>
+    <div class="you"><h3>3. Gałąź z dwoma rezystorami: R1 + (R2 ‖ (R3 + R4))</h3>
+      <svg class="dia" viewBox="0 0 470 260" style="max-width:470px"><g style="stroke:var(--fg,#1d2330);fill:none" stroke-width="3"><polyline points="40,230 40,140"/><polyline points="40,120 40,40 100,40"/><line x1="20" y1="120" x2="60" y2="120"/><line x1="28" y1="140" x2="52" y2="140"/><rect x="100" y="27" width="80" height="26" rx="4"/><polyline points="180,40 250,40 250,80"/><polyline points="250,40 380,40 380,62"/><rect x="237" y="80" width="26" height="76" rx="4"/><rect x="367" y="62" width="26" height="60" rx="4"/><polyline points="380,122 380,140"/><rect x="367" y="140" width="26" height="60" rx="4"/><polyline points="250,156 250,230 40,230"/><polyline points="380,200 380,230 250,230"/></g><circle cx="250" cy="40" r="5" style="fill:var(--fg,#1d2330)"/><circle cx="250" cy="230" r="5" style="fill:var(--fg,#1d2330)"/><text x="140" y="18" text-anchor="middle" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">R1 = 100 Ω</text><text x="230" y="124" text-anchor="end" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">R2 = 600 Ω</text><text x="402" y="97" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">R3 =</text><text x="402" y="116" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">200 Ω</text><text x="402" y="175" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">R4 =</text><text x="402" y="194" style="fill:var(--fg,#1d2330)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">100 Ω</text><text x="58" y="192" style="fill:var(--accent2,#e2741d)" font-size="17" font-weight="700" font-family="system-ui,sans-serif">U = 24 V</text></svg>
+      <p>Oblicz R<sub>34</sub>, R<sub>234</sub>, R<sub>z</sub>, I, U<sub>234</sub>, I<sub>2</sub>, I<sub>34</sub> oraz U<sub>3</sub> i U<sub>4</sub>.</p>
+      <details><summary>odpowiedź</summary><p>R<sub>34</sub> = 300 Ω; R<sub>234</sub> = 600·300/900 = 200 Ω; R<sub>z</sub> = 300 Ω; I = 80 mA; U<sub>1</sub> = 8 V, U<sub>234</sub> = 16 V; I<sub>2</sub> = 16/600 ≈ 26,7 mA; I<sub>34</sub> = 16/300 ≈ 53,3 mA; U<sub>3</sub> ≈ 10,7 V, U<sub>4</sub> ≈ 5,33 V (suma 16 V ✔)</p></details></div>
+  </div>
+  <aside class="notes">
+    <p><b>Rozwiązania:</b></p>
+<ol><li><b>Szeregowo:</b> R<sub>z</sub> = 100 + 220 + 680 = 1000 Ω; I = 12 V / 1000 Ω = 12 mA; U<sub>3</sub> = 680 · 0,012 = 8,16 V.</li>
+<li><b>Równolegle:</b> R<sub>z</sub> = 1000 · 4700 / 5700 ≈ 825 Ω; I<sub>1</sub> = 9 / 1000 = 9 mA; I<sub>2</sub> = 9 / 4700 ≈ 1,91 mA; I = 10,9 mA (= 9 V / 825 Ω ✔).</li>
+<li><b>R1 + (R2 ‖ (R3 + R4)):</b> zaczynamy „od środka”: R3 i R4 są w szeregu → R<sub>34</sub> = 200 + 100 = 300 Ω. Ta gałąź jest równoległa z R2 → R<sub>234</sub> = 600 · 300 / (600 + 300) = 200 Ω. Całość w szeregu z R1 → R<sub>z</sub> = 100 + 200 = 300 Ω. Prąd źródła I = 24 / 300 = 80 mA. Napięcia: U<sub>1</sub> = 100 · 0,08 = 8 V, U<sub>234</sub> = 200 · 0,08 = 16 V (8 + 16 = 24 ✔). Prądy gałęzi: I<sub>2</sub> = 16 / 600 ≈ 26,7 mA, I<sub>34</sub> = 16 / 300 ≈ 53,3 mA (suma 80 mA ✔). W gałęzi R3–R4 jeden prąd: U<sub>3</sub> = 200 · 0,0533 ≈ 10,7 V, U<sub>4</sub> = 100 · 0,0533 ≈ 5,33 V (suma 16 V ✔).</li></ol>
+  </aside>
+</section>
+<!-- 24 -->
+<section class="slide" id="s-karta" data-blok="Karta pracy">
+  <div class="kicker">Karta pracy · formularz</div>
+  <h2>Karta pracy 1: 8 zadań, 22 punkty — każdy ma inne dane</h2>
+  <div class="cols">
+    <div class="card"><h3>📄 Jak</h3><ol>
+      <li>Otwórz <span class="mono">Karta_pracy_1.html</span> (Teams → Zadania) w Chrome / Edge.</li>
+      <li>Wpisz imię, nazwisko i <b>numer albumu</b> → „Generuj moje zadania”.</li>
+      <li>Wyniki wpisuj w pola — zapisują się automatycznie w przeglądarce.</li>
+      <li>Na koniec „💾 Zapisz plik z odpowiedziami” → <b>oddaj pobrany plik</b> w Teams.</li></ol></div>
+    <div class="card"><h3>🧮 Co w karcie</h3><ol>
+      <li>energia i koszt pracy maszyny</li><li>układ mieszany R1 + (R2 ‖ (R3 + R4)) — jak „Twoja kolej”, zad. 3</li><li>spadek napięcia na kablu 24 V</li><li>obwód gniazd 16 A</li>
+      <li>I prawo Kirchhoffa — węzeł</li><li>II prawo Kirchhoffa — oczko</li><li>rezystor do LED</li><li>dzielnik napięcia</li></ol>
+      <p class="info">Liczby wpisuj zwyczajnie: <span class="mono">19,8</span> albo <span class="mono">0,0198</span> — w jednostce podanej przy polu.</p></div>
+  </div>
+  <div class="def" style="border-left-color:var(--violet)"><p><b>Termin:</b> zaczynamy teraz; plik oddajecie w Teams <b>do piątku 27.11.2026, godz. 23:59</b>.</p></div>
+  <aside class="notes">
+    <p><b>Karta pracy</b> to formularz w przeglądarce. Wpisz imię, nazwisko i numer albumu — każdy numer daje <b>inne dane</b>. Odpowiedzi zapisują się automatycznie w tej przeglądarce (możesz zamknąć kartę i wrócić na tym samym komputerze). Na końcu kliknij „💾 Zapisz plik z odpowiedziami” i <b>oddaj pobrany plik</b> w Teams → Zadania.</p>
+<p><b>Wskazówki:</b> wynik wpisuj w jednostce podanej przy polu (np. mA, a nie A). Zaokrąglaj do 3 cyfr znaczących. W polach „tok obliczeń” krótko zapisz obliczenia — pomaga dostać część punktów, gdy wynik się nie zgadza. Na cudzym komputerze po oddaniu kliknij „Usuń moje odpowiedzi z tego komputera”.</p>
+  </aside>
+</section>
+<!-- 25 -->
+<section class="slide" id="s-end" data-blok="Karta pracy">
+  <div class="kicker">Zakończenie</div>
+  <h2>Co zostaje po dzisiejszych zajęciach</h2>
+  <div class="cols">
+    <div class="card"><h3>Prawa Kirchhoffa</h3><ul><li>węzeł: Σ prądów wpływających = Σ wypływających</li><li>oczko: Σ napięć źródeł = Σ spadków napięć</li><li>minus w wyniku = prąd płynie w drugą stronę niż strzałka</li><li>dzielnik napięcia: U<sub>wy</sub> = U · R2 / (R1 + R2)</li><li>dzielnik — do pomiaru, nie do zasilania</li></ul></div>
+    <div class="card"><h3>Obwody mieszane</h3><ul><li>od środka na zewnątrz: R<sub>z</sub> → I → U → prądy gałęzi</li><li>dwa równolegle: R1·R2/(R1+R2)</li><li>prądy gałęzi: I<sub>k</sub> = U<sub>23</sub> / R<sub>k</sub></li><li>kontrola: ΣU w oczku, ΣI w węźle, bilans mocy</li></ul></div>
+  </div>
+  <p class="info" style="margin:.6vh 0">📏 <b>Pomiar:</b> amperomierz szeregowo, woltomierz równolegle; rezystancję mierzymy tylko bez zasilania.</p>
+  <div class="def" style="border-left-color:var(--violet)"><p><b>Następnym razem (4.12):</b> źródła napięcia i prądu, moc i straty, rezystancja a temperatura (czujniki PT100 / PT1000), błąd pomiaru.</p></div>
+  <aside class="notes">
+    <p><b>Podsumowanie.</b> Dwa prawa Kirchhoffa to bilanse: w <b>węźle</b> prąd się nie gromadzi (suma wpływających = suma wypływających), w <b>oczku</b> napięcie źródeł rozkłada się na odbiorniki (suma napięć źródeł = suma spadków). Zwrot strzałki zakładamy dowolnie — minus w wyniku oznacza przeciwny kierunek. <b>Dzielnik napięcia</b> wynika z II prawa i prawa Ohma; służy do pomiaru (odbiornik musi mieć dużo większą rezystancję niż R2).</p>
+<p><b>Obwody mieszane</b> rozwiązujemy, zastępując kolejne grupy szeregowe i równoległe jedną rezystancją, a potem wracając do szczegółów. Każde rozwiązanie sprawdzamy: suma napięć w oczku, suma prądów w węźle, <b>bilans mocy</b>.</p>
+<p><b>Następne zajęcia:</b> źródła napięcia i prądu (idealne i rzeczywiste), moc i straty, zależność rezystancji od temperatury, czujniki PT100 / PT1000 i błąd pomiaru.</p>
+  </aside>
+</section>
+
+<div id="notes"></div>
+<div id="bar">
+  <button id="b-prev" title="poprzedni (←)">◀</button>
+  <button id="b-next" title="następny (→)">▶</button>
+  <span id="blk"></span>
+  <div id="prog"><div></div></div>
+  <span id="cnt"></span>
+  <button id="b-notes" title="notatki pod slajdem (N)">notatki</button>
+  <button id="b-spk" title="notatki w osobnym oknie (S)">okno notatek</button>
+  <button id="b-theme" title="motyw (T)">◐</button>
+  <button id="b-fs" title="pełny ekran (F)">⛶</button>
+</div>
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const TAU=Math.PI*2;
+let C={}, NOW=0, DT=0, LAST=0;
+function readColors(){ const cs=getComputedStyle(document.documentElement); for(const k of ['bg','panel','fg','muted','grid','accent','accent2','accent3','danger','violet','gold','chip']) C[k]=cs.getPropertyValue('--'+k).trim(); }
+function toggleTheme(){ const r=document.documentElement; r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'; try{localStorage.setItem('akw-theme',r.dataset.theme);}catch(e){} }
+try{ const t=localStorage.getItem('akw-theme'); if(t) document.documentElement.dataset.theme=t; }catch(e){}
+readColors();
+
+/* ---------- liczby i rysowanie ---------- */
+function fmt(x,d=2){ if(!isFinite(x)) return '—'; const neg=x<0; x=Math.abs(x); const s=(Math.round(x*10**d)/10**d).toFixed(d); let [a,b]=s.split('.');
+  a=a.replace(/\B(?=(\d{3})+(?!\d))/g,' '); b=b?b.replace(/0+$/,''):''; return (neg?'−':'')+(b?a+','+b:a); }
+const num=el=>{ const v=parseFloat(String(el.value).replace(',','.')); return isFinite(v)?v:NaN; };
+function bytes(b){ const U=[[1e12,'TB'],[1e9,'GB'],[1e6,'MB'],[1e3,'kB']]; for(const [m,u] of U) if(b>=m) return fmt(b/m,b/m<10?2:(b/m<100?1:0))+' '+u; return fmt(b,0)+' B'; }
+function fit(cv){ const r=cv.getBoundingClientRect(), d=window.devicePixelRatio||1; const W=Math.max(10,r.width), H=Math.max(10,r.height);
+  if(cv.width!==Math.round(W*d)||cv.height!==Math.round(H*d)){ cv.width=Math.round(W*d); cv.height=Math.round(H*d); }
+  const g=cv.getContext('2d'); g.setTransform(d,0,0,d,0,0); g.clearRect(0,0,W,H); return {g,w:W,h:H}; }
+function line(g,x1,y1,x2,y2,col,w=2,dash){ g.strokeStyle=col; g.lineWidth=w; g.setLineDash(dash||[]); g.beginPath(); g.moveTo(x1,y1); g.lineTo(x2,y2); g.stroke(); g.setLineDash([]); }
+function poly(g,pts,col,w=2.5){ if(!pts.length) return; g.strokeStyle=col; g.lineWidth=w; g.lineJoin='round'; g.beginPath(); pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1])); g.stroke(); }
+function text(g,s,x,y,col,size=14,align='left',weight=600){ g.fillStyle=col; g.font=`${weight} ${size}px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif`; g.textAlign=align; g.textBaseline='middle'; g.fillText(s,x,y); }
+function dot(g,x,y,r,col){ g.fillStyle=col; g.beginPath(); g.arc(x,y,r,0,TAU); g.fill(); }
+function axes(g,x0,y0,x1,y1,xmax,ymax,xl,yl,xt,yt,fx,fy,xmin=0,ymin=0){ line(g,x0,y0,x1,y0,C.muted,1.5); line(g,x0,y0,x0,y1,C.muted,1.5);
+  for(let i=0;i<=xt;i++){ const x=x0+(x1-x0)*i/xt; line(g,x,y0,x,y1,C.grid,1); text(g,fx(xmin+(xmax-xmin)*i/xt),x,y0+14,C.muted,12,'center',500); }
+  for(let i=0;i<=yt;i++){ const y=y0+(y1-y0)*i/yt; line(g,x0,y,x1,y,C.grid,1); text(g,fy(ymin+(ymax-ymin)*i/yt),x0-6,y,C.muted,12,'right',500); }
+  text(g,xl,x1,y0+30,C.fg,13,'right',700); text(g,yl,x0+6,y1-10,C.fg,13,'left',700); }
+function rng(seed){ let a=seed>>>0; return ()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}; }
+const frame={};
+
+/* kroki w przykładach */
+$$('[data-steps]').forEach(ex=>{ const li=[...ex.querySelectorAll('ol li')]; let k=0; const upd=()=>li.forEach((l,i)=>l.classList.toggle('on',i<k));
+  ex.querySelector('[data-next]').onclick=()=>{ k=Math.min(li.length,k+1); upd(); }; ex.querySelector('[data-reset]').onclick=()=>{ k=0; upd(); }; upd(); });
+
+
+$$('svg.stages').forEach(svg=>{ const ex=svg.closest('section').querySelector('[data-steps]'); if(!ex) return; const li=[...ex.querySelectorAll('ol li')];
+  const upd=()=>{ const k=li.filter(l=>l.classList.contains('on')).length, st=k?(li[k-1].dataset.st||'0'):'0';
+    svg.querySelectorAll('.st').forEach(g=>g.classList.toggle('on',g.dataset.st===st));
+    svg.querySelectorAll('[data-from]').forEach(e=>{ e.style.display=k>=+e.dataset.from?'':'none'; }); };
+  ex.querySelectorAll('[data-next],[data-reset]').forEach(b=>b.addEventListener('click',upd)); upd(); });
+
+function chain(id,data,on){ const el=$(id); el.innerHTML=data.map((c,i)=>(i?'<span class="arr">→</span>':'')+`<button data-i="${i}">${c[0]}<small>${c[1]}</small></button>`).join('');
+  const bs=[...el.querySelectorAll('button')]; bs.forEach(b=>b.onclick=()=>{ bs.forEach(x=>x.classList.toggle('sel',x===b)); on(data[+b.dataset.i], +b.dataset.i); }); bs[0].click(); }
+function selGroup(attr,on){ $$('['+attr+']').forEach(b=>b.onclick=()=>{ $$('['+attr+']').forEach(x=>x.classList.toggle('sel',x===b)); on(b.getAttribute(attr)); }); }
+function slide(id,fmtf,cb){ const el=$('#'+id); const u=()=>{ $('#'+id+'v').textContent=fmtf(+el.value); if(cb) cb(); }; el.addEventListener('input',u); u(); }
+const ohm=v=>v>=1e6?fmt(v/1e6,2)+' MΩ':v>=1000?fmt(v/1000,2)+' kΩ':fmt(v,1)+' Ω';
+const amp=v=>Math.abs(v)<1?fmt(v*1000,1)+' mA':fmt(v,2)+' A';
+const watt=v=>v<1?fmt(v*1000,0)+' mW':v>=1000?fmt(v/1000,2)+' kW':fmt(v,2)+' W';
+function niceMax(v){ const p=10**Math.floor(Math.log10(v)); for(const m of [1,1.2,1.5,2,2.5,3,4,5,6,8,10]) if(m*p>=v) return m*p; return 10*p; }
+function resistor(g,x,y,w,h,col,lab){ g.strokeStyle=col; g.lineWidth=2.5; g.strokeRect(x,y,w,h); if(lab) text(g,lab,x+w/2,y+h/2,C.fg,13,'center',800); }
+
+/* ===== model obwodu ===== */
+slide('md-u',v=>v+' V'); slide('md-r',v=>v+' Ω');
+let MDPH=0;
+frame['s-model']=()=>{ const {g,w,h}=fit($('#cv-mod')); const U=+$('#md-u').value, R=+$('#md-r').value, on=$('#md-sw').checked, I=on?U/R:0;
+  $('#md-i').textContent=fmt(I,2)+' A'; $('#md-p').textContent=fmt(U*I,1)+' W';
+  const x0=w*0.15,x1=w*0.85,y0=h*0.18,y1=h*0.82; const L=2*(x1-x0)+2*(y1-y0);
+  const P=s=>{ s=((s%L)+L)%L; const a=x1-x0,b=y1-y0; if(s<a) return [x0+s,y0]; s-=a; if(s<b) return [x1,y0+s]; s-=b; if(s<a) return [x1-s,y1]; s-=a; return [x0,y1-s]; };
+  g.strokeStyle=C.muted; g.lineWidth=3; g.strokeRect(x0,y0,x1-x0,y1-y0);
+  // źródło (lewa krawędź)
+  const ym=(y0+y1)/2; g.fillStyle=C.panel; g.fillRect(x0-30,ym-30,60,60); line(g,x0-26,ym-8,x0+26,ym-8,C.fg,4); line(g,x0-14,ym+8,x0+14,ym+8,C.fg,4);
+  text(g,'+',x0+36,ym-14,C.danger,18,'left',800); text(g,'źródło '+U+' V',x0-38,ym,C.fg,14,'right',700);
+  // odbiornik (prawa)
+  g.fillStyle=C.panel; g.fillRect(x1-22,ym-50,44,100); resistor(g,x1-16,ym-46,32,92,C.accent2,''); text(g,'R = '+R+' Ω',x1+30,ym,C.fg,14,'left',700);
+  // łącznik (góra)
+  const xm=(x0+x1)/2; g.fillStyle=C.panel; g.fillRect(xm-40,y0-30,80,40); dot(g,xm-30,y0,5,C.fg); dot(g,xm+30,y0,5,C.fg);
+  if(on) line(g,xm-30,y0,xm+30,y0,C.fg,4); else line(g,xm-30,y0,xm+24,y0-26,C.fg,4); text(g,on?'łącznik zamknięty':'łącznik otwarty',xm,y0-40,on?C.accent3:C.danger,13,'center',700);
+  MDPH+=DT*I*60; const n=Math.round(L/34); for(let k=0;k<n;k++){ const [x,y]=P(k*L/n+MDPH); dot(g,x,y,4.5,C.accent); }
+  if(on){ text(g,'I = '+fmt(I,2)+' A →',xm,y1+24,C.accent,15,'center',800); } };
+
+/* ===== prawo Ohma ===== */
+slide('oh-r',v=>v+' Ω'); slide('oh-u',v=>fmt(v,1)+' V');
+frame['s-ohm']=()=>{ const {g,w,h}=fit($('#cv-ohm')); const R=+$('#oh-r').value, U=+$('#oh-u').value, I=U/R; $('#oh-i').textContent=fmt(I,3)+' A = '+fmt(I*1000,0)+' mA';
+  const ym=niceMax(24/R*1.05), x0=60,x1=w-20,y0=h-40,y1=20, X=u=>x0+(x1-x0)*u/24, Y=i=>y0-(y0-y1)*i/ym;
+  axes(g,x0,y0,x1,y1,24,ym,'U [V]','I [A]',8,5,v=>fmt(v,0),v=>fmt(v,ym<1?2:1));
+  [[R*2,C.grid],[R/2,C.grid]].forEach(([r,c])=>{ if(r>=1){ const ue=Math.min(24,ym*r); line(g,X(0),Y(0),X(ue),Y(ue/r),C.muted,1.2,[5,4]); text(g,'R = '+fmt(r,0)+' Ω',X(ue)-4,Y(ue/r)-10,C.muted,11,'right',600);} });
+  line(g,X(0),Y(0),X(24),Y(24/R),C.accent,3); line(g,X(U),y0,X(U),Y(I),C.accent2,1.5,[4,4]); line(g,x0,Y(I),X(U),Y(I),C.accent2,1.5,[4,4]); dot(g,X(U),Y(I),7,C.accent2);
+  text(g,'R = '+R+' Ω',X(24)-6,Y(24/R)+16,C.accent,13,'right',800); };
+
+/* ===== kalkulator energii ===== */
+const enUpd=()=>{ const P=+$('#en-p').value, H=+$('#en-h').value, D=+$('#en-d').value, c=+$('#en-c').value, E=P*H*D;
+  $('#en-e').textContent=fmt(E,0)+' kWh/rok'; $('#en-k').textContent=fmt(E*c,0)+' zł'; $('#en-msg').innerHTML=`= ${fmt(P,1)} kW × ${H} h × ${D} dni. Każdy 1 kW w tym trybie pracy kosztuje <b>${fmt(H*D*c,0)} zł</b> rocznie.`; };
+slide('en-p',v=>fmt(v,1)+' kW',enUpd); slide('en-h',v=>v+' h',enUpd); slide('en-d',v=>v,enUpd); slide('en-c',v=>fmt(v,2)+' zł/kWh',enUpd);
+
+/* ===== szeregowo / równolegle ===== */
+let SPM='s'; selGroup('data-sp',v=>SPM=v); slide('sp-u',v=>v+' V'); slide('sp-1',v=>v+' Ω'); slide('sp-2',v=>v+' Ω');
+frame['s-series']=()=>{ const {g,w,h}=fit($('#cv-sp')); const U=+$('#sp-u').value, R1=+$('#sp-1').value, R2=+$('#sp-2').value; let Rz,I,I1,I2,U1,U2;
+  if(SPM==='s'){ Rz=R1+R2; I=U/Rz; I1=I2=I; U1=I*R1; U2=I*R2; } else { Rz=R1*R2/(R1+R2); I1=U/R1; I2=U/R2; I=I1+I2; U1=U2=U; }
+  $('#sp-t').textContent=SPM==='s'?'Szeregowo: wspólny prąd':'Równolegle: wspólne napięcie';
+  $('#sp-f').innerHTML=SPM==='s'?'R = R₁ + R₂ = '+fmt(Rz,1)+' Ω':'R = R₁·R₂/(R₁+R₂) = '+fmt(Rz,1)+' Ω';
+  $('#sp-tab').innerHTML=`<tr><td></td><td><b>R₁</b></td><td><b>R₂</b></td><td><b>całość</b></td></tr><tr><td>U</td><td>${fmt(U1,2)} V</td><td>${fmt(U2,2)} V</td><td>${U} V</td></tr><tr><td>I</td><td>${amp(I1)}</td><td>${amp(I2)}</td><td>${amp(I)}</td></tr><tr><td>P</td><td>${watt(U1*I1)}</td><td>${watt(U2*I2)}</td><td>${watt(U*I)}</td></tr>`;
+  $('#sp-msg').textContent=SPM==='s'?'Większe napięcie odkłada się na większym rezystorze.':'Większy prąd płynie przez mniejszy rezystor. R zastępcza mniejsza od najmniejszej.';
+  const x0=w*0.12,x1=w*0.88,y0=h*0.2,y1=h*0.8,ym=(y0+y1)/2;
+  line(g,x0,y0,x0,y1,C.muted,3); g.fillStyle=C.panel; g.fillRect(x0-28,ym-22,56,44); line(g,x0-24,ym-6,x0+24,ym-6,C.fg,4); line(g,x0-12,ym+8,x0+12,ym+8,C.fg,4); text(g,U+' V',x0-34,ym,C.fg,14,'right',800);
+  if(SPM==='s'){ const a=x0+(x1-x0)*0.3, b=x0+(x1-x0)*0.62; line(g,x0,y0,x1,y0,C.muted,3); line(g,x1,y0,x1,y1,C.muted,3); line(g,x1,y1,x0,y1,C.muted,3);
+    g.fillStyle=C.panel; g.fillRect(a-50,y0-16,100,32); resistor(g,a-50,y0-16,100,32,C.accent,'R₁ '+R1+' Ω'); g.fillStyle=C.panel; g.fillRect(b-50,y0-16,100,32); resistor(g,b-50,y0-16,100,32,C.accent2,''); text(g,'R₂ '+R2+' Ω',b,y0,C.fg,13,'center',800);
+    text(g,fmt(U1,2)+' V',a,y0-32,C.accent,14,'center',800); text(g,fmt(U2,2)+' V',b,y0-32,C.accent2,14,'center',800); text(g,'I = '+amp(I)+' (wszędzie ten sam)',(x0+x1)/2,y1+22,C.accent3,15,'center',800); }
+  else { const xa=x0+(x1-x0)*0.5, xb=x1; line(g,x0,y0,xb,y0,C.muted,3); line(g,x0,y1,xb,y1,C.muted,3); line(g,xa,y0,xa,y1,C.muted,3); line(g,xb,y0,xb,y1,C.muted,3);
+    g.fillStyle=C.panel; g.fillRect(xa-17,ym-50,34,100); resistor(g,xa-17,ym-50,34,100,C.accent,''); g.fillStyle=C.panel; g.fillRect(xb-17,ym-50,34,100); resistor(g,xb-17,ym-50,34,100,C.accent2,'');
+    text(g,'R₁ '+R1+' Ω',xa-24,ym-12,C.accent,13,'right',800); text(g,amp(I1),xa-24,ym+10,C.accent,13,'right',800); text(g,'R₂ '+R2+' Ω',xb-24,ym-12,C.accent2,13,'right',800); text(g,amp(I2),xb-24,ym+10,C.accent2,13,'right',800);
+    text(g,'I = '+amp(I)+' = I₁ + I₂',(x0+xa)/2,y0-18,C.accent3,15,'center',800); text(g,'na obu: '+U+' V',(xa+xb)/2,y1+22,C.fg,14,'center',700); } };
+
+/* ===== dzielnik ===== */
+slide('dv-x',v=>v+' %');
+frame['s-div']=()=>{ const {g,w,h}=fit($('#cv-div')); const x=+$('#dv-x').value/100, R2=10000*x, R1=10000-R2, U=10*x;
+  $('#dv-r1').textContent=ohm(R1); $('#dv-r2').textContent=ohm(R2); $('#dv-u').textContent=fmt(U,2)+' V'; $('#dv-pv').textContent=fmt(Math.round(27648*x),0);
+  const cx=w*0.35, yt=h*0.12, yb=h*0.88, rt=h*0.22, rb=h*0.78, ys=rb-(rb-rt)*x;
+  line(g,cx,yt,cx,rt,C.muted,3); line(g,cx,rb,cx,yb,C.muted,3); text(g,'+10 V',cx,yt-8,C.danger,14,'center',800); text(g,'0 V',cx,yb+12,C.fg,14,'center',800);
+  g.fillStyle=C.accent; g.globalAlpha=.25; g.fillRect(cx-18,rt,36,ys-rt); g.fillStyle=C.accent2; g.fillRect(cx-18,ys,36,rb-ys); g.globalAlpha=1; resistor(g,cx-18,rt,36,rb-rt,C.fg,'');
+  text(g,'R₁',cx-26,(rt+ys)/2,C.accent,15,'right',800); text(g,'R₂',cx-26,(ys+rb)/2,C.accent2,15,'right',800);
+  line(g,cx+60,ys,cx+22,ys,C.fg,3); g.fillStyle=C.fg; g.beginPath(); g.moveTo(cx+20,ys); g.lineTo(cx+32,ys-7); g.lineTo(cx+32,ys+7); g.fill(); line(g,cx+60,ys,w*0.7,ys,C.fg,2);
+  g.fillStyle=C.panel; g.strokeStyle=C.accent3; g.lineWidth=2; g.fillRect(w*0.7,ys-24,w*0.24,48); g.strokeRect(w*0.7,ys-24,w*0.24,48); text(g,'PLC AI: '+fmt(U,2)+' V',w*0.82,ys,C.accent3,14,'center',800);
+  text(g,'suwak',cx+64,ys-14,C.muted,12,'left',600); };
+
+/* ===== Kirchhoff I: gniazda ===== */
+const K1=[['czajnik',2000,true],['grzejnik olejowy',1500,false],['ekspres do kawy',1200,false],['komputer + monitor',300,true],['lampa',100,false],['odkurzacz przemysłowy',1400,false]];
+$('#k1-list').innerHTML=K1.map((d,i)=>`<label class="dev"><input type="checkbox" data-k1="${i}" ${d[2]?'checked':''}> ${d[0]} — ${d[1]} W → <b>${fmt(d[1]/230,2)} A</b></label>`).join('');
+$$('[data-k1]').forEach(c=>c.onchange=()=>K1[+c.dataset.k1][2]=c.checked);
+frame['s-k1']=()=>{ const {g,w,h}=fit($('#cv-k1')); const on=K1.filter(d=>d[2]), I=on.reduce((s,d)=>s+d[1]/230,0); const pal=[C.accent,C.accent2,C.accent3,C.violet,C.gold,C.danger];
+  const x0=20,x1=w-20, M=Math.max(24,I*1.1), X=v=>x0+(x1-x0)*v/M, yb=h*0.35, bh=h*0.3; let s=0;
+  K1.forEach((d,i)=>{ if(!d[2]) return; const v=d[1]/230; g.fillStyle=pal[i]; g.fillRect(X(s),yb,X(s+v)-X(s)-2,bh); if(X(s+v)-X(s)>40) text(g,fmt(v,1),(X(s)+X(s+v))/2,yb+bh/2,'#fff',13,'center',800); s+=v; });
+  line(g,X(16),yb-30,X(16),yb+bh+20,C.danger,3,[6,4]); text(g,'16 A',X(16),yb-40,C.danger,14,'center',800);
+  for(let v=0;v<=M;v+=4){ text(g,v,X(v),yb+bh+34,C.muted,11,'center',500); }
+  $('#k1-i').textContent=fmt(I,1)+' A'; $('#k1-i').style.color=I>16?C.danger:C.accent3;
+  $('#k1-msg').innerHTML=I>16?`<span class="bad">Przeciążenie ${fmt(100*I/16,0)}% — wyłącznik zadziała</span> (przy małym przeciążeniu po kilkudziesięciu sekundach lub minutach).`:`Zapas: ${fmt(16-I,1)} A. I = I₁ + I₂ + … (I prawo Kirchhoffa).`; };
+
+/* ===== Kirchhoff II: kabel ===== */
+slide('k2-l',v=>v+' m'); slide('k2-i',v=>fmt(v,1)+' A');
+frame['s-k2']=()=>{ const {g,w,h}=fit($('#cv-k2')); const l=+$('#k2-l').value, S=+$('#k2-s').value, I=+$('#k2-i').value, Rk=0.0175*2*l/S; let du=Rk*I; if(du>24) du=24; const Uo=24-du;
+  $('#k2-r').textContent=fmt(Rk,2)+' Ω'; $('#k2-du').textContent=fmt(du,2)+' V'; $('#k2-u').textContent=fmt(Uo,2)+' V'; $('#k2-u').style.color=Uo<20.4?C.danger:C.accent3;
+  $('#k2-msg').innerHTML=Uo<20.4?'<span class="bad">Poniżej 20,4 V (−15%)</span> — zawór może nie zadziałać. Większy przekrój lub krótsza trasa.':'Napięcie w tolerancji odbiornika (24 V −15% / +20%). Straty w kablu: '+fmt(I*du,1)+' W.';
+  const x0=40,x1=w-30, X=v=>x0+(x1-x0)*v/24, yb=h*0.18, bh=h*0.16;
+  g.fillStyle=C.danger; g.globalAlpha=.8; g.fillRect(X(0),yb,X(du/2)-X(0),bh); g.fillRect(X(24-du/2),yb,X(24)-X(24-du/2),bh); g.globalAlpha=1;
+  g.fillStyle=Uo<20.4?C.accent2:C.accent3; g.fillRect(X(du/2),yb,X(24-du/2)-X(du/2),bh); text(g,'odbiornik '+fmt(Uo,1)+' V',(X(du/2)+X(24-du/2))/2,yb+bh/2,'#fff',15,'center',800);
+  text(g,'kabel „tam” + „z powrotem”: '+fmt(du,2)+' V',x0,yb-14,C.danger,13,'left',800); text(g,'24 V z zasilacza = suma spadków',x1,yb+bh+18,C.fg,13,'right',700);
+  const ys=h*0.68; line(g,x0+40,ys-30,x1-60,ys-30,C.danger,3); line(g,x0+40,ys+30,x1-60,ys+30,C.danger,3);
+  g.fillStyle=C.panel; g.fillRect(x0,ys-40,80,80); g.strokeStyle=C.accent; g.lineWidth=2; g.strokeRect(x0,ys-40,80,80); text(g,'zasilacz',x0+40,ys-8,C.fg,13,'center',800); text(g,'24 V',x0+40,ys+12,C.accent,14,'center',800);
+  g.fillStyle=C.panel; g.fillRect(x1-80,ys-40,80,80); g.strokeStyle=C.accent3; g.strokeRect(x1-80,ys-40,80,80); text(g,'zawór',x1-40,ys-8,C.fg,13,'center',800); text(g,fmt(Uo,1)+' V',x1-40,ys+12,Uo<20.4?C.danger:C.accent3,14,'center',800);
+  text(g,l+' m · '+String(S).replace('.',',')+' mm² · R = '+fmt(Rk/2,2)+' Ω',(x0+x1)/2,ys-44,C.fg,13,'center',700); text(g,'powrót: '+l+' m · '+fmt(Rk/2,2)+' Ω',(x0+x1)/2,ys+48,C.fg,13,'center',700); };
+
+/* ===== źródło rzeczywiste ===== */
+slide('sr-r',v=>v===0?'0 Ω (zwarcie)':v+' Ω');
+frame['s-src']=()=>{ const {g,w,h}=fit($('#cv-src')); const E=9, Rw=2, R=+$('#sr-r').value, I=E/(R+Rw), U=E-I*Rw;
+  $('#sr-i').textContent=fmt(I,2)+' A'; $('#sr-u').textContent=fmt(U,2)+' V'; $('#sr-z').textContent=fmt(E/Rw,1)+' A';
+  const x0=56,x1=w-24,y0=h-40,y1=24, X=i=>x0+(x1-x0)*i/5, Y=u=>y0-(y0-y1)*u/10;
+  axes(g,x0,y0,x1,y1,5,10,'I [A]','U [V]',5,5,v=>fmt(v,0),v=>fmt(v,0));
+  line(g,X(0),Y(E),X(E/Rw),Y(0),C.accent,3); line(g,X(0),Y(E),X(5),Y(E),C.muted,1.2,[5,4]); text(g,'E = 9 V (bez obciążenia)',X(5)-4,Y(E)-12,C.muted,12,'right',700);
+  dot(g,X(E/Rw),Y(0),6,C.danger); text(g,'zwarcie 4,5 A',X(E/Rw),Y(0)-16,C.danger,12,'center',800);
+  line(g,X(I),Y(U),X(I),y0,C.accent2,1.5,[4,4]); line(g,x0,Y(U),X(I),Y(U),C.accent2,1.5,[4,4]); dot(g,X(I),Y(U),7,C.accent2);
+  g.fillStyle=C.danger; g.globalAlpha=.25; g.fillRect(X(I)-5,Y(E),10,Y(U)-Y(E)); g.globalAlpha=1; text(g,'I·Rw = '+fmt(I*Rw,2)+' V',X(I)+10,(Y(E)+Y(U))/2,C.danger,12,'left',800); };
+
+
+(()=>{
+/* ---------- liczby ---------- */
+function fmt(x,d=2){ if(!isFinite(x)) return '—'; const neg=x<0; x=Math.abs(x); const s=(Math.round(x*10**d)/10**d).toFixed(d); let [a,b]=s.split('.');
+  a=a.replace(/\B(?=(\d{3})+(?!\d))/g,' '); b=b?b.replace(/0+$/,''):''; return (neg?'−':'')+(b?a+','+b:a); }
+function si(x,unit,d=3){ if(!isFinite(x)) return '∞ '+unit; const ax=Math.abs(x); if(ax===0) return '0 '+unit;
+  const P=[[1e9,'G'],[1e6,'M'],[1e3,'k'],[1,''],[1e-3,'m'],[1e-6,'µ']]; for(const [m,p] of P){ if(ax>=m*0.9995){ const v=x/m; const dd=Math.max(0,d-1-Math.floor(Math.log10(Math.abs(v)+1e-12))); return fmt(v,dd)+' '+p+unit; } }
+  return fmt(x/1e-6,1)+' µ'+unit; }
+const ohm=r=>si(r,'Ω');
+const num=el=>{ const v=parseFloat(String(el.value).replace(',','.')); return isFinite(v)?v:NaN; };
+
+/* ---------- rysowanie ---------- */
+function fit(cv){ const r=cv.getBoundingClientRect(), d=window.devicePixelRatio||1; const W=Math.max(10,r.width), H=Math.max(10,r.height);
+  if(cv.width!==Math.round(W*d)||cv.height!==Math.round(H*d)){ cv.width=Math.round(W*d); cv.height=Math.round(H*d); }
+  const g=cv.getContext('2d'); g.setTransform(d,0,0,d,0,0); g.clearRect(0,0,W,H); return {g,w:W,h:H}; }
+function line(g,x1,y1,x2,y2,col,w=2,dash){ g.strokeStyle=col; g.lineWidth=w; g.setLineDash(dash||[]); g.beginPath(); g.moveTo(x1,y1); g.lineTo(x2,y2); g.stroke(); g.setLineDash([]); }
+function poly(g,pts,col,w=2.5,closed=false){ g.strokeStyle=col; g.lineWidth=w; g.lineJoin='round'; g.beginPath(); pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1])); if(closed) g.closePath(); g.stroke(); }
+function text(g,s,x,y,col,size=14,align='left',weight=600){ g.fillStyle=col; g.font=`${weight} ${size}px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif`; g.textAlign=align; g.textBaseline='middle'; g.fillText(s,x,y); }
+function dot(g,x,y,r,col){ g.fillStyle=col; g.beginPath(); g.arc(x,y,r,0,TAU); g.fill(); }
+function arrow(g,x1,y1,x2,y2,col,w=3,hs=12){ line(g,x1,y1,x2,y2,col,w); const a=Math.atan2(y2-y1,x2-x1); g.fillStyle=col; g.beginPath(); g.moveTo(x2,y2); g.lineTo(x2-hs*Math.cos(a-0.4),y2-hs*Math.sin(a-0.4)); g.lineTo(x2-hs*Math.cos(a+0.4),y2-hs*Math.sin(a+0.4)); g.closePath(); g.fill(); }
+function resistor(g,x,y,vert,label,col){ const L=54,W=20; g.fillStyle=C.panel; g.strokeStyle=col||C.fg; g.lineWidth=2.5;
+  if(vert){ g.fillRect(x-W/2,y-L/2,W,L); g.strokeRect(x-W/2,y-L/2,W,L); if(label) text(g,label,x+W/2+8,y,col||C.fg,15,'left',700); }
+  else { g.fillRect(x-L/2,y-W/2,L,W); g.strokeRect(x-L/2,y-W/2,L,W); if(label) text(g,label,x,y-W/2-12,col||C.fg,15,'center',700); } }
+function battery(g,x,y,label,vert=true){ g.fillStyle=C.panel; if(vert){ g.fillRect(x-22,y-7,44,14); line(g,x-20,y-6,x+20,y-6,C.fg,3); line(g,x-10,y+6,x+10,y+6,C.fg,6);
+    text(g,'+',x+26,y-12,C.danger,16,'left',800); if(label) text(g,label,x-30,y,C.fg,15,'right',700); }
+  else { g.fillRect(x-7,y-22,14,44); line(g,x-6,y-20,x-6,y+20,C.fg,3); line(g,x+6,y-10,x+6,y+10,C.fg,6); if(label) text(g,label,x,y-34,C.fg,15,'center',700); } }
+function meter(g,x,y,letter,reading,col){ g.fillStyle=C.panel; g.strokeStyle=col||C.fg; g.lineWidth=2.5; g.beginPath(); g.arc(x,y,18,0,TAU); g.fill(); g.stroke();
+  text(g,letter,x,y+1,col||C.fg,18,'center',800); if(reading) text(g,reading,x,y+34,C.accent,16,'center',800); }
+function node(g,x,y){ dot(g,x,y,4.5,C.fg); }
+function led(g,x,y,on,rot=0){ // domyślnie pozioma, anoda z lewej; rot=Math.PI/2 → anoda u góry
+  g.save(); g.translate(x,y); g.rotate(rot); x=0; y=0;
+  g.fillStyle=C.panel; g.fillRect(x-14,y-14,28,28); g.fillStyle=on?C.danger:C.panel; g.strokeStyle=C.fg; g.lineWidth=2.5;
+  g.beginPath(); g.moveTo(x-12,y-12); g.lineTo(x+10,y); g.lineTo(x-12,y+12); g.closePath(); g.fill(); g.stroke(); line(g,x+11,y-13,x+11,y+13,C.fg,3);
+  if(on){ arrow(g,x+2,y-16,x+12,y-28,C.danger,2,6); arrow(g,x+10,y-12,x+20,y-24,C.danger,2,6); } g.restore(); }
+/* płynące kropki (kierunek umowny prądu) */
+const PH={};
+function pathOf(pts,closed){ const P=closed?[...pts,pts[0]]:pts, seg=[]; let L=0; for(let i=0;i<P.length-1;i++){ const a=P[i],b=P[i+1],l=Math.hypot(b[0]-a[0],b[1]-a[1]); seg.push([a,b,l,L]); L+=l; } return {seg,L}; }
+function pointAt(p,s){ for(const [a,b,l,L0] of p.seg){ if(s<=L0+l){ const u=l?(s-L0)/l:0; return [a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u]; } } const z=p.seg[p.seg.length-1]; return z[1]; }
+function flow(g,key,pts,closed,speed,col,gap=26,r=3.4){ if(speed<=0.01) return; const p=pathOf(pts,closed); PH[key]=((PH[key]||0)+speed*DT)%gap; for(let s=PH[key]; s<p.L; s+=gap){ const [x,y]=pointAt(p,s); dot(g,x,y,r,col); } }
+const spd=(I,Iref)=>Math.min(160,Math.max(0,90*I/Iref)); // px/s
+/* osie wykresu */
+function axes(g,x0,y0,x1,y1,xmax,ymax,xl,yl,xt,yt,fx,fy){ line(g,x0,y0,x1,y0,C.muted,1.5); line(g,x0,y0,x0,y1,C.muted,1.5);
+  for(let i=0;i<=xt;i++){ const x=x0+(x1-x0)*i/xt; line(g,x,y0,x,y1,C.grid,1); text(g,fx(xmax*i/xt),x,y0+14,C.muted,12,'center',500); }
+  for(let i=0;i<=yt;i++){ const y=y0+(y1-y0)*i/yt; line(g,x0,y,x1,y,C.grid,1); text(g,fy(ymax*i/yt),x0-6,y,C.muted,12,'right',500); }
+  text(g,xl,x1,y0+30,C.fg,13,'right',700); text(g,yl,x0+6,y1-10,C.fg,13,'left',700); }
+
+const E12=[10,12,15,18,22,27,33,39,47,56,68,82];
+const RLIST=[100,150,220,300,330,470,600,680,1000,1500,2200,3300,4700,6800,10000];
+function fillR(sel,val,list=RLIST){ sel.innerHTML=list.map(r=>`<option value="${r}"${r===val?' selected':''}>${ohm(r)}</option>`).join(''); }
+function e12up(r){ for(let dec=1;dec<=1e6;dec*=10) for(const v of E12){ if(v*dec>=r-1e-9) return v*dec; } return r; }
+/* ===== 13. jak mierzyć ===== */
+let PM='ok';
+const PMMSG={ok:'<span class="res">Poprawnie.</span> Amperomierz w szeregu mierzy prąd odbiornika, woltomierz równolegle — napięcie na nim. Żarówka świeci.',
+  apar:'<span class="bad">Zwarcie!</span> Amperomierz ma rezystancję bliską zeru — prąd płynie przez miernik zamiast przez żarówkę. Przepala się bezpiecznik miernika (albo miernik).',
+  vser:'<span class="bad">Prawie brak prądu.</span> Woltomierz ma ogromną rezystancję (ok. 10 MΩ) — żarówka nie świeci, a miernik pokazuje napięcie całego źródła.'};
+$$('[data-pm]').forEach(b=>b.onclick=()=>{ PM=b.dataset.pm; $$('[data-pm]').forEach(x=>x.classList.toggle('sel',x===b)); $('#pm-msg').innerHTML=PMMSG[PM]; }); $('#pm-msg').innerHTML=PMMSG.ok;
+function bulb(g,x,y,on){ if(on){ g.fillStyle=C.gold; g.globalAlpha=.35; g.beginPath(); g.arc(x,y,34,0,TAU); g.fill(); g.globalAlpha=1; }
+  g.fillStyle=on?C.gold:C.panel; g.strokeStyle=C.fg; g.lineWidth=2.5; g.beginPath(); g.arc(x,y,18,0,TAU); g.fill(); g.stroke(); const d=12.7; line(g,x-d,y-d,x+d,y+d,C.fg,2); line(g,x-d,y+d,x+d,y-d,C.fg,2); }
+frame['s-pomiar']=()=>{ const {g,w,h}=fit($('#cv-pom')); const x1=w*0.2,x2=w*0.58,x3=w*0.8,y1=h*0.18,y2=h*0.82,ym=(y1+y2)/2, xa=(x1+x2)/2;
+  const loop=[[x1,y2],[x1,y1],[x2,y1],[x2,y2]]; poly(g,loop,C.fg,2.5,true); poly(g,[[x2,y1],[x3,y1],[x3,y2],[x2,y2]],C.muted,2); node(g,x2,y1); node(g,x2,y2);
+  battery(g,x1,ym,'12 V');
+  if(PM==='ok'){ flow(g,'pm',loop,true,70,C.accent2); bulb(g,x2,ym,true); meter(g,xa,y1,'A','0,5 A'); meter(g,x3,ym,'V','12 V'); }
+  else if(PM==='apar'){ flow(g,'pm2',[[x1,y2],[x1,y1],[x3,y1],[x3,y2]],true,160,C.danger,16,4); bulb(g,x2,ym,false); meter(g,x3,ym,'A','!!!',C.danger); g.fillStyle=C.panel; g.fillRect(xa-20,y1-8,40,16); text(g,'(przewód)',xa,y1-16,C.muted,12,'center',500); line(g,xa-20,y1,xa+20,y1,C.fg,2.5);
+    text(g,'💥',x3+30,ym-30,C.danger,30,'center',400); }
+  else { bulb(g,x2,ym,false); meter(g,xa,y1,'V','≈ 12 V',C.danger); g.fillStyle=C.panel; g.fillRect(x3-6,ym-24,12,48); text(g,'(brak drugiego miernika)',x3+8,ym,C.muted,12,'left',500); }
+};
+
+/* ===== 18. wirtualna płytka ===== */
+let PL='s'; fillR($('#pl-r1'),220); fillR($('#pl-r2'),470); fillR($('#pl-r3'),1000);
+$$('[data-pl]').forEach(b=>b.onclick=()=>{ PL=b.dataset.pl; $$('[data-pl]').forEach(x=>x.classList.toggle('sel',x===b)); plUpd(); });
+let PLS={};
+function plSolve(){ const U=+$('#pl-u').value, R=[+$('#pl-r1').value,+$('#pl-r2').value,+$('#pl-r3').value]; let Rz,I,u,i;
+  if(PL==='s'){ Rz=R[0]+R[1]+R[2]; I=U/Rz; i=[I,I,I]; u=R.map(r=>r*I); }
+  else if(PL==='p'){ Rz=1/(1/R[0]+1/R[1]+1/R[2]); I=U/Rz; u=[U,U,U]; i=R.map(r=>U/r); }
+  else { const R23=R[1]*R[2]/(R[1]+R[2]); Rz=R[0]+R23; I=U/Rz; const U23=I*R23; u=[I*R[0],U23,U23]; i=[I,U23/R[1],U23/R[2]]; }
+  return {U,R,Rz,I,u,i}; }
+function plUpd(){ PLS=plSolve(); const S=PLS; $('#pl-uv').textContent=S.U+' V'; $('#pl-rz').textContent=ohm(S.Rz); $('#pl-i').textContent=si(S.I,'A');
+  $('#pl-tab').innerHTML='<tr><th></th><th>R</th><th>U</th><th>I</th><th>P</th></tr>'+[0,1,2].map(k=>`<tr><td><b>R${k+1}</b></td><td>${ohm(S.R[k])}</td><td>${fmt(S.u[k],2)} V</td><td>${si(S.i[k],'A')}</td><td>${si(S.u[k]*S.i[k],'W')}</td></tr>`).join('');
+  $('#pl-chk').innerHTML = PL==='s' ? `Kontrola: U<sub>1</sub> + U<sub>2</sub> + U<sub>3</sub> = ${fmt(S.u[0]+S.u[1]+S.u[2],2)} V = U ✔` : PL==='p' ? `Kontrola: I<sub>1</sub> + I<sub>2</sub> + I<sub>3</sub> = ${si(S.i[0]+S.i[1]+S.i[2],'A')} = I ✔` : `Kontrola: U<sub>1</sub> + U<sub>23</sub> = ${fmt(S.u[0]+S.u[1],2)} V ✔; I<sub>2</sub> + I<sub>3</sub> = ${si(S.i[1]+S.i[2],'A')} = I ✔`; }
+$('#s-plytka').addEventListener('input',plUpd); plUpd();
+frame['s-plytka']=()=>{ const {g,w,h}=fit($('#cv-pl')); const S=PLS, x1=w*0.17,x2=w*0.9,y1=h*0.18,y2=h*0.82,ym=(y1+y2)/2, ref=Math.max(S.I,1e-9), col=C.accent2;
+  const lab=k=>'R'+(k+1)+' = '+ohm(S.R[k]);
+  if(PL==='s'){ const loop=[[x1,y2],[x1,y1],[x2,y1],[x2,y2]]; poly(g,loop,C.fg,2.5,true); flow(g,'pls',loop,true,90,col);
+    resistor(g,x1+(x2-x1)*0.33,y1,false,lab(0)); resistor(g,x1+(x2-x1)*0.7,y1,false,lab(1)); resistor(g,x2,ym,true,''); text(g,lab(2),x2-18,ym,C.fg,15,'right',700); }
+  else { const xa=PL==='p'?x1+(x2-x1)*0.45:x1+(x2-x1)*0.6, xb=PL==='p'?x1+(x2-x1)*0.72:x2-(x2-x1)*0.08, xc=x2;
+    const br=PL==='p'?[[xa,0],[xb,1],[x2,2]]:[[xa,1],[xb,2]];
+    const last=br[br.length-1][0]; poly(g,[[last,y1],[x1,y1],[x1,y2],[last,y2]],C.fg,2.5);
+    br.forEach(([x,k])=>{ line(g,x,y1,x,y2,C.fg,2.5); });
+    // przepływ w gałęziach
+    br.forEach(([x,k])=>flow(g,'plb'+k,[[x,y1],[x,y2]],false,90*S.i[k]/ref,col));
+    // przepływ w przewodach głównych
+    let acc=S.I; let px=x1; flow(g,'plm0',[[x1,y2],[x1,y1]],false,90,col);
+    if(PL==='m'){ const xr=x1+(x2-x1)*0.3; flow(g,'plm1',[[x1,y1],[xa,y1]],false,90,col); resistor(g,xr,y1,false,lab(0)); px=xa; }
+    br.forEach(([x,k],j)=>{ flow(g,'plt'+j,[[px,y1],[x,y1]],false,90*acc/ref,col); if(j>0) flow(g,'plbt'+j,[[x,y2],[px,y2]],false,90*acc/ref,col); acc-=S.i[k]; px=x; });
+    flow(g,'plret',[[br[0][0],y2],[x1,y2]],false,90,col);
+    br.forEach(([x,k])=>{ resistor(g,x,ym,true,''); text(g,'R'+(k+1),x-16,ym-9,C.fg,15,'right',800); text(g,ohm(S.R[k]),x-16,ym+9,C.muted,13,'right',700); });
+    br.forEach(([x])=>{ node(g,x,y1); node(g,x,y2); }); }
+  battery(g,x1,ym,'U = '+S.U+' V'); };
+
+/* ===== 22. węzeł ===== */
+let K1={};
+function k1Upd(){ const a=+$('#kl1-a').value, b=+$('#kl1-b').value, c=+$('#kl1-c').value, d=a+b-c; K1={a,b,c,d}; $('#kl1-av').textContent=fmt(a,1)+' A'; $('#kl1-bv').textContent=fmt(b,1)+' A'; $('#kl1-cv').textContent=fmt(c,1)+' A';
+  $('#kl1-d').textContent=fmt(d,1)+' A'; $('#kl1-msg').innerHTML=d<0?`<span class="bad">Wynik ujemny</span> — prąd I<sub>4</sub> płynie <b>do</b> węzła (w przeciwną stronę niż założona strzałka).`:`${fmt(a,1)} + ${fmt(b,1)} = ${fmt(c,1)} + ${fmt(d,1)} ✔`; }
+$('#s-kl1').addEventListener('input',k1Upd); k1Upd();
+frame['s-kl1']=()=>{ const {g,w,h}=fit($('#cv-kl1')); const cx=w/2, cy=h/2, L=Math.min(w,h)*0.38, S=K1;
+  const br=[[-1,-0.7,'I₁',S.a,true,C.accent],[-1,0.7,'I₂',S.b,true,C.accent3],[1,-0.7,'I₃',S.c,false,C.violet],[1,0.7,'I₄',S.d,false,C.accent2]];
+  br.forEach(([dx,dy,lab,v,inn,col],k)=>{ const ex=cx+dx*L*1.3, ey=cy+dy*L; line(g,ex,ey,cx,cy,C.fg,2.5);
+    const into=inn?v>=0:v<0, mx=(ex+cx)/2, my=(ey+cy)/2, ux=(cx-ex), uy=(cy-ey), n=Math.hypot(ux,uy), s=into?1:-1;
+    arrow(g,mx-s*ux/n*22,my-s*uy/n*22,mx+s*ux/n*22,my+s*uy/n*22,col,4,14);
+    const pts=into?[[ex,ey],[cx,cy]]:[[cx,cy],[ex,ey]]; flow(g,'k1'+k,pts,false,30*Math.abs(v),col,26,4);
+    text(g,lab+' = '+fmt(Math.abs(v),1)+' A',ex+(dx<0?-8:8),ey-22,col,17,dx<0?'left':'right',800); });
+  dot(g,cx,cy,9,C.fg); text(g,'węzeł',cx,cy+28,C.muted,13,'center',600); };
+
+/* ===== 23. oczko ===== */
+function k2Upd(){ const b=num($('#kl2-b')), r=num($('#kl2-r')), l=num($('#kl2-l')); if(![b,r,l].every(isFinite)){ $('#kl2-out').innerHTML='<span class="info">Wpisz trzy zmierzone napięcia.</span>'; return; }
+  const s=r+l, d=b-s; $('#kl2-out').innerHTML=`U<sub>R</sub> + U<sub>LED</sub> = <b>${fmt(s,2)} V</b>; U<sub>bat</sub> − suma = <b>${fmt(d,2)} V</b> ${Math.abs(d)<=0.05*b?'<span style="color:var(--accent3);font-weight:800">✔ zgodne</span>':'<span class="bad">— sprawdź pomiar</span>'}<br>prąd: I = U<sub>R</sub> / 470 Ω = <b>${fmt(r/470*1000,1)} mA</b>`; }
+$('#s-kl2').addEventListener('input',k2Upd); $('#kl2-demo').onclick=()=>{ $('#kl2-b').value=9.38; $('#kl2-r').value=7.45; $('#kl2-l').value=1.92; k2Upd(); }; k2Upd();
+frame['s-kl2']=()=>{ const {g,w,h}=fit($('#cv-kl2')); const x1=w*0.22,x2=w*0.8,y1=h*0.2,y2=h*0.8,ym=(y1+y2)/2; const loop=[[x1,y2],[x1,y1],[x2,y1],[x2,y2]];
+  poly(g,loop,C.fg,2.5,true); const ub=num($('#kl2-b')), ur=num($('#kl2-r')), ul=num($('#kl2-l'));
+  flow(g,'k2',loop,true,60,C.accent2); battery(g,x1,ym,''); text(g,'U',x1-60,ym,C.accent,18,'right',800); text(g,'bat',x1-46,ym+7,C.accent,12,'left',800);
+  resistor(g,(x1+x2)/2,y1,false,'470 Ω'); led(g,x2,ym,true,Math.PI/2);
+  // strzałki napięć
+  arrow(g,(x1+x2)/2+30,y1+26,(x1+x2)/2-30,y1+26,C.violet,2.5,9); text(g,'U R = '+(isFinite(ur)?fmt(ur,2)+' V':'?'),(x1+x2)/2,y1+46,C.violet,15,'center',800);
+  arrow(g,x2-30,ym+30,x2-30,ym-30,C.danger,2.5,9); text(g,'U LED = '+(isFinite(ul)?fmt(ul,2)+' V':'?'),x2-40,ym+50,C.danger,15,'right',800);
+  text(g,isFinite(ub)?fmt(ub,2)+' V':'?',x1-30,ym+28,C.accent,15,'right',800); };
+
+
+/* przyciski „przykład 1 / 2” na płytce */
+$$('[data-ex]').forEach(b=>b.onclick=()=>{ const E=b.dataset.ex==='1'?[9,220,470,470]:[24,100,300,600];
+  $('#pl-u').value=E[0]; $('#pl-r1').value=E[1]; $('#pl-r2').value=E[2]; $('#pl-r3').value=E[3];
+  $('[data-pl="m"]').click(); });
+
+})();
+
+/* ---------------- nawigacja ---------------- */
+const slides=$$('.slide'); let cur=0, spk=null;
+const title=i=>slides[i].querySelector('h1,h2').textContent;
+function notesHTML(i){const n=slides[i].querySelector('.notes'); return n?n.innerHTML:'<p>(brak komentarza)</p>';}
+function updSpeaker(){ if(!spk||spk.closed) return; const nx=slides[cur+1]?title(cur+1):'— koniec —';
+  spk.document.body.innerHTML=`<p style="color:#777;margin:0">${slides[cur].dataset.blok||''}</p><h3 style="margin:.1em 0 .4em">Slajd ${cur+1}/${slides.length}: ${title(cur)}</h3>${notesHTML(cur)}<hr><p style="color:#777">Następny: ${nx}</p>`; }
+function show(i){ i=Math.max(0,Math.min(slides.length-1,i)); slides[cur].classList.remove('active'); cur=i; slides[cur].classList.add('active');
+  $('#prog div').style.width=(100*(cur+1)/slides.length)+'%'; $('#cnt').textContent=(cur+1)+' / '+slides.length; $('#blk').textContent=slides[cur].dataset.blok||''; $('#notes').innerHTML=notesHTML(cur); updSpeaker(); history.replaceState(null,'','#'+(cur+1)); }
+const next=()=>show(cur+1), prev=()=>show(cur-1);
+$('#b-next').onclick=next; $('#b-prev').onclick=prev; $('#b-theme').onclick=toggleTheme;
+const fsToggle=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen(); $('#b-fs').onclick=fsToggle;
+function openSpeaker(){ spk=window.open('','komentarze_eti1','width=760,height=640'); if(!spk) return; spk.document.title='Notatki do slajdów';
+  spk.document.head.innerHTML='<meta charset="utf-8"><style>body{font:18px/1.5 system-ui,sans-serif;padding:16px 22px;background:#fffdf6;color:#222}b{color:#b5520c}.mono{font-family:monospace}</style>'; updSpeaker(); }
+$('#b-spk').onclick=openSpeaker; $('#b-notes').onclick=()=>$('#notes').classList.toggle('show');
+document.addEventListener('keydown',e=>{ const tag=e.target.tagName, k=e.key;
+  if(tag==='INPUT'&&(e.target.type==='text'||e.target.type==='number'||k.startsWith('Arrow'))) return; if(tag==='SELECT') return;
+  if(k==='ArrowRight'||k==='PageDown'||(k===' '&&tag!=='BUTTON'&&tag!=='SUMMARY')){e.preventDefault();next();}
+  else if(k==='ArrowLeft'||k==='PageUp'){e.preventDefault();prev();}
+  else if(k==='Home') show(0); else if(k==='End') show(slides.length-1);
+  else if(k==='n'||k==='N') $('#notes').classList.toggle('show'); else if(k==='s'||k==='S') openSpeaker(); else if(k==='f'||k==='F') fsToggle(); else if(k==='t'||k==='T') toggleTheme(); });
+document.addEventListener('click',e=>{ if(e.target.tagName==='BUTTON') e.target.blur(); });
+function loop(now){ DT=Math.min(0.05,(now-LAST)/1000||0); LAST=now; NOW=now/1000; const f=frame[slides[cur].id]; if(f){ readColors(); try{f(NOW);}catch(err){console.error(err);} } requestAnimationFrame(loop); }
+show((parseInt(location.hash.slice(1))||1)-1); requestAnimationFrame(loop);
+</script>
+</body></html>
